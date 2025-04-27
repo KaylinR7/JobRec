@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <!-- Top App Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:elevation="2dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/white"
+            app:titleTextColor="@color/black"
+            app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="end|center_vertical">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/profileButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Profile"
+                    android:textColor="@color/primary"
+                    android:icon="@drawable/ic_person"
+                    android:iconTint="@color/primary"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/contactButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Contact"
+                    android:textColor="@color/primary"
+                    android:icon="@drawable/ic_contact"
+                    android:iconTint="@color/primary"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/helpButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Help"
+                    android:textColor="@color/primary"
+                    android:icon="@drawable/ic_help"
+                    android:iconTint="@color/primary"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/logoutButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Logout"
+                    android:textColor="@color/primary"
+                    android:icon="@drawable/ic_logout"
+                    android:iconTint="@color/primary"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="8dp" />
+            </LinearLayout>
+        </com.google.android.material.appbar.MaterialToolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Main Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- Search Bar -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_search"
+                    android:tint="@color/primary"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Search jobs..."
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Recently Posted Jobs Section -->
+        <TextView
+            android:id="@+id/recentJobsLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Recently Posted Jobs"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingStart="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="4dp"
+            android:textColor="@color/primary" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recentJobsRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        <!-- Tab Layout -->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            app:tabGravity="fill"
+            app:tabIndicatorColor="@color/primary"
+            app:tabMode="fixed"
+            app:tabSelectedTextColor="@color/primary"
+            app:tabTextColor="@color/black"
+            app:tabRippleColor="@color/primary"
+            app:tabIndicatorHeight="3dp"
+            android:layout_marginTop="8dp" />
+
+        <!-- ViewPager for tabs -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- RecyclerView for job listings -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/jobsRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="16dp"
+            android:clipToPadding="false" />
+
+    </LinearLayout>
+
+    <!-- Floating Action Button for searching jobs -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:text="Search Jobs"
+        android:textColor="@color/white"
+        app:icon="@drawable/ic_search"
+        app:iconTint="@color/white"
+        app:backgroundTint="@color/primary" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout> 
