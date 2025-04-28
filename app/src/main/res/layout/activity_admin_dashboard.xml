@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Admin Dashboard"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp" />
+
+    <Button
+        android:id="@+id/btnManageUsers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Manage Users"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/btnManageCompanies"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Manage Companies"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/btnManageJobs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Manage Jobs"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/btnManageApplications"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Manage Applications"
+        android:layout_marginBottom="16dp" />
+
+    <!-- TODO: Add admin dashboard features here -->
+
+</LinearLayout> 
