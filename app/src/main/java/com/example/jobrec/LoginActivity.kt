@@ -17,7 +17,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var loginButton: Button
     private lateinit var signupLink: TextView
     private lateinit var companySignupLink: TextView
-    private val firebaseHelper = FirebaseHelper.getInstance()
+    private lateinit var adminLoginLink: TextView
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
 
@@ -33,6 +33,7 @@ class LoginActivity : AppCompatActivity() {
         loginButton = findViewById(R.id.loginButton)
         signupLink = findViewById(R.id.signupLink)
         companySignupLink = findViewById(R.id.companySignupLink)
+        adminLoginLink = findViewById(R.id.adminLoginLink)
 
         // Check if user is already logged in
         val currentUser = auth.currentUser
@@ -51,8 +52,12 @@ class LoginActivity : AppCompatActivity() {
         companySignupLink.setOnClickListener {
             startActivity(Intent(this, CompanySignupActivity::class.java))
         }
+
+        adminLoginLink.setOnClickListener {
+            startActivity(Intent(this, AdminLoginActivity::class.java))
+        }
     }
-    
+
     private fun loginUser() {
         val email = emailInput.text.toString().trim()
         val password = passwordInput.text.toString().trim()

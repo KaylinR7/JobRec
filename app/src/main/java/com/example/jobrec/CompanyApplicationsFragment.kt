@@ -19,6 +19,7 @@ class CompanyApplicationsFragment : Fragment() {
     private lateinit var adapter: ApplicationAdapter
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private var companyId: String = ""
 
     companion object {
         private const val ARG_COMPANY_ID = "company_id"
@@ -29,6 +30,14 @@ class CompanyApplicationsFragment : Fragment() {
             args.putString(ARG_COMPANY_ID, companyId)
             fragment.arguments = args
             return fragment
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        companyId = arguments?.getString(ARG_COMPANY_ID) ?: ""
+        if (companyId.isEmpty()) {
+            Toast.makeText(context, "Error: Company ID not found", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -56,14 +65,13 @@ class CompanyApplicationsFragment : Fragment() {
     }
 
     private fun loadApplications() {
-        val currentUser = auth.currentUser
-        if (currentUser == null) {
-            Toast.makeText(context, "User not logged in", Toast.LENGTH_SHORT).show()
+        if (companyId.isEmpty()) {
+            Toast.makeText(context, "Error: Company ID not found", Toast.LENGTH_SHORT).show()
             return
         }
 
         db.collection("applications")
-            .whereEqualTo("companyId", currentUser.uid)
+            .whereEqualTo("companyId", companyId)
             .orderBy("appliedDate", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
@@ -78,7 +86,7 @@ class CompanyApplicationsFragment : Fragment() {
                             applicantName = document.getString("applicantName") ?: "",
                             companyId = document.getString("companyId") ?: "",
                             appliedDate = appliedDate,
-                            status = document.getString("status") ?: "Pending",
+                            status = document.getString("status") ?: ApplicationStatus.PENDING.name,
                             cvUrl = document.getString("cvUrl") ?: "",
                             coverLetter = document.getString("coverLetter") ?: ""
                         )

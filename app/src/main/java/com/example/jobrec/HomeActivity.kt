@@ -3,6 +3,8 @@ package com.example.jobrec
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.Timestamp
+import androidx.core.content.ContextCompat
 
 class HomeActivity : AppCompatActivity() {
     private lateinit var logoutButton: MaterialButton
@@ -36,6 +39,9 @@ class HomeActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         
+        // Create Firestore indexes
+        FirestoreIndexManager.createIndexes()
+        
         // Get user ID from intent extras
         userId = intent.getStringExtra("userId")
         Log.d("HomeActivity", "User ID from intent: $userId")
@@ -51,7 +57,13 @@ class HomeActivity : AppCompatActivity() {
 
         // Set up toolbar
         setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
+        supportActionBar?.apply {
+            setDisplayShowTitleEnabled(false)
+            setDisplayHomeAsUpEnabled(false)
+            setDisplayShowHomeEnabled(false)
+        }
+        toolbar.setNavigationIcon(null)
+        toolbar.setOverflowIcon(ContextCompat.getDrawable(this, R.drawable.ic_more_vert))
 
         // Set up RecyclerViews
         jobsRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -167,5 +179,20 @@ class HomeActivity : AppCompatActivity() {
                 Log.e("HomeActivity", "Error getting user ID", e)
                 Toast.makeText(this, "Error getting user data", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_my_applications -> {
+                startActivity(Intent(this, MyApplicationsActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 } 

@@ -117,14 +117,14 @@ class PostJobActivity : AppCompatActivity() {
     private fun postJob() {
         val job = hashMapOf(
             "title" to jobTitleInput.text.toString(),
-            "jobType" to jobTypeInput.text.toString(),
+            "type" to jobTypeInput.text.toString(),
             "location" to locationInput.text.toString(),
             "salary" to salaryInput.text.toString(),
             "description" to descriptionInput.text.toString(),
             "requirements" to requirementsInput.text.toString(),
             "companyId" to companyId,
             "postedDate" to Date(),
-            "status" to "active"
+            "status" to "Active"
         )
 
         db.collection("jobs")

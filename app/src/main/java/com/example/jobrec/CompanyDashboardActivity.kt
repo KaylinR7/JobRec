@@ -16,9 +16,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.viewpager2.widget.ViewPager2
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.firestore.Query
 
 class CompanyDashboardActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
@@ -55,17 +52,7 @@ class CompanyDashboardActivity : AppCompatActivity() {
         fab = findViewById(R.id.fab)
 
         // Set up ViewPager adapter
-        viewPager.adapter = CompanyDashboardPagerAdapter(this)
-
-        // Connect TabLayout with ViewPager
-        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = when (position) {
-                0 -> "Profile"
-                1 -> "Jobs"
-                2 -> "Applications"
-                else -> null
-            }
-        }.attach()
+        setupViewPager()
 
         // Set up FAB click listener
         fab.setOnClickListener {
@@ -100,6 +87,20 @@ class CompanyDashboardActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun setupViewPager() {
+        viewPager.adapter = CompanyDashboardPagerAdapter(this)
+        
+        // Connect TabLayout with ViewPager
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> "Profile"
+                1 -> "Jobs"
+                2 -> "Applications"
+                else -> null
+            }
+        }.attach()
     }
 
     inner class CompanyDashboardPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {

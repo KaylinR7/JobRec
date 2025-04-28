@@ -21,4 +21,10 @@
     <color name="status_interviewing">#9C27B0</color>
     <color name="status_offered">#FF9800</color>
     <color name="status_rejected">#F44336</color>
+    
+    <!-- Custom colors for application status -->
+    <color name="red">#FF0000</color>
+    <color name="green">#4CAF50</color>
+    <color name="orange">#FF9800</color>
+    <color name="ic_launcher_background">#2196F3</color>
 </resources>

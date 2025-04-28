@@ -103,12 +103,12 @@ class EditJobActivity : AppCompatActivity() {
                     
                     // Fill the form with job data
                     jobTitleInput.setText(data["title"] as? String ?: "")
-                    jobTypeInput.setText(data["jobType"] as? String ?: "")
+                    jobTypeInput.setText(data["type"] as? String ?: "")
                     locationInput.setText(data["location"] as? String ?: "")
                     salaryInput.setText(data["salary"] as? String ?: "")
                     descriptionInput.setText(data["description"] as? String ?: "")
                     requirementsInput.setText(data["requirements"] as? String ?: "")
-                    statusInput.setText(data["status"] as? String ?: "active")
+                    statusInput.setText(data["status"] as? String ?: "Active")
                 } else {
                     Toast.makeText(this, "Error: Job not found", Toast.LENGTH_SHORT).show()
                     finish()
@@ -164,7 +164,7 @@ class EditJobActivity : AppCompatActivity() {
     private fun updateJob() {
         val jobUpdates = hashMapOf<String, Any>(
             "title" to jobTitleInput.text.toString(),
-            "jobType" to jobTypeInput.text.toString(),
+            "type" to jobTypeInput.text.toString(),
             "location" to locationInput.text.toString(),
             "salary" to salaryInput.text.toString(),
             "description" to descriptionInput.text.toString(),

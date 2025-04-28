@@ -13,15 +13,12 @@ data class Job(
     val type: String = "",
     val description: String = "",
     val requirements: String = "",
-    val postedDate: Timestamp = Timestamp.now()
+    val postedDate: Timestamp = Timestamp.now(),
+    val status: String = "Active"
 ) {
     @Exclude
     fun getRequirementsList(): List<String> {
-        return when (requirements) {
-            is String -> listOf(requirements as String)
-            is List<*> -> (requirements as List<*>).filterIsInstance<String>()
-            else -> emptyList()
-        }
+        return requirements.split("\n").filter { it.isNotEmpty() }
     }
 
     @Exclude

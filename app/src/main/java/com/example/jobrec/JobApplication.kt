@@ -10,9 +10,10 @@ data class JobApplication(
     val applicantName: String = "",
     val companyId: String = "",
     val appliedDate: Date = Date(),
-    val status: String = "Pending",
+    val status: String = ApplicationStatus.PENDING.name,
     val cvUrl: String = "",
-    val coverLetter: String = ""
+    val coverLetter: String = "",
+    val notes: String = ""
 )
 
 enum class ApplicationStatus {

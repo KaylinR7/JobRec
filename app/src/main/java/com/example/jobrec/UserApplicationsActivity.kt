@@ -68,7 +68,7 @@ class UserApplicationsActivity : AppCompatActivity() {
         
         db.collection("applications")
             .whereEqualTo("userId", userId)
-            .whereEqualTo("status", status)
+            .whereEqualTo("status", status.name)
             .orderBy("appliedDate", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->

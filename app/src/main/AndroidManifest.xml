@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.jobrec">
 
     <!-- Internet permission for Firebase -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -9,8 +10,11 @@
     <!-- Storage permission for profile images -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
     <application
+        android:name=".JobRecApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -20,6 +24,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.JobRec"
         tools:targetApi="31">
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <!-- Main Activities -->
         <activity
@@ -38,9 +46,19 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".HomeActivity"
+            android:name=".SignupActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".ProfileActivity"
@@ -74,6 +92,30 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Add MyApplicationsActivity -->
+        <activity
+            android:name=".MyApplicationsActivity"
+            android:exported="false"
+            android:parentActivityName=".HomeActivity" />
+
+        <!-- Add missing activities -->
+        <activity
+            android:name=".CVDetailsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".EditCompanyProfileActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".CompanyProfileActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".JobDetailActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Firebase Services -->
         <service
             android:name="com.google.firebase.components.ComponentDiscoveryService"
@@ -88,6 +130,31 @@
                 android:name="com.google.firebase.components:com.google.firebase.storage.StorageRegistrar"
                 android:value="com.google.firebase.components.ComponentRegistrar" />
         </service>
+
+        <activity
+            android:name=".AdminLoginActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".AdminUsersActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".AdminCompaniesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".AdminJobsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".AdminApplicationsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
     </application>
 
