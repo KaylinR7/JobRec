@@ -46,6 +46,11 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".CandidateSearchActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".SignupActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -116,6 +121,18 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Add Candidate Search Activity -->
+        <activity
+            android:name=".CandidateSearchActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Job Alerts Activity -->
+        <activity
+            android:name=".JobAlertsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Firebase Services -->
         <service
             android:name="com.google.firebase.components.ComponentDiscoveryService"
@@ -155,6 +172,15 @@
             android:name=".AdminApplicationsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".EmployerAnalyticsActivity"
+            android:label="Analytics Dashboard"
+            android:parentActivityName=".CompanyDashboardActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CompanyDashboardActivity" />
+        </activity>
 
     </application>
 

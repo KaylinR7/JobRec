@@ -28,14 +28,15 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.8"
@@ -65,6 +66,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-messaging-ktx")
     
     // Glide for image loading
     implementation("com.github.bumptech.glide:glide:4.16.0")
@@ -81,6 +83,9 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // MPAndroidChart for analytics
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }
 
 

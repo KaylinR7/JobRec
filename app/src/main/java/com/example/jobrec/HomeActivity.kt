@@ -192,6 +192,10 @@ class HomeActivity : AppCompatActivity() {
                 startActivity(Intent(this, MyApplicationsActivity::class.java))
                 true
             }
+            R.id.action_job_alerts -> {
+                startActivity(Intent(this, JobAlertsActivity::class.java))
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }

@@ -85,6 +85,14 @@ class CompanyDashboardActivity : AppCompatActivity() {
                 finish()
                 true
             }
+            R.id.action_search -> {
+                startActivity(Intent(this, CandidateSearchActivity::class.java))
+                true
+            }
+            R.id.action_analytics -> {
+                startActivity(Intent(this, EmployerAnalyticsActivity::class.java))
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }

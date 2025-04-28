@@ -11,9 +11,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
-rootProject.name = "Kotlin App"
+rootProject.name = "JobRec"
 include(":app")
  
