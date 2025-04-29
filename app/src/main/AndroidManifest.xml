@@ -41,6 +41,12 @@
         </activity>
 
         <activity
+            android:name=".SignupActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+
+        <activity
             android:name=".CompanySignupActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

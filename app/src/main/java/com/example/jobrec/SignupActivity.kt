@@ -1,152 +1,96 @@
 package com.example.jobrec
 
-import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import com.google.android.material.textfield.TextInputEditText
-import android.widget.Button
-import android.widget.TextView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class SignupActivity : AppCompatActivity() {
-    private lateinit var nameInput: TextInputEditText
-    private lateinit var surnameInput: TextInputEditText
-    private lateinit var emailInput: TextInputEditText
-    private lateinit var phoneNumberInput: TextInputEditText
-    private lateinit var addressInput: TextInputEditText
-    private lateinit var idNumberInput: TextInputEditText
-    private lateinit var passwordInput: TextInputEditText
-    private lateinit var confirmPasswordInput: TextInputEditText
-    private lateinit var nextButton: Button
-    private val firebaseHelper = FirebaseHelper.getInstance()
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var firestore: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_signup)
 
-        nameInput = findViewById(R.id.nameInput)
-        surnameInput = findViewById(R.id.surnameInput)
-        emailInput = findViewById(R.id.emailInput)
-        phoneNumberInput = findViewById(R.id.phoneInput)
-        addressInput = findViewById(R.id.addressInput)
-        idNumberInput = findViewById(R.id.idNumberInput)
-        passwordInput = findViewById(R.id.passwordInput)
-        confirmPasswordInput = findViewById(R.id.confirmPasswordInput)
-        nextButton = findViewById(R.id.nextButton)
+        // Toolbar setup
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        toolbar.title = "Student Registration"
+        toolbar.setNavigationOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
 
-        nextButton.setOnClickListener {
-            val name = nameInput.text.toString().trim()
-            val surname = surnameInput.text.toString().trim()
-            val email = emailInput.text.toString().trim()
-            val phoneNumber = phoneNumberInput.text.toString().trim()
-            val address = addressInput.text.toString().trim()
-            val idNumber = idNumberInput.text.toString().trim()
-            val password = passwordInput.text.toString().trim()
-            val confirmPassword = confirmPasswordInput.text.toString().trim()
+        // Initialize Firebase - matching CompanySignupActivity pattern
+        auth = FirebaseAuth.getInstance()
+        firestore = FirebaseFirestore.getInstance()
 
-            if (validateInput(name, surname, email, phoneNumber, address, idNumber, password, confirmPassword)) {
-                // Check if email already exists
-                firebaseHelper.isEmailExists(email) { emailExists ->
-                    if (emailExists) {
-                        runOnUiThread {
-                            emailInput.error = "Email already exists"
+        // Register button
+        findViewById<Button>(R.id.btnRegister).setOnClickListener {
+            registerStudent()
+        }
+    }
+
+    private fun registerStudent() {
+        // Get data from input fields
+        val name = findViewById<TextInputEditText>(R.id.etName).text.toString()
+        val surname = findViewById<TextInputEditText>(R.id.etSurname).text.toString()
+        val cellNumber = findViewById<TextInputEditText>(R.id.etCellNumber).text.toString()
+        val email = findViewById<TextInputEditText>(R.id.etEmail).text.toString()
+        val password = findViewById<TextInputEditText>(R.id.etPassword).text.toString() // Add this field if missing
+        val address = findViewById<TextInputEditText>(R.id.etAddress).text.toString()
+
+        // Collecting list values from the form
+        val skills = findViewById<TextInputEditText>(R.id.etSkills).text.toString().split(",").map { it.trim() }
+        val hobbies = findViewById<TextInputEditText>(R.id.etHobbies).text.toString().split(",").map { it.trim() }
+
+        // Validate inputs
+        if (name.isEmpty() || surname.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Create student object - similar to Company object but for student
+        val student = hashMapOf(
+            "name" to name,
+            "surname" to surname,
+            "cellNumber" to cellNumber,
+            "email" to email,
+            "address" to address,
+            "skills" to skills,
+            "hobbies" to hobbies,
+            // Add other fields as needed
+        )
+
+        // Register with Firebase Auth first
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Save student data to Firestore
+                    firestore.collection("students")
+                        .document(auth.currentUser?.uid ?: "") // Using UID as document ID
+                        .set(student)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
+                            // You can navigate to another activity here if needed
                         }
-                        return@isEmailExists
-                    }
-
-                    // Check if ID number already exists
-                    firebaseHelper.isIdNumberExists(idNumber) { idExists ->
-                        if (idExists) {
-                            runOnUiThread {
-                                idNumberInput.error = "ID Number already exists"
-                            }
-                            return@isIdNumberExists
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Failed to save student data: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
-
-                        // If validation passes and email/ID don't exist, proceed to CV details
-                        runOnUiThread {
-                            // Create intent to CVDetailsActivity
-                            val intent = Intent(this, CVDetailsActivity::class.java)
-                            
-                            // Pass user data to CVDetailsActivity
-                            intent.putExtra("name", name)
-                            intent.putExtra("surname", surname)
-                            intent.putExtra("email", email)
-                            intent.putExtra("phoneNumber", phoneNumber)
-                            intent.putExtra("address", address)
-                            intent.putExtra("idNumber", idNumber)
-                            intent.putExtra("password", password)
-                            
-                            // Start CVDetailsActivity
-                            startActivity(intent)
-                        }
-                    }
+                } else {
+                    Toast.makeText(this, "Registration failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
             }
-        }
     }
 
-    private fun validateInput(
-        name: String,
-        surname: String,
-        email: String,
-        phoneNumber: String,
-        address: String,
-        idNumber: String,
-        password: String,
-        confirmPassword: String
-    ): Boolean {
-        var isValid = true
-
-        if (name.isEmpty()) {
-            nameInput.error = "Name is required"
-            isValid = false
-        }
-
-        if (surname.isEmpty()) {
-            surnameInput.error = "Surname is required"
-            isValid = false
-        }
-
-        if (email.isEmpty()) {
-            emailInput.error = "Email is required"
-            isValid = false
-        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailInput.error = "Invalid email format"
-            isValid = false
-        }
-
-        if (phoneNumber.isEmpty()) {
-            phoneNumberInput.error = "Phone number is required"
-            isValid = false
-        }
-
-        if (address.isEmpty()) {
-            addressInput.error = "Address is required"
-            isValid = false
-        }
-
-        if (idNumber.isEmpty()) {
-            idNumberInput.error = "ID number is required"
-            isValid = false
-        }
-
-        if (password.isEmpty()) {
-            passwordInput.error = "Password is required"
-            isValid = false
-        } else if (password.length < 6) {
-            passwordInput.error = "Password must be at least 6 characters"
-            isValid = false
-        }
-
-        if (confirmPassword.isEmpty()) {
-            confirmPasswordInput.error = "Confirm password is required"
-            isValid = false
-        } else if (confirmPassword != password) {
-            confirmPasswordInput.error = "Passwords do not match"
-            isValid = false
-        }
-
-        return isValid
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressedDispatcher.onBackPressed()
+        return true
     }
-} 
+}
