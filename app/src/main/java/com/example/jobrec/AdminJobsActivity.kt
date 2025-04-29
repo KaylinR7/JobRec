@@ -20,7 +20,6 @@ class AdminJobsActivity : AppCompatActivity() {
     private lateinit var searchEditText: EditText
     private lateinit var progressIndicator: CircularProgressIndicator
     private val db = FirebaseFirestore.getInstance()
-    private var jobIds: MutableList<String> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,13 +33,7 @@ class AdminJobsActivity : AppCompatActivity() {
         adapter = AdminJobsAdapter(emptyList(),
             onViewClick = { job -> viewJob(job) },
             onEditClick = { job -> editJob(job) },
-            onDeleteClick = { job ->
-                val index = adapter.jobsList.indexOfFirst { j -> j.id == job.id }
-                if (index != -1) {
-                    val jobId = jobIds[index]
-                    deleteJob(jobId)
-                }
-            }
+            onDeleteClick = { job -> deleteJob(job.id) }
         )
         recyclerView.adapter = adapter
 
@@ -84,7 +77,7 @@ class AdminJobsActivity : AppCompatActivity() {
                 progressIndicator.visibility = View.GONE
             }
             .addOnFailureListener { exception ->
-                // Handle error
+                Toast.makeText(this, "Error loading jobs: ${exception.message}", Toast.LENGTH_SHORT).show()
                 progressIndicator.visibility = View.GONE
             }
     }
@@ -113,7 +106,7 @@ class AdminJobsActivity : AppCompatActivity() {
                 progressIndicator.visibility = View.GONE
             }
             .addOnFailureListener { exception ->
-                // Handle error
+                Toast.makeText(this, "Error searching jobs: ${exception.message}", Toast.LENGTH_SHORT).show()
                 progressIndicator.visibility = View.GONE
             }
     }

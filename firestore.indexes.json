@@ -11,6 +11,10 @@
         {
           "fieldPath": "postedDate",
           "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
         }
       ]
     },
@@ -47,11 +51,15 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "userId",
+          "fieldPath": "companyId",
           "order": "ASCENDING"
         },
         {
           "fieldPath": "appliedDate",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
           "order": "DESCENDING"
         }
       ]
@@ -61,7 +69,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "companyId",
+          "fieldPath": "userId",
           "order": "ASCENDING"
         },
         {

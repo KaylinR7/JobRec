@@ -2,6 +2,7 @@ package com.example.jobrec
 
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.Timestamp
+import java.util.*
 
 data class Job(
     val id: String = "",
@@ -11,6 +12,7 @@ data class Job(
     val location: String = "",
     val salary: String = "",
     val type: String = "",
+    val jobType: String = "",
     val description: String = "",
     val requirements: String = "",
     val postedDate: Timestamp = Timestamp.now(),

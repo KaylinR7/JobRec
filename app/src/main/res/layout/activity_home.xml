@@ -28,6 +28,19 @@
                 android:gravity="end|center_vertical">
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/notificationsButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Notifications"
+                    android:textColor="@color/primary"
+                    android:icon="@drawable/ic_notifications"
+                    android:iconTint="@color/primary"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="8dp" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/profileButton"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
@@ -39,155 +52,188 @@
                     android:minWidth="0dp"
                     android:minHeight="0dp"
                     android:padding="8dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/contactButton"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Contact"
-                    android:textColor="@color/primary"
-                    android:icon="@drawable/ic_contact"
-                    android:iconTint="@color/primary"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="8dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/helpButton"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Help"
-                    android:textColor="@color/primary"
-                    android:icon="@drawable/ic_help"
-                    android:iconTint="@color/primary"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="8dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/logoutButton"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Logout"
-                    android:textColor="@color/primary"
-                    android:icon="@drawable/ic_logout"
-                    android:iconTint="@color/primary"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="8dp" />
             </LinearLayout>
         </com.google.android.material.appbar.MaterialToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Main Content -->
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Search Bar -->
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp">
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Search Bar -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/searchCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="12dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_search"
+                        android:tint="@color/primary"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Search jobs..."
+                        android:textColor="@color/black"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Quick Actions -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Quick Actions"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="8dp"
-                android:gravity="center_vertical">
+                android:layout_marginBottom="16dp">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_search"
-                    android:tint="@color/primary"
-                    android:layout_marginEnd="8dp" />
-
-                <TextView
+                <!-- My Applications Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/myApplicationsCard"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Search jobs..."
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
+                    android:layout_marginEnd="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="16dp">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_application"
+                            android:tint="@color/primary"
+                            android:layout_marginBottom="8dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="My Applications"
+                            android:textSize="14sp"
+                            android:gravity="center"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Job Alerts Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/jobAlertsCard"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="16dp">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_notifications"
+                            android:tint="@color/primary"
+                            android:layout_marginBottom="8dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Job Alerts"
+                            android:textSize="14sp"
+                            android:gravity="center"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <!-- Recently Posted Jobs Section -->
-        <TextView
-            android:id="@+id/recentJobsLabel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Recently Posted Jobs"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:paddingStart="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="4dp"
-            android:textColor="@color/primary" />
+            <!-- Recently Posted Jobs Section -->
+            <TextView
+                android:id="@+id/recentJobsLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Recently Posted Jobs"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"
+                android:textColor="@color/primary" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recentJobsRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:clipToPadding="false"
-            android:orientation="horizontal"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recentJobsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-        <!-- Tab Layout -->
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            app:tabGravity="fill"
-            app:tabIndicatorColor="@color/primary"
-            app:tabMode="fixed"
-            app:tabSelectedTextColor="@color/primary"
-            app:tabTextColor="@color/black"
-            app:tabRippleColor="@color/primary"
-            app:tabIndicatorHeight="3dp"
-            android:layout_marginTop="8dp" />
+            <!-- Recommended Jobs Section -->
+            <TextView
+                android:id="@+id/recommendedJobsLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Recommended for You"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:textColor="@color/primary" />
 
-        <!-- ViewPager for tabs -->
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recommendedJobsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-        <!-- RecyclerView for job listings -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/jobsRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="16dp"
-            android:clipToPadding="false" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-    </LinearLayout>
-
-    <!-- Floating Action Button for searching jobs -->
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:text="Search Jobs"
-        android:textColor="@color/white"
-        app:icon="@drawable/ic_search"
-        app:iconTint="@color/white"
-        app:backgroundTint="@color/primary" />
+        android:layout_gravity="bottom"
+        android:background="@color/white"
+        app:menu="@menu/bottom_nav_menu"
+        app:labelVisibilityMode="labeled"
+        app:itemIconTint="@color/bottom_nav_item_color"
+        app:itemTextColor="@color/bottom_nav_item_color"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout> 

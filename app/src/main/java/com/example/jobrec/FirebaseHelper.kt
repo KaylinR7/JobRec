@@ -107,22 +107,4 @@ class FirebaseHelper private constructor() {
                 callback(false)
             }
     }
-}
-
-// Data classes for education and experience
-data class Education(
-    val institution: String = "",
-    val degree: String = "",
-    val fieldOfStudy: String = "",
-    val startDate: String = "",
-    val endDate: String = "",
-    val description: String = ""
-)
-
-data class Experience(
-    val company: String = "",
-    val position: String = "",
-    val startDate: String = "",
-    val endDate: String = "",
-    val description: String = ""
-) 
+} 

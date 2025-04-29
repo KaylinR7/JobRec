@@ -1,6 +1,7 @@
 package com.example.jobrec
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -70,15 +71,17 @@ class CompanyApplicationsFragment : Fragment() {
             return
         }
 
+        Log.d("CompanyApplicationsFragment", "Loading applications for company: $companyId")
+
         db.collection("applications")
             .whereEqualTo("companyId", companyId)
-            .orderBy("appliedDate", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
+                Log.d("CompanyApplicationsFragment", "Query succeeded with ${documents.size()} documents")
                 val applications = documents.mapNotNull { document ->
                     try {
                         val appliedDate = document.getDate("appliedDate") ?: Date()
-                        JobApplication(
+                        val application = JobApplication(
                             id = document.id,
                             jobId = document.getString("jobId") ?: "",
                             jobTitle = document.getString("jobTitle") ?: "",
@@ -90,13 +93,22 @@ class CompanyApplicationsFragment : Fragment() {
                             cvUrl = document.getString("cvUrl") ?: "",
                             coverLetter = document.getString("coverLetter") ?: ""
                         )
+                        Log.d("CompanyApplicationsFragment", "Successfully parsed application: ${application.jobTitle}")
+                        application
                     } catch (e: Exception) {
+                        Log.e("CompanyApplicationsFragment", "Error parsing application document", e)
                         null
                     }
                 }
-                adapter.updateApplications(applications)
+                
+                // Sort applications in memory by appliedDate
+                val sortedApplications = applications.sortedByDescending { it.appliedDate }
+                Log.d("CompanyApplicationsFragment", "Processed ${sortedApplications.size} applications")
+                
+                adapter.updateApplications(sortedApplications)
             }
             .addOnFailureListener { exception ->
+                Log.e("CompanyApplicationsFragment", "Error loading applications", exception)
                 Toast.makeText(context, "Error loading applications: ${exception.message}", Toast.LENGTH_SHORT).show()
             }
     }

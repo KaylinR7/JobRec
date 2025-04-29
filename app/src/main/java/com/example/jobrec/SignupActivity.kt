@@ -43,12 +43,18 @@ class SignupActivity : AppCompatActivity() {
         val surname = findViewById<TextInputEditText>(R.id.etSurname).text.toString()
         val cellNumber = findViewById<TextInputEditText>(R.id.etCellNumber).text.toString()
         val email = findViewById<TextInputEditText>(R.id.etEmail).text.toString()
-        val password = findViewById<TextInputEditText>(R.id.etPassword).text.toString() // Add this field if missing
+        val password = findViewById<TextInputEditText>(R.id.etPassword).text.toString()
         val address = findViewById<TextInputEditText>(R.id.etAddress).text.toString()
 
         // Collecting list values from the form
         val skills = findViewById<TextInputEditText>(R.id.etSkills).text.toString().split(",").map { it.trim() }
         val hobbies = findViewById<TextInputEditText>(R.id.etHobbies).text.toString().split(",").map { it.trim() }
+
+        // Get new fields
+        val achievements = findViewById<TextInputEditText>(R.id.etAchievements).text.toString()
+        val linkedin = findViewById<TextInputEditText>(R.id.etLinkedin).text.toString()
+        val github = findViewById<TextInputEditText>(R.id.etGithub).text.toString()
+        val portfolio = findViewById<TextInputEditText>(R.id.etPortfolio).text.toString()
 
         // Validate inputs
         if (name.isEmpty() || surname.isEmpty() || email.isEmpty() || password.isEmpty()) {
@@ -56,16 +62,20 @@ class SignupActivity : AppCompatActivity() {
             return
         }
 
-        // Create student object - similar to Company object but for student
-        val student = hashMapOf(
-            "name" to name,
-            "surname" to surname,
-            "cellNumber" to cellNumber,
-            "email" to email,
-            "address" to address,
-            "skills" to skills,
-            "hobbies" to hobbies,
-            // Add other fields as needed
+        // Create student object
+        val student = User(
+            name = name,
+            surname = surname,
+            phoneNumber = cellNumber,
+            email = email,
+            address = address,
+            skills = skills,
+            hobbies = hobbies,
+            achievements = achievements,
+            linkedin = linkedin,
+            github = github,
+            portfolio = portfolio,
+            role = "student"
         )
 
         // Register with Firebase Auth first
@@ -73,12 +83,12 @@ class SignupActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Save student data to Firestore
-                    firestore.collection("students")
+                    firestore.collection("Users")
                         .document(auth.currentUser?.uid ?: "") // Using UID as document ID
                         .set(student)
                         .addOnSuccessListener {
                             Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
-                            // You can navigate to another activity here if needed
+                            finish() // Return to previous activity
                         }
                         .addOnFailureListener { e ->
                             Toast.makeText(this, "Failed to save student data: ${e.message}", Toast.LENGTH_SHORT).show()
