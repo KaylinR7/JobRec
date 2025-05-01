@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -18,6 +19,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.util.UUID
 import java.util.Date
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.textfield.TextInputEditText
 
 class JobDetailsActivity : AppCompatActivity() {
     private lateinit var jobTitle: TextView
@@ -117,23 +121,27 @@ class JobDetailsActivity : AppCompatActivity() {
     }
 
     private fun showApplicationDialog() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Apply for Job")
-            .setMessage("How would you like to apply?")
-            .setPositiveButton("Use My Profile") { _, _ ->
-                useProfileAsCv()
-            }
-            .setNeutralButton("Upload CV") { _, _ ->
-                selectCv()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+        val bottomSheetView = layoutInflater.inflate(R.layout.bottom_sheet_apply, null)
+        val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.setContentView(bottomSheetView)
+
+        bottomSheetView.findViewById<MaterialCardView>(R.id.profileCard).setOnClickListener {
+            bottomSheetDialog.dismiss()
+            useProfileAsCv()
+        }
+
+        bottomSheetView.findViewById<MaterialCardView>(R.id.uploadCard).setOnClickListener {
+            bottomSheetDialog.dismiss()
+            selectCv()
+        }
+
+        bottomSheetDialog.show()
     }
 
     private fun useProfileAsCv() {
         val userId = auth.currentUser?.uid ?: return
         // First get the user's ID number from the Users collection using their email
-        db.collection("Users")
+        db.collection("users")
             .whereEqualTo("email", auth.currentUser?.email)
             .get()
             .addOnSuccessListener { documents ->
@@ -232,32 +240,24 @@ class JobDetailsActivity : AppCompatActivity() {
     }
 
     private fun showCoverLetterDialog() {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_cover_letter, null)
-        val coverLetterText = dialogView.findViewById<TextView>(R.id.coverLetterText)
+        val bottomSheetView = layoutInflater.inflate(R.layout.bottom_sheet_cover_letter, null)
+        val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.setContentView(bottomSheetView)
 
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Cover Letter")
-            .setMessage("Please provide a cover letter for this application.")
-            .setView(dialogView)
-            .setPositiveButton("Submit") { _, _ ->
-                val coverLetter = coverLetterText?.text?.toString() ?: ""
-                if (coverLetter.isNotEmpty()) {
-                    submitApplication(coverLetter)
-                } else {
-                    Toast.makeText(this, "Please provide a cover letter", Toast.LENGTH_SHORT).show()
-                    applyButton.isEnabled = true
-                    applyButton.text = "Apply Now"
-                }
+        val coverLetterText = bottomSheetView.findViewById<TextInputEditText>(R.id.coverLetterText)
+        val submitButton = bottomSheetView.findViewById<MaterialButton>(R.id.submitButton)
+
+        submitButton.setOnClickListener {
+            val coverLetter = coverLetterText.text?.toString() ?: ""
+            if (coverLetter.isNotEmpty()) {
+                bottomSheetDialog.dismiss()
+                submitApplication(coverLetter)
+            } else {
+                coverLetterText.error = "Please provide a cover letter"
             }
-            .setNegativeButton("Cancel") { _, _ ->
-                applyButton.isEnabled = true
-                applyButton.text = "Apply Now"
-            }
-            .setOnCancelListener {
-                applyButton.isEnabled = true
-                applyButton.text = "Apply Now"
-            }
-            .show()
+        }
+
+        bottomSheetDialog.show()
     }
 
     private fun submitApplication(coverLetter: String) {
@@ -267,7 +267,7 @@ class JobDetailsActivity : AppCompatActivity() {
         val cvUrl = currentCvUrl ?: return
 
         // First get the user's name
-        db.collection("Users")
+        db.collection("users")
             .whereEqualTo("email", auth.currentUser?.email)
             .get()
             .addOnSuccessListener { documents ->
@@ -330,20 +330,33 @@ class JobDetailsActivity : AppCompatActivity() {
     }
 
     private fun loadJobDetails(jobId: String) {
-        db.collection("jobs").document(jobId).get()
+        Log.d("JobDetailsActivity", "Loading job details for ID: $jobId")
+        if (jobId.isBlank()) {
+            Log.e("JobDetailsActivity", "Invalid job ID: $jobId")
+            Toast.makeText(this, "Invalid job ID", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        db.collection("jobs")
+            .document(jobId)
+            .get()
             .addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
+                if (document.exists()) {
                     val job = document.toObject(Job::class.java)
                     job?.let { 
+                        Log.d("JobDetailsActivity", "Successfully loaded job: ${it.title}")
                         displayJobDetails(it)
                         companyId = it.companyId
                     }
                 } else {
+                    Log.e("JobDetailsActivity", "No job found with ID: $jobId")
                     Toast.makeText(this, "Job not found", Toast.LENGTH_SHORT).show()
                     finish()
                 }
             }
-            .addOnFailureListener {
+            .addOnFailureListener { e ->
+                Log.e("JobDetailsActivity", "Error loading job details", e)
                 Toast.makeText(this, "Error loading job details", Toast.LENGTH_SHORT).show()
                 finish()
             }
@@ -371,6 +384,14 @@ class JobDetailsActivity : AppCompatActivity() {
                     } else {
                         // Show apply button for regular users
                         applyButton.visibility = View.VISIBLE
+                        applyButton.setOnClickListener {
+                            if (auth.currentUser != null) {
+                                checkIfAlreadyApplied()
+                            } else {
+                                Toast.makeText(this, "Please sign in to apply", Toast.LENGTH_SHORT).show()
+                                // TODO: Navigate to login screen
+                            }
+                        }
                     }
                 }
         }

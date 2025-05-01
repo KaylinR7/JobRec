@@ -1,31 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="32dp"
+    android:padding="24dp"
+    android:background="@android:color/white"
     android:gravity="center">
 
-    <EditText
-        android:id="@+id/adminEmailInput"
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Admin Portal"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign in to access admin dashboard"
+        android:textSize="16sp"
+        android:textColor="@android:color/darker_gray"
+        android:layout_marginBottom="32dp"/>
+
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Admin Email"
-        android:inputType="textEmailAddress" />
+        android:layout_marginBottom="16dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        app:boxStrokeColor="@android:color/black"
+        app:hintTextColor="@android:color/black">
 
-    <EditText
-        android:id="@+id/adminPasswordInput"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/adminEmailInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Admin Email"
+            android:inputType="textEmailAddress"
+            android:textColor="@android:color/black"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Password"
-        android:inputType="textPassword"
-        android:layout_marginTop="16dp" />
+        android:layout_marginBottom="24dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        app:boxStrokeColor="@android:color/black"
+        app:hintTextColor="@android:color/black"
+        app:passwordToggleEnabled="true"
+        app:passwordToggleTint="@android:color/black">
 
-    <Button
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/adminPasswordInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:textColor="@android:color/black"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/adminLoginButton"
         android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Sign In"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        app:backgroundTint="@android:color/black"
+        android:layout_marginBottom="24dp"/>
+
+    <TextView
+        android:id="@+id/backToLoginLink"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Login"
-        android:layout_marginTop="24dp" />
+        android:text="Back to Login"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:padding="8dp"
+        android:background="?attr/selectableItemBackground"/>
 
 </LinearLayout> 

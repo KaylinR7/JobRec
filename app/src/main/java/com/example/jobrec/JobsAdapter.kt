@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.Chip
 
 class JobsAdapter(private val onJobClick: (Job) -> Unit) :
     ListAdapter<Job, JobsAdapter.JobViewHolder>(JobDiffCallback()) {
@@ -23,11 +24,11 @@ class JobsAdapter(private val onJobClick: (Job) -> Unit) :
     }
 
     inner class JobViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val jobTitle: TextView = itemView.findViewById(R.id.jobTitleTextView)
-        private val companyName: TextView = itemView.findViewById(R.id.companyNameTextView)
-        private val jobLocation: TextView = itemView.findViewById(R.id.jobLocationTextView)
-        private val jobType: TextView = itemView.findViewById(R.id.jobTypeTextView)
-        private val jobSalary: TextView = itemView.findViewById(R.id.jobSalaryTextView)
+        private val titleTextView: TextView = itemView.findViewById(R.id.jobTitleTextView)
+        private val companyTextView: TextView = itemView.findViewById(R.id.companyNameTextView)
+        private val locationTextView: TextView = itemView.findViewById(R.id.locationTextView)
+        private val jobTypeChip: Chip = itemView.findViewById(R.id.jobTypeChip)
+        private val postedDateText: TextView = itemView.findViewById(R.id.postedDateText)
 
         init {
             itemView.setOnClickListener {
@@ -39,11 +40,21 @@ class JobsAdapter(private val onJobClick: (Job) -> Unit) :
         }
 
         fun bind(job: Job) {
-            jobTitle.text = job.title
-            companyName.text = job.companyName
-            jobLocation.text = job.location
-            jobType.text = job.type
-            jobSalary.text = job.salary
+            titleTextView.text = job.title
+            companyTextView.text = job.companyName
+            locationTextView.text = job.location
+            jobTypeChip.text = job.type
+            // Format the posted date
+            val dateFormat = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
+            val postedDate = java.util.Date(job.getPostedDateMillis())
+            val daysAgo = calculateDaysAgo(job.getPostedDateMillis())
+            postedDateText.text = if (daysAgo == 0) "Posted today" else "Posted $daysAgo days ago"
+        }
+
+        private fun calculateDaysAgo(timestamp: Long): Int {
+            val currentTime = System.currentTimeMillis()
+            val diff = currentTime - timestamp
+            return (diff / (1000 * 60 * 60 * 24)).toInt()
         }
     }
 

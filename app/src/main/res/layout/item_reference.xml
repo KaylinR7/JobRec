@@ -3,9 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
+    android:layout_marginBottom="16dp"
     app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#E0E0E0">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,67 +18,96 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxStrokeColor="@android:color/black"
+            app:hintTextColor="@android:color/black">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/referenceNameInput"
+                android:id="@+id/etReferenceName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Reference Name"
-                android:inputType="textPersonName"/>
+                android:inputType="textPersonName"
+                android:textColor="@android:color/black"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxStrokeColor="@android:color/black"
+            app:hintTextColor="@android:color/black">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/referencePositionInput"
+                android:id="@+id/etReferencePosition"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Position"
-                android:inputType="text"/>
+                android:inputType="text"
+                android:textColor="@android:color/black"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxStrokeColor="@android:color/black"
+            app:hintTextColor="@android:color/black">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/referenceCompanyInput"
+                android:id="@+id/etReferenceCompany"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Company"
-                android:inputType="text"/>
+                android:inputType="text"
+                android:textColor="@android:color/black"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxStrokeColor="@android:color/black"
+            app:hintTextColor="@android:color/black">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/referenceEmailInput"
+                android:id="@+id/etReferenceEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Email"
-                android:inputType="textEmailAddress"/>
+                android:inputType="textEmailAddress"
+                android:textColor="@android:color/black"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxStrokeColor="@android:color/black"
+            app:hintTextColor="@android:color/black">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/referencePhoneInput"
+                android:id="@+id/etReferencePhone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Phone"
-                android:inputType="phone"/>
+                android:hint="Phone Number"
+                android:inputType="phone"
+                android:textColor="@android:color/black"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-    </LinearLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRemoveReference"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Remove Reference"
+            android:textColor="@android:color/white"
+            app:backgroundTint="@android:color/black"
+            android:layout_gravity="end"/>
 
+    </LinearLayout>
 </com.google.android.material.card.MaterialCardView> 

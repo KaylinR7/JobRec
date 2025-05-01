@@ -1,60 +1,62 @@
 package com.example.jobrec
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButton
+import com.example.jobrec.databinding.ItemAdminApplicationBinding
+import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 class AdminApplicationsAdapter(
-    private var applications: List<JobApplication>,
-    private val onViewDetailsClick: (JobApplication) -> Unit
+    private val applications: List<Application>,
+    private val onViewDetailsClick: (Application) -> Unit
 ) : RecyclerView.Adapter<AdminApplicationsAdapter.ApplicationViewHolder>() {
 
-    class ApplicationViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val jobTitleTextView: TextView = view.findViewById(R.id.jobTitleTextView)
-        val statusTextView: TextView = view.findViewById(R.id.statusTextView)
-        val companyNameTextView: TextView = view.findViewById(R.id.companyNameTextView)
-        val applicantNameTextView: TextView = view.findViewById(R.id.applicantNameTextView)
-        val dateTextView: TextView = view.findViewById(R.id.dateTextView)
-        val viewDetailsButton: MaterialButton = view.findViewById(R.id.viewDetailsButton)
+    class ApplicationViewHolder(private val binding: ItemAdminApplicationBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(application: Application, onViewDetailsClick: (Application) -> Unit) {
+            binding.apply {
+                jobTitleTextView.text = application.jobTitle
+                companyNameTextView.text = application.companyName
+                applicantNameTextView.text = application.applicantName
+                dateTextView.text = formatDate(application.appliedDate)
+                
+                // Set status chip
+                statusChip.text = application.status.capitalize()
+                statusChip.setChipBackgroundColorResource(getStatusColor(application.status))
+                
+                // Set click listener
+                viewDetailsButton.setOnClickListener { onViewDetailsClick(application) }
+            }
+        }
+
+        private fun formatDate(timestamp: Timestamp): String {
+            val date = timestamp.toDate()
+            return SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(date)
+        }
+
+        private fun getStatusColor(status: String): Int {
+            return when (status.lowercase()) {
+                "pending" -> R.color.status_pending
+                "shortlisted" -> R.color.status_shortlisted
+                "rejected" -> R.color.status_rejected
+                else -> R.color.status_pending
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ApplicationViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_admin_application, parent, false)
-        return ApplicationViewHolder(view)
+        val binding = ItemAdminApplicationBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return ApplicationViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ApplicationViewHolder, position: Int) {
-        val application = applications[position]
-        holder.jobTitleTextView.text = application.jobTitle
-        holder.statusTextView.text = application.status
-        holder.companyNameTextView.text = application.companyId // TODO: Load company name
-        holder.applicantNameTextView.text = application.applicantName
-        
-        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-        holder.dateTextView.text = dateFormat.format(application.appliedDate)
-        
-        // Set status text color based on status
-        when (application.status.toLowerCase()) {
-            "pending" -> holder.statusTextView.setTextColor(holder.itemView.context.getColor(R.color.orange))
-            "accepted" -> holder.statusTextView.setTextColor(holder.itemView.context.getColor(R.color.green))
-            "rejected" -> holder.statusTextView.setTextColor(holder.itemView.context.getColor(R.color.red))
-        }
-        
-        holder.viewDetailsButton.setOnClickListener {
-            onViewDetailsClick(application)
-        }
+        holder.bind(applications[position], onViewDetailsClick)
     }
 
-    override fun getItemCount(): Int = applications.size
-
-    fun updateApplications(newApplications: List<JobApplication>) {
-        applications = newApplications
-        notifyDataSetChanged()
-    }
+    override fun getItemCount() = applications.size
 } 

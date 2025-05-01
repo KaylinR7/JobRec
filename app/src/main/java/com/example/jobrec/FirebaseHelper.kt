@@ -37,17 +37,23 @@ class FirebaseHelper private constructor() {
         // First create the user in Firebase Auth
         auth.createUserWithEmailAndPassword(user.email, password)
             .addOnSuccessListener { authResult ->
-                // Then add the user data to Firestore
-                usersCollection.document(user.idNumber)
-                    .set(user)
-                    .addOnSuccessListener {
-                        Log.d("FirebaseHelper", "User added successfully: ${user.email}")
-                        callback(true, null)
-                    }
-                    .addOnFailureListener { e ->
-                        Log.e("FirebaseHelper", "Error adding user", e)
-                        callback(false, e.message)
-                    }
+                // Then add the user data to Firestore using the Firebase Auth UID
+                val userId = authResult.user?.uid
+                if (userId != null) {
+                    val userWithId = user.copy(id = userId)
+                    usersCollection.document(userId)
+                        .set(userWithId)
+                        .addOnSuccessListener {
+                            Log.d("FirebaseHelper", "User added successfully: ${user.email}")
+                            callback(true, null)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("FirebaseHelper", "Error adding user", e)
+                            callback(false, e.message)
+                        }
+                } else {
+                    callback(false, "Failed to get user ID")
+                }
             }
             .addOnFailureListener { e ->
                 Log.e("FirebaseHelper", "Error creating user", e)

@@ -3,13 +3,15 @@ package com.example.jobrec
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 
-class EducationAdapter : RecyclerView.Adapter<EducationAdapter.EducationViewHolder>() {
+class EducationAdapter : RecyclerView.Adapter<EducationAdapter.ViewHolder>() {
     
     private val educationList = mutableListOf<Education>()
-    private val viewHolders = mutableMapOf<Int, EducationViewHolder>()
+    private val viewHolders = mutableMapOf<Int, ViewHolder>()
     
     init {
         // Add an empty education item by default
@@ -32,7 +34,7 @@ class EducationAdapter : RecyclerView.Adapter<EducationAdapter.EducationViewHold
         notifyItemInserted(educationList.size - 1)
     }
     
-    fun getEducationList(): List<Education> {
+    fun getEducationList(): List<Map<String, String>> {
         // Update the data from the views before returning
         for (i in educationList.indices) {
             val holder = viewHolders[i]
@@ -42,44 +44,72 @@ class EducationAdapter : RecyclerView.Adapter<EducationAdapter.EducationViewHold
                 education.degree = holder.degreeInput.text.toString()
                 education.startDate = holder.startDateInput.text.toString()
                 education.endDate = holder.endDateInput.text.toString()
+                education.description = holder.descriptionInput.text.toString()
             }
         }
-        return educationList
+        return educationList.map { education ->
+            mapOf(
+                "institution" to education.institution,
+                "degree" to education.degree,
+                "startDate" to education.startDate,
+                "endDate" to education.endDate,
+                "description" to education.description
+            )
+        }
     }
     
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EducationViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_education, parent, false)
-        return EducationViewHolder(view)
+        return ViewHolder(view)
     }
     
-    override fun onBindViewHolder(holder: EducationViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         viewHolders[position] = holder
         val education = educationList[position]
         holder.institutionInput.setText(education.institution)
         holder.degreeInput.setText(education.degree)
         holder.startDateInput.setText(education.startDate)
         holder.endDateInput.setText(education.endDate)
+        holder.descriptionInput.setText(education.description)
+        
+        // Set up remove button click listener
+        holder.removeButton.setOnClickListener {
+            if (educationList.size > 1) {  // Keep at least one education entry
+                val position = holder.adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    educationList.removeAt(position)
+                    notifyItemRemoved(position)
+                    // Update positions of remaining items
+                    for (i in position until educationList.size) {
+                        notifyItemChanged(i)
+                    }
+                }
+            }
+        }
     }
     
-    override fun onViewRecycled(holder: EducationViewHolder) {
+    override fun onViewRecycled(holder: ViewHolder) {
         super.onViewRecycled(holder)
         viewHolders.remove(holder.adapterPosition)
     }
     
     override fun getItemCount(): Int = educationList.size
     
-    class EducationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val institutionInput: TextInputEditText = itemView.findViewById(R.id.institutionInput)
-        val degreeInput: TextInputEditText = itemView.findViewById(R.id.degreeInput)
-        val startDateInput: TextInputEditText = itemView.findViewById(R.id.startDateInput)
-        val endDateInput: TextInputEditText = itemView.findViewById(R.id.endDateInput)
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val institutionInput: TextInputEditText = view.findViewById(R.id.etEducationInstitution)
+        val degreeInput: TextInputEditText = view.findViewById(R.id.etEducationDegree)
+        val startDateInput: TextInputEditText = view.findViewById(R.id.etEducationStartDate)
+        val endDateInput: TextInputEditText = view.findViewById(R.id.etEducationEndDate)
+        val descriptionInput: TextInputEditText = view.findViewById(R.id.etEducationDescription)
+        val removeButton: Button = view.findViewById(R.id.btnRemoveEducation)
     }
     
     data class Education(
         var institution: String = "",
         var degree: String = "",
         var startDate: String = "",
-        var endDate: String = ""
+        var endDate: String = "",
+        var description: String = ""
     )
 } 

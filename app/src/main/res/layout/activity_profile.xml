@@ -37,21 +37,23 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="24dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="4dp">
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E0E0E0">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/profileImage"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
                         android:scaleType="centerCrop"
                         android:src="@android:drawable/ic_menu_myplaces"
                         app:shapeAppearanceOverlay="@style/CircleImageView" />
@@ -60,9 +62,10 @@
                         android:id="@+id/changePhotoButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="16dp"
                         android:text="Change Photo"
-                        style="@style/Widget.MaterialComponents.Button.TextButton" />
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/black" />
 
                 </LinearLayout>
 
@@ -72,28 +75,31 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E0E0E0">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Personal Information"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
-                        android:layout_marginBottom="16dp"/>
+                        android:textColor="@color/black"
+                        android:layout_marginBottom="24dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="16dp"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -101,27 +107,14 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Name"
+                            android:textColor="@color/black"
                             android:inputType="textPersonName"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/surnameInput"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Surname"
-                            android:inputType="textPersonName"/>
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="16dp"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -129,6 +122,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Email"
+                            android:textColor="@color/black"
                             android:inputType="textEmailAddress"
                             android:enabled="false"/>
                     </com.google.android.material.textfield.TextInputLayout>
@@ -136,7 +130,7 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="16dp"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -144,6 +138,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Phone Number"
+                            android:textColor="@color/black"
                             android:inputType="phone"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -157,6 +152,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Address"
+                            android:textColor="@color/black"
                             android:inputType="textPostalAddress"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -164,36 +160,29 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- CV Information Section -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="CV Information"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="8dp"/>
-
             <!-- Professional Summary Section -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E0E0E0">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Professional Summary"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:layout_marginBottom="16dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -206,92 +195,11 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Write a brief summary about yourself"
+                            android:textColor="@color/black"
                             android:inputType="textMultiLine"
                             android:minLines="3"
                             android:gravity="top"/>
                     </com.google.android.material.textfield.TextInputLayout>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Experience Section -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Work Experience"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="16dp"/>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/experienceRecyclerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:nestedScrollingEnabled="false"/>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/addExperienceButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_marginTop="8dp"
-                        android:text="Add Experience"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"/>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Education Section -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Education"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="16dp"/>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/educationRecyclerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:nestedScrollingEnabled="false"/>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/addEducationButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_marginTop="8dp"
-                        android:text="Add Education"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"/>
 
                 </LinearLayout>
 
@@ -301,163 +209,165 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E0E0E0">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Skills"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:layout_marginBottom="16dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/skillsInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Add skills"
+                            android:textColor="@color/black"/>
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.chip.ChipGroup
                         android:id="@+id/skillsChipGroup"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:chipSpacingHorizontal="8dp"
-                        app:chipSpacingVertical="8dp"/>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
-
-                        <AutoCompleteTextView
-                            android:id="@+id/skillsInput"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Add a skill and press enter"
-                            android:inputType="text"/>
-                    </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_height="wrap_content"/>
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Hobbies Section -->
+            <!-- Experience Section -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E0E0E0">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Hobbies"
-                        android:textSize="18sp"
+                        android:text="Work Experience"
+                        android:textSize="20sp"
                         android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:layout_marginBottom="16dp"/>
 
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/hobbiesChipGroup"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/experienceRecyclerView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:chipSpacingHorizontal="8dp"
-                        app:chipSpacingVertical="8dp"/>
+                        android:layout_marginBottom="16dp"/>
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/addExperienceButton"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
-
-                        <AutoCompleteTextView
-                            android:id="@+id/hobbiesInput"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Add a hobby and press enter"
-                            android:inputType="text"/>
-                    </com.google.android.material.textfield.TextInputLayout>
+                        android:text="Add Experience"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/black"/>
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Achievements Section -->
+            <!-- Education Section -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E0E0E0">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Achievements &amp; Certifications"
-                        android:textSize="18sp"
+                        android:text="Education"
+                        android:textSize="20sp"
                         android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:layout_marginBottom="16dp"/>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/educationRecyclerView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        android:layout_marginBottom="16dp"/>
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/achievementsInput"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="List your achievements and certifications"
-                            android:inputType="textMultiLine"
-                            android:minLines="3"
-                            android:gravity="top"/>
-                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/addEducationButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Add Education"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/black"/>
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Social Media Links Section -->
+            <!-- Social Links Section -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E0E0E0">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Social Media Links"
-                        android:textSize="18sp"
+                        android:text="Social Links"
+                        android:textSize="20sp"
                         android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:layout_marginBottom="16dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="16dp"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -465,13 +375,14 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="LinkedIn Profile"
+                            android:textColor="@color/black"
                             android:inputType="textUri"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="16dp"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -479,6 +390,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="GitHub Profile"
+                            android:textColor="@color/black"
                             android:inputType="textUri"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -492,6 +404,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Portfolio Website"
+                            android:textColor="@color/black"
                             android:inputType="textUri"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -503,38 +416,41 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E0E0E0">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="References"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:layout_marginBottom="16dp"/>
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/referencesRecyclerView"
+                    <LinearLayout
+                        android:id="@+id/referencesContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:nestedScrollingEnabled="false"/>
+                        android:orientation="vertical"
+                        android:layout_marginBottom="16dp"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/addReferenceButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_marginTop="8dp"
                         android:text="Add Reference"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"/>
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/black"/>
 
                 </LinearLayout>
 
@@ -546,8 +462,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Save Profile"
+                android:textColor="@color/white"
+                android:padding="12dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="32dp"
+                app:cornerRadius="8dp"/>
 
         </LinearLayout>
 

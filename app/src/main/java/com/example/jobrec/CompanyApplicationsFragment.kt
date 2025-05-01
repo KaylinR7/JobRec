@@ -1,23 +1,22 @@
 package com.example.jobrec
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.example.jobrec.databinding.FragmentCompanyApplicationsBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import java.text.SimpleDateFormat
-import java.util.*
 
 class CompanyApplicationsFragment : Fragment() {
-    private lateinit var recyclerView: RecyclerView
+    private var _binding: FragmentCompanyApplicationsBinding? = null
+    private val binding get() = _binding!!
     private lateinit var adapter: ApplicationAdapter
+    private val applications = mutableListOf<Application>()
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private var companyId: String = ""
@@ -26,11 +25,11 @@ class CompanyApplicationsFragment : Fragment() {
         private const val ARG_COMPANY_ID = "company_id"
 
         fun newInstance(companyId: String): CompanyApplicationsFragment {
-            val fragment = CompanyApplicationsFragment()
-            val args = Bundle()
-            args.putString(ARG_COMPANY_ID, companyId)
-            fragment.arguments = args
-            return fragment
+            return CompanyApplicationsFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_COMPANY_ID, companyId)
+                }
+            }
         }
     }
 
@@ -46,23 +45,27 @@ class CompanyApplicationsFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_company_applications, container, false)
+    ): View {
+        _binding = FragmentCompanyApplicationsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recyclerView = view.findViewById(R.id.applicationsRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-
-        adapter = ApplicationAdapter(emptyList()) { application ->
-            // Handle application click
-            // TODO: Navigate to application details
-        }
-
-        recyclerView.adapter = adapter
+        setupRecyclerView()
         loadApplications()
+    }
+
+    private fun setupRecyclerView() {
+        adapter = ApplicationAdapter(applications) { application ->
+            // Handle application click
+            showApplicationDetails(application)
+        }
+        binding.applicationsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = this@CompanyApplicationsFragment.adapter
+        }
     }
 
     private fun loadApplications() {
@@ -71,45 +74,37 @@ class CompanyApplicationsFragment : Fragment() {
             return
         }
 
-        Log.d("CompanyApplicationsFragment", "Loading applications for company: $companyId")
-
         db.collection("applications")
             .whereEqualTo("companyId", companyId)
+            .orderBy("appliedDate", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
-                Log.d("CompanyApplicationsFragment", "Query succeeded with ${documents.size()} documents")
-                val applications = documents.mapNotNull { document ->
-                    try {
-                        val appliedDate = document.getDate("appliedDate") ?: Date()
-                        val application = JobApplication(
-                            id = document.id,
-                            jobId = document.getString("jobId") ?: "",
-                            jobTitle = document.getString("jobTitle") ?: "",
-                            userId = document.getString("userId") ?: "",
-                            applicantName = document.getString("applicantName") ?: "",
-                            companyId = document.getString("companyId") ?: "",
-                            appliedDate = appliedDate,
-                            status = document.getString("status") ?: ApplicationStatus.PENDING.name,
-                            cvUrl = document.getString("cvUrl") ?: "",
-                            coverLetter = document.getString("coverLetter") ?: ""
-                        )
-                        Log.d("CompanyApplicationsFragment", "Successfully parsed application: ${application.jobTitle}")
-                        application
-                    } catch (e: Exception) {
-                        Log.e("CompanyApplicationsFragment", "Error parsing application document", e)
-                        null
-                    }
+                applications.clear()
+                for (document in documents) {
+                    val application = document.toObject(Application::class.java)
+                    application.id = document.id
+                    applications.add(application)
                 }
-                
-                // Sort applications in memory by appliedDate
-                val sortedApplications = applications.sortedByDescending { it.appliedDate }
-                Log.d("CompanyApplicationsFragment", "Processed ${sortedApplications.size} applications")
-                
-                adapter.updateApplications(sortedApplications)
+                adapter.notifyDataSetChanged()
+                updateEmptyState()
             }
-            .addOnFailureListener { exception ->
-                Log.e("CompanyApplicationsFragment", "Error loading applications", exception)
-                Toast.makeText(context, "Error loading applications: ${exception.message}", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { e ->
+                Toast.makeText(context, "Error loading applications: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun updateEmptyState() {
+        binding.emptyStateLayout.visibility = if (applications.isEmpty()) View.VISIBLE else View.GONE
+        binding.applicationsRecyclerView.visibility = if (applications.isEmpty()) View.GONE else View.VISIBLE
+    }
+
+    private fun showApplicationDetails(application: Application) {
+        val dialog = ApplicationDetailsDialog.newInstance(application)
+        dialog.show(childFragmentManager, "ApplicationDetails")
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 } 

@@ -15,9 +15,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class CVDetailsActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
+    private lateinit var firestore: FirebaseFirestore
     private lateinit var educationAdapter: EducationAdapter
-    private lateinit var experienceAdapter: ExperienceAdapter
     
     // User data from SignupActivity
     private lateinit var name: String
@@ -51,107 +50,44 @@ class CVDetailsActivity : AppCompatActivity() {
         password = intent.getStringExtra("password") ?: ""
 
         auth = FirebaseAuth.getInstance()
-        db = FirebaseFirestore.getInstance()
+        firestore = FirebaseFirestore.getInstance()
 
-        // Initialize RecyclerViews
-        val educationRecyclerView = findViewById<RecyclerView>(R.id.educationRecyclerView)
-        val experienceRecyclerView = findViewById<RecyclerView>(R.id.experienceRecyclerView)
-
+        // Initialize RecyclerView
+        val recyclerView = findViewById<RecyclerView>(R.id.educationRecyclerView)
         educationAdapter = EducationAdapter()
-        experienceAdapter = ExperienceAdapter()
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = educationAdapter
 
-        educationRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@CVDetailsActivity)
-            adapter = educationAdapter
-        }
-
-        experienceRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@CVDetailsActivity)
-            adapter = experienceAdapter
-        }
-
-        // Set up click listeners
+        // Set up add education button
         findViewById<Button>(R.id.addEducationButton).setOnClickListener {
             educationAdapter.addNewEducation()
         }
 
-        findViewById<Button>(R.id.addExperienceButton).setOnClickListener {
-            experienceAdapter.addNewExperience()
-        }
-
+        // Set up save button
         findViewById<Button>(R.id.submitButton).setOnClickListener {
-            saveCVDetailsAndRegisterUser()
+            saveCVDetails()
         }
     }
 
-    private fun saveCVDetailsAndRegisterUser() {
-        val summary = findViewById<TextInputEditText>(R.id.summaryInput).text.toString()
-        val skills = findViewById<TextInputEditText>(R.id.skillsInput).text.toString()
-            .split(",")
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
+    private fun saveCVDetails() {
+        val userId = auth.currentUser?.uid ?: return
+        val educations = educationAdapter.getEducationList()
 
-        Log.d("CVDetailsActivity", "Saving CV details for user: $idNumber")
-        Log.d("CVDetailsActivity", "Name: $name, Email: $email")
-
-        // Convert adapter education list to FirebaseHelper Education list
-        val educationList = educationAdapter.getEducationList().map { adapterEducation ->
-            Education(
-                institution = adapterEducation.institution,
-                degree = adapterEducation.degree,
-                fieldOfStudy = "", // Not available in adapter
-                startDate = adapterEducation.startDate,
-                endDate = adapterEducation.endDate,
-                description = "" // Not available in adapter
-            )
-        }
-
-        // Convert adapter experience list to FirebaseHelper Experience list
-        val experienceList = experienceAdapter.getExperienceList().map { adapterExperience ->
-            Experience(
-                company = adapterExperience.company,
-                position = adapterExperience.position,
-                startDate = adapterExperience.startDate,
-                endDate = adapterExperience.endDate,
-                description = adapterExperience.description
-            )
-        }
-
-        // Create user object with all information
-        val user = User(
-            idNumber = idNumber,
-            name = name,
-            surname = surname,
-            email = email,
-            phoneNumber = phoneNumber,
-            address = address,
-            summary = summary,
-            skills = skills,
-            education = educationList,
-            experience = experienceList
+        val cvData = hashMapOf(
+            "educations" to educations
         )
 
-        Log.d("CVDetailsActivity", "Created user object with ID: ${user.idNumber}")
-
-        // Register user with Firebase
-        val firebaseHelper = FirebaseHelper.getInstance()
-        firebaseHelper.addUser(user, password) { success, errorMessage ->
-            runOnUiThread {
-                if (success) {
-                    Log.d("CVDetailsActivity", "Registration successful, navigating to LoginActivity")
-                    Toast.makeText(this, "Registration successful! Please login to continue.", Toast.LENGTH_LONG).show()
-                    
-                    // Navigate to login page
-                    val intent = Intent(this, LoginActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    finish()
-                } else {
-                    Log.e("CVDetailsActivity", "Registration failed: $errorMessage")
-                    Toast.makeText(this, "Registration failed: ${errorMessage ?: "Unknown error"}", Toast.LENGTH_LONG).show()
-                }
+        firestore.collection("users").document(userId)
+            .collection("cv")
+            .document("details")
+            .set(cvData)
+            .addOnSuccessListener {
+                Toast.makeText(this, "CV details saved successfully!", Toast.LENGTH_SHORT).show()
+                finish()
             }
-        }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error saving CV details: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     override fun onSupportNavigateUp(): Boolean {

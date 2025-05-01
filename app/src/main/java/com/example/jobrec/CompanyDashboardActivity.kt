@@ -4,27 +4,26 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import androidx.viewpager2.widget.ViewPager2
+import com.google.firebase.firestore.Query
 import android.util.Log
 
 class CompanyDashboardActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private lateinit var companyId: String
-    private lateinit var viewPager: ViewPager2
-    private lateinit var tabLayout: TabLayout
-    private lateinit var fab: FloatingActionButton
     private lateinit var auth: FirebaseAuth
+    private lateinit var bottomNavigation: BottomNavigationView
+    private lateinit var activeJobsCount: TextView
+    private lateinit var applicationsCount: TextView
+    private lateinit var recentActivityTitle: TextView
+    private lateinit var recentActivityDescription: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,24 +42,25 @@ class CompanyDashboardActivity : AppCompatActivity() {
             }
 
             // Initialize views
-            viewPager = findViewById(R.id.viewPager)
-            tabLayout = findViewById(R.id.tabLayout)
-            fab = findViewById(R.id.fab)
+            bottomNavigation = findViewById(R.id.bottomNavigation)
+            activeJobsCount = findViewById(R.id.activeJobsCount)
+            applicationsCount = findViewById(R.id.applicationsCount)
+            recentActivityTitle = findViewById(R.id.recentActivityTitle)
+            recentActivityDescription = findViewById(R.id.recentActivityDescription)
 
             // Setup toolbar
             val toolbar = findViewById<Toolbar>(R.id.toolbar)
             setSupportActionBar(toolbar)
-            supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            supportActionBar?.setDisplayHomeAsUpEnabled(false)
 
-            // Setup ViewPager and TabLayout
-            setupViewPager()
+            // Setup bottom navigation
+            setupBottomNavigation()
 
-            // Setup FAB
-            fab.setOnClickListener {
-                val intent = Intent(this, PostJobActivity::class.java)
-                intent.putExtra("companyId", companyId)
-                startActivity(intent)
-            }
+            // Setup quick action buttons
+            setupQuickActions()
+
+            // Load dashboard data
+            loadDashboardData()
         } catch (e: Exception) {
             Log.e("CompanyDashboardActivity", "Error in onCreate", e)
             Toast.makeText(this, "Error initializing activity: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -68,81 +68,116 @@ class CompanyDashboardActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupViewPager() {
-        try {
-            viewPager.adapter = CompanyDashboardPagerAdapter(this)
-            
-            // Connect TabLayout with ViewPager
-            TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-                tab.text = when (position) {
-                    0 -> "Profile"
-                    1 -> "Jobs"
-                    2 -> "Applications"
-                    else -> null
-                }
-            }.attach()
-        } catch (e: Exception) {
-            Log.e("CompanyDashboardActivity", "Error in setupViewPager", e)
-            Toast.makeText(this, "Error setting up tabs: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        try {
-            menuInflater.inflate(R.menu.company_dashboard_menu, menu)
-            return true
-        } catch (e: Exception) {
-            Log.e("CompanyDashboardActivity", "Error creating options menu", e)
-            return false
-        }
+        menuInflater.inflate(R.menu.company_dashboard_menu, menu)
+        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return try {
-            when (item.itemId) {
-                R.id.action_logout -> {
-                    FirebaseAuth.getInstance().signOut()
-                    startActivity(Intent(this, LoginActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.action_search -> {
-                    startActivity(Intent(this, CandidateSearchActivity::class.java))
-                    true
-                }
-                R.id.action_analytics -> {
-                    startActivity(Intent(this, EmployerAnalyticsActivity::class.java))
-                    true
-                }
-                android.R.id.home -> {
-                    onBackPressed()
-                    true
-                }
-                else -> super.onOptionsItemSelected(item)
+        return when (item.itemId) {
+            R.id.action_logout -> {
+                logout()
+                true
             }
-        } catch (e: Exception) {
-            Log.e("CompanyDashboardActivity", "Error in onOptionsItemSelected", e)
-            Toast.makeText(this, "Error handling menu action: ${e.message}", Toast.LENGTH_SHORT).show()
-            false
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
-    inner class CompanyDashboardPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
-        override fun getItemCount(): Int = 3
+    private fun logout() {
+        auth.signOut()
+        // Navigate to login screen
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
 
-        override fun createFragment(position: Int): Fragment {
-            return try {
-                when (position) {
-                    0 -> CompanyProfileFragment.newInstance(companyId)
-                    1 -> CompanyJobsFragment.newInstance(companyId)
-                    2 -> CompanyApplicationsFragment.newInstance(companyId)
-                    else -> throw IllegalArgumentException("Invalid position $position")
+    private fun setupBottomNavigation() {
+        bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_home -> {
+                    // Already on home
+                    true
                 }
-            } catch (e: Exception) {
-                Log.e("CompanyDashboardActivity", "Error creating fragment", e)
-                Toast.makeText(this@CompanyDashboardActivity, "Error loading content: ${e.message}", Toast.LENGTH_SHORT).show()
-                CompanyProfileFragment.newInstance(companyId) // Fallback to profile fragment
+                R.id.navigation_search -> {
+                    startActivity(Intent(this, CandidateSearchActivity::class.java))
+                    false
+                }
+                R.id.navigation_applications -> {
+                    val intent = Intent(this, ApplicationsActivity::class.java)
+                    intent.putExtra("companyId", companyId)
+                    startActivity(intent)
+                    false
+                }
+                R.id.navigation_profile -> {
+                    val intent = Intent(this, CompanyProfileActivity::class.java)
+                    intent.putExtra("companyId", companyId)
+                    startActivity(intent)
+                    false
+                }
+                else -> false
             }
         }
+    }
+
+    private fun setupQuickActions() {
+        findViewById<View>(R.id.btnPostJob).setOnClickListener {
+            val intent = Intent(this, PostJobActivity::class.java)
+            intent.putExtra("companyId", companyId)
+            startActivity(intent)
+        }
+
+        findViewById<View>(R.id.btnViewApplications).setOnClickListener {
+            val intent = Intent(this, ApplicationsActivity::class.java)
+            intent.putExtra("companyId", companyId)
+            startActivity(intent)
+        }
+    }
+
+    private fun loadDashboardData() {
+        // Load active jobs count
+        db.collection("jobs")
+            .whereEqualTo("companyId", companyId)
+            .whereEqualTo("status", "active")
+            .get()
+            .addOnSuccessListener { documents ->
+                activeJobsCount.text = documents.size().toString()
+            }
+            .addOnFailureListener { e ->
+                Log.e("CompanyDashboardActivity", "Error loading active jobs", e)
+            }
+
+        // Load applications count
+        db.collection("applications")
+            .whereEqualTo("companyId", companyId)
+            .get()
+            .addOnSuccessListener { documents ->
+                applicationsCount.text = documents.size().toString()
+            }
+            .addOnFailureListener { e ->
+                Log.e("CompanyDashboardActivity", "Error loading applications", e)
+            }
+
+        // Load recent activity
+        db.collection("applications")
+            .whereEqualTo("companyId", companyId)
+            .orderBy("appliedDate", Query.Direction.DESCENDING)
+            .limit(1)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (!documents.isEmpty) {
+                    val latestApplication = documents.documents[0]
+                    recentActivityTitle.text = "New Application Received"
+                    recentActivityDescription.text = "Application for ${latestApplication.getString("jobTitle")}"
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("CompanyDashboardActivity", "Error loading recent activity", e)
+            }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadDashboardData() // Refresh data when returning to dashboard
     }
 } 

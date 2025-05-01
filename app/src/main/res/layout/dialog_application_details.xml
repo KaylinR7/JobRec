@@ -7,62 +7,129 @@
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/jobTitle"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:text="Application Details"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        android:textColor="?attr/colorOnSurface"
+        android:layout_marginBottom="16dp"/>
 
     <TextView
-        android:id="@+id/applicantName"
+        android:id="@+id/jobTitleText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textColor="@color/black"
-        android:textSize="16sp" />
+        android:textAppearance="?attr/textAppearanceSubtitle1"
+        android:textColor="?attr/colorOnSurface"
+        android:layout_marginBottom="4dp"/>
 
     <TextView
-        android:id="@+id/appliedDate"
+        android:id="@+id/companyNameText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textColor="@color/gray"
-        android:textSize="14sp" />
+        android:textAppearance="?attr/textAppearanceBody2"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:layout_marginBottom="16dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status:"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:layout_marginEnd="8dp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/statusChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            app:chipBackgroundColor="@color/status_pending"
+            android:textColor="@android:color/white"/>
+
+    </LinearLayout>
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Cover Letter"
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:text="Applicant Information"
+        android:textAppearance="?attr/textAppearanceSubtitle1"
+        android:textColor="?attr/colorOnSurface"
+        android:layout_marginBottom="8dp"/>
 
     <TextView
-        android:id="@+id/coverLetter"
+        android:id="@+id/applicantNameText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textColor="@color/black"
-        android:textSize="14sp" />
+        android:textAppearance="?attr/textAppearanceBody2"
+        android:textColor="?attr/colorOnSurface"
+        android:layout_marginBottom="4dp"/>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/downloadCvButton"
+    <TextView
+        android:id="@+id/appliedDateText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Download CV"
-        app:icon="@drawable/ic_download"
-        app:iconGravity="start" />
+        android:textAppearance="?attr/textAppearanceBody2"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:layout_marginBottom="16dp"/>
+
+    <LinearLayout
+        android:id="@+id/coverLetterLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cover Letter"
+            android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/coverLetterText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textColor="?attr/colorOnSurface"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/cvUrlLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CV/Resume"
+            android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/cvUrlText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textColor="?attr/colorOnSurface"/>
+
+    </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/updateStatusButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:text="Update Status"
-        app:icon="@drawable/ic_update"
-        app:iconGravity="start" />
+        android:layout_marginTop="16dp"/>
 
 </LinearLayout> 

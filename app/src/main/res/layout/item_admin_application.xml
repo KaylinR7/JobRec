@@ -48,12 +48,19 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/statusTextView"
+            <com.google.android.material.chip.Chip
+                android:id="@+id/statusChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                app:chipMinHeight="32dp"
+                app:chipBackgroundColor="@color/status_pending"
+                android:textColor="@android:color/white"/>
+
+            <Space
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="14sp"/>
+                android:layout_weight="1"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/viewDetailsButton"

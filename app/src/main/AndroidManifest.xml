@@ -45,7 +45,6 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-
         <activity
             android:name=".CompanySignupActivity"
             android:exported="false"
@@ -57,12 +56,6 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".SignupActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-
-        <activity
             android:name=".HomeActivity"
             android:exported="true">
             <intent-filter>
@@ -70,6 +63,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".SearchActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ProfileActivity"
@@ -108,6 +106,12 @@
             android:name=".MyApplicationsActivity"
             android:exported="false"
             android:parentActivityName=".HomeActivity" />
+
+        <!-- Add ApplicationsActivity -->
+        <activity
+            android:name=".ApplicationsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- Add missing activities -->
         <activity

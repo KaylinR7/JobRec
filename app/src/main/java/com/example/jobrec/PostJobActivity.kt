@@ -123,8 +123,8 @@ class PostJobActivity : AppCompatActivity() {
             "description" to descriptionInput.text.toString(),
             "requirements" to requirementsInput.text.toString(),
             "companyId" to companyId,
-            "postedDate" to Date(),
-            "status" to "Active"
+            "postedAt" to Date(),
+            "status" to "active"
         )
 
         db.collection("jobs")

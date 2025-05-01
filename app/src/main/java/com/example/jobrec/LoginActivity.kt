@@ -3,6 +3,8 @@ package com.example.jobrec
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
@@ -35,6 +37,18 @@ class LoginActivity : AppCompatActivity() {
         companySignupLink = findViewById(R.id.companySignupLink)
         adminLoginLink = findViewById(R.id.adminLoginLink)
 
+        // Apply animations
+        val slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up)
+        val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in)
+
+        // Animate elements with delay
+        findViewById<View>(R.id.emailInput).startAnimation(slideUp)
+        findViewById<View>(R.id.passwordInput).startAnimation(slideUp)
+        findViewById<View>(R.id.loginButton).startAnimation(slideUp)
+        findViewById<View>(R.id.signupLink).startAnimation(fadeIn)
+        findViewById<View>(R.id.companySignupLink).startAnimation(fadeIn)
+        findViewById<View>(R.id.adminLoginLink).startAnimation(fadeIn)
+
         // Check if user is already logged in
         val currentUser = auth.currentUser
         if (currentUser != null) {
@@ -47,14 +61,17 @@ class LoginActivity : AppCompatActivity() {
 
         signupLink.setOnClickListener {
             startActivity(Intent(this, SignupActivity::class.java))
+            overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
         }
 
         companySignupLink.setOnClickListener {
             startActivity(Intent(this, CompanySignupActivity::class.java))
+            overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
         }
 
         adminLoginLink.setOnClickListener {
             startActivity(Intent(this, AdminLoginActivity::class.java))
+            overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
         }
     }
 
@@ -97,7 +114,7 @@ class LoginActivity : AppCompatActivity() {
                 } else {
                     // Check if it's a regular user
                     Log.d("LoginActivity", "Not a company, checking if it's a regular user")
-                    db.collection("Users")
+                    db.collection("users")
                         .whereEqualTo("email", email)
                         .get()
                         .addOnSuccessListener { userDocuments ->
@@ -106,7 +123,7 @@ class LoginActivity : AppCompatActivity() {
                             if (!userDocuments.isEmpty) {
                                 // It's a regular user
                                 Log.d("LoginActivity", "User is a job seeker, redirecting to HomeActivity")
-                                val userId = userDocuments.documents[0].id
+                                val userId = auth.currentUser?.uid
                                 Log.d("LoginActivity", "User ID: $userId")
                                 val intent = Intent(this, HomeActivity::class.java)
                                 intent.putExtra("userId", userId)

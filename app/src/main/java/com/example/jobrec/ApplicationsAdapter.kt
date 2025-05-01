@@ -1,71 +1,62 @@
 package com.example.jobrec
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.jobrec.databinding.ItemApplicationBinding
+import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
-class ApplicationsAdapter(private val onItemClick: (JobApplication) -> Unit) : 
-    RecyclerView.Adapter<ApplicationsAdapter.ApplicationViewHolder>() {
+class ApplicationsAdapter(
+    private val applications: List<Application>,
+    private val onItemClick: (Application) -> Unit
+) : RecyclerView.Adapter<ApplicationsAdapter.ApplicationViewHolder>() {
 
-    private var applications: List<JobApplication> = emptyList()
-    private val db = FirebaseFirestore.getInstance()
+    class ApplicationViewHolder(private val binding: ItemApplicationBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(application: Application, onItemClick: (Application) -> Unit) {
+            binding.apply {
+                jobTitle.text = application.jobTitle
+                companyName.text = application.companyName
+                appliedDate.text = "Applied on ${formatDate(application.appliedDate)}"
+                
+                // Set status chip
+                statusChip.text = application.status.capitalize()
+                statusChip.setChipBackgroundColorResource(getStatusColor(application.status))
+                
+                // Set click listener
+                root.setOnClickListener { onItemClick(application) }
+                viewDetailsButton.setOnClickListener { onItemClick(application) }
+            }
+        }
 
-    fun updateApplications(newApplications: List<JobApplication>) {
-        applications = newApplications
-        notifyDataSetChanged()
+        private fun formatDate(timestamp: Timestamp): String {
+            val date = timestamp.toDate()
+            return SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(date)
+        }
+
+        private fun getStatusColor(status: String): Int {
+            return when (status.lowercase()) {
+                "pending" -> R.color.status_pending
+                "shortlisted" -> R.color.status_shortlisted
+                "rejected" -> R.color.status_rejected
+                else -> R.color.status_pending
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ApplicationViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_application, parent, false)
-        return ApplicationViewHolder(view)
+        val binding = ItemApplicationBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return ApplicationViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ApplicationViewHolder, position: Int) {
-        holder.bind(applications[position])
+        holder.bind(applications[position], onItemClick)
     }
 
-    override fun getItemCount(): Int = applications.size
-
-    inner class ApplicationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val applicantName: TextView = itemView.findViewById(R.id.applicantName)
-        private val jobTitle: TextView = itemView.findViewById(R.id.jobTitle)
-        private val appliedDate: TextView = itemView.findViewById(R.id.appliedDate)
-        private val status: TextView = itemView.findViewById(R.id.status)
-
-        fun bind(application: JobApplication) {
-            // Load applicant name from Firestore
-            db.collection("Users")
-                .document(application.userId)
-                .get()
-                .addOnSuccessListener { document: DocumentSnapshot ->
-                    val firstName = document.getString("firstName") ?: ""
-                    val lastName = document.getString("lastName") ?: ""
-                    applicantName.text = "$firstName $lastName"
-                }
-
-            // Load job title from Firestore
-            db.collection("jobs")
-                .document(application.jobId)
-                .get()
-                .addOnSuccessListener { document: DocumentSnapshot ->
-                    jobTitle.text = document.getString("title") ?: "Unknown Job"
-                }
-
-            // Format date
-            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            appliedDate.text = "Applied: ${dateFormat.format(application.appliedDate)}"
-            
-            // Set status
-            status.text = application.status
-
-            itemView.setOnClickListener { onItemClick(application) }
-        }
-    }
+    override fun getItemCount() = applications.size
 } 

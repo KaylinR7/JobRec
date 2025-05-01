@@ -1,9 +1,17 @@
 package com.example.jobrec
 
+import com.google.firebase.Timestamp
+
 data class Application(
-    val id: String = "",
+    var id: String = "",
+    val jobId: String = "",
     val jobTitle: String = "",
+    val companyName: String = "",
+    val userId: String = "",
     val applicantName: String = "",
-    val appliedDate: String = "",
-    val status: String = "pending"
+    val appliedDate: Timestamp = Timestamp.now(),
+    val status: String = "pending",
+    val coverLetter: String = "",
+    val cvUrl: String = "",
+    val notes: String = ""
 ) 

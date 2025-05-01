@@ -1,53 +1,62 @@
 package com.example.jobrec
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.jobrec.databinding.ItemApplicationBinding
+import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 class ApplicationAdapter(
-    private var applications: List<JobApplication>,
-    private val onApplicationClick: (JobApplication) -> Unit
+    private val applications: List<Application>,
+    private val onItemClick: (Application) -> Unit
 ) : RecyclerView.Adapter<ApplicationAdapter.ApplicationViewHolder>() {
 
-    class ApplicationViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val jobTitle: TextView = view.findViewById(R.id.jobTitle)
-        val applicantName: TextView = view.findViewById(R.id.applicantName)
-        val appliedDate: TextView = view.findViewById(R.id.appliedDate)
-        val status: TextView = view.findViewById(R.id.status)
-    }
+    class ApplicationViewHolder(private val binding: ItemApplicationBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(application: Application, onItemClick: (Application) -> Unit) {
+            binding.apply {
+                jobTitle.text = application.jobTitle
+                companyName.text = application.companyName
+                appliedDate.text = "Applied on ${formatDate(application.appliedDate)}"
+                
+                // Set status chip
+                statusChip.text = application.status.capitalize()
+                statusChip.setChipBackgroundColorResource(getStatusColor(application.status))
+                
+                // Set click listener
+                root.setOnClickListener { onItemClick(application) }
+                viewDetailsButton.setOnClickListener { onItemClick(application) }
+            }
+        }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ApplicationViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_application, parent, false)
-        return ApplicationViewHolder(view)
-    }
+        private fun formatDate(timestamp: Timestamp): String {
+            val date = timestamp.toDate()
+            return SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(date)
+        }
 
-    override fun onBindViewHolder(holder: ApplicationViewHolder, position: Int) {
-        val application = applications[position]
-        
-        holder.jobTitle.text = application.jobTitle
-        holder.applicantName.text = application.applicantName
-        holder.appliedDate.text = formatDate(application.appliedDate)
-        holder.status.text = application.status
-
-        holder.itemView.setOnClickListener {
-            onApplicationClick(application)
+        private fun getStatusColor(status: String): Int {
+            return when (status.lowercase()) {
+                "pending" -> R.color.status_pending
+                "shortlisted" -> R.color.status_shortlisted
+                "rejected" -> R.color.status_rejected
+                else -> R.color.status_pending
+            }
         }
     }
 
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ApplicationViewHolder {
+        val binding = ItemApplicationBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return ApplicationViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: ApplicationViewHolder, position: Int) {
+        holder.bind(applications[position], onItemClick)
+    }
+
     override fun getItemCount() = applications.size
-
-    fun updateApplications(newApplications: List<JobApplication>) {
-        applications = newApplications
-        notifyDataSetChanged()
-    }
-
-    private fun formatDate(timestamp: Date): String {
-        val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-        return sdf.format(timestamp)
-    }
 } 

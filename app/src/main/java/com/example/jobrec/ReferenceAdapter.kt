@@ -3,14 +3,15 @@ package com.example.jobrec
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 
-class ReferenceAdapter : RecyclerView.Adapter<ReferenceAdapter.ReferenceViewHolder>() {
+class ReferenceAdapter : RecyclerView.Adapter<ReferenceAdapter.ViewHolder>() {
     
     private val referenceList = mutableListOf<Reference>()
-    private val viewHolders = mutableMapOf<Int, ReferenceViewHolder>()
+    private val viewHolders = mutableMapOf<Int, ViewHolder>()
     
     init {
         // Add an empty reference item by default
@@ -49,13 +50,13 @@ class ReferenceAdapter : RecyclerView.Adapter<ReferenceAdapter.ReferenceViewHold
         return referenceList
     }
     
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReferenceViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_reference, parent, false)
-        return ReferenceViewHolder(view)
+        return ViewHolder(view)
     }
     
-    override fun onBindViewHolder(holder: ReferenceViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         viewHolders[position] = holder
         val reference = referenceList[position]
         holder.nameInput.setText(reference.name)
@@ -65,19 +66,20 @@ class ReferenceAdapter : RecyclerView.Adapter<ReferenceAdapter.ReferenceViewHold
         holder.phoneInput.setText(reference.phone)
     }
     
-    override fun onViewRecycled(holder: ReferenceViewHolder) {
+    override fun onViewRecycled(holder: ViewHolder) {
         super.onViewRecycled(holder)
         viewHolders.remove(holder.adapterPosition)
     }
     
     override fun getItemCount(): Int = referenceList.size
     
-    class ReferenceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val nameInput: TextInputEditText = itemView.findViewById(R.id.referenceNameInput)
-        val positionInput: TextInputEditText = itemView.findViewById(R.id.referencePositionInput)
-        val companyInput: TextInputEditText = itemView.findViewById(R.id.referenceCompanyInput)
-        val emailInput: TextInputEditText = itemView.findViewById(R.id.referenceEmailInput)
-        val phoneInput: TextInputEditText = itemView.findViewById(R.id.referencePhoneInput)
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val nameInput: TextInputEditText = view.findViewById(R.id.etReferenceName)
+        val positionInput: TextInputEditText = view.findViewById(R.id.etReferencePosition)
+        val companyInput: TextInputEditText = view.findViewById(R.id.etReferenceCompany)
+        val emailInput: TextInputEditText = view.findViewById(R.id.etReferenceEmail)
+        val phoneInput: TextInputEditText = view.findViewById(R.id.etReferencePhone)
+        val removeButton: Button = view.findViewById(R.id.btnRemoveReference)
     }
     
     data class Reference(
