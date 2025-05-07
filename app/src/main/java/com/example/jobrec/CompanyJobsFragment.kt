@@ -20,7 +20,7 @@ class CompanyJobsFragment : Fragment() {
     private lateinit var db: FirebaseFirestore
     private var companyId: String? = null
     private lateinit var jobsRecyclerView: RecyclerView
-    private lateinit var noJobsText: TextView
+    private lateinit var emptyView: TextView
     private lateinit var jobsAdapter: JobsAdapter
     private lateinit var addJobFab: FloatingActionButton
 
@@ -42,7 +42,7 @@ class CompanyJobsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         jobsRecyclerView = view.findViewById(R.id.jobsRecyclerView)
-        noJobsText = view.findViewById(R.id.noJobsText)
+        emptyView = view.findViewById(R.id.emptyView)
         addJobFab = view.findViewById(R.id.addJobFab)
         
         setupRecyclerView()
@@ -81,6 +81,7 @@ class CompanyJobsFragment : Fragment() {
                 .addOnSuccessListener { documents ->
                     val jobs = documents.mapNotNull { it.toObject(Job::class.java) }
                     jobsAdapter.submitList(jobs)
+                    emptyView.visibility = if (jobs.isEmpty()) View.VISIBLE else View.GONE
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(context, "Error loading jobs: ${e.message}", Toast.LENGTH_SHORT).show()

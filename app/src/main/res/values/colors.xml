@@ -26,6 +26,7 @@
     
     <!-- Application Status Colors -->
     <color name="status_pending">#FFA500</color>
-    <color name="status_shortlisted">#4CAF50</color>
+    <color name="status_reviewed">#2196F3</color>
+    <color name="status_accepted">#4CAF50</color>
     <color name="status_rejected">#F44336</color>
 </resources>

@@ -237,40 +237,54 @@ class HomeActivity : AppCompatActivity() {
     private fun loadRecentJobs() {
         Log.d(TAG, "Loading recent jobs...")
         db.collection("jobs")
-            .orderBy("postedAt", Query.Direction.DESCENDING)
+            .whereEqualTo("status", "active")
+            .orderBy("postedDate", Query.Direction.DESCENDING)
             .limit(10)
             .get()
             .addOnSuccessListener { documents ->
                 Log.d(TAG, "Found ${documents.size()} jobs")
                 val jobs = documents.mapNotNull { doc ->
-                    doc.toObject(Job::class.java).copy(id = doc.id)
+                    try {
+                        doc.toObject(Job::class.java).copy(id = doc.id)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error converting document to Job object: ${e.message}")
+                        null
+                    }
                 }
                 Log.d(TAG, "Successfully mapped ${jobs.size} jobs")
                 recentJobsAdapter.submitList(jobs)
                 binding.swipeRefreshLayout.isRefreshing = false
             }
             .addOnFailureListener { e ->
-                Log.w(TAG, "Error loading recent jobs", e)
-                showError("Failed to load recent jobs")
+                Log.e(TAG, "Error loading recent jobs: ${e.message}", e)
+                showError("Failed to load recent jobs: ${e.message}")
                 binding.swipeRefreshLayout.isRefreshing = false
             }
     }
 
     private fun loadRecommendedJobs() {
-        // TODO: Implement job recommendations based on user profile and preferences
+        Log.d(TAG, "Loading recommended jobs...")
         db.collection("jobs")
-            .orderBy("postedAt", Query.Direction.DESCENDING)
+            .whereEqualTo("status", "active")
+            .orderBy("postedDate", Query.Direction.DESCENDING)
             .limit(10)
             .get()
             .addOnSuccessListener { documents ->
+                Log.d(TAG, "Found ${documents.size()} recommended jobs")
                 val jobs = documents.mapNotNull { doc ->
-                    doc.toObject(Job::class.java).copy(id = doc.id)
+                    try {
+                        doc.toObject(Job::class.java).copy(id = doc.id)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error converting document to Job object: ${e.message}")
+                        null
+                    }
                 }
+                Log.d(TAG, "Successfully mapped ${jobs.size} recommended jobs")
                 recommendedJobsAdapter.submitList(jobs)
             }
             .addOnFailureListener { e ->
-                Log.w(TAG, "Error loading recommended jobs", e)
-                showError("Failed to load recommended jobs")
+                Log.e(TAG, "Error loading recommended jobs: ${e.message}", e)
+                showError("Failed to load recommended jobs: ${e.message}")
             }
     }
 

@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.chip.Chip
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -27,32 +26,19 @@ class RecentJobsAdapter(private val onJobClick: (Job) -> Unit) :
     }
 
     inner class JobViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val titleTextView: TextView = itemView.findViewById(R.id.jobTitleTextView)
-        private val companyTextView: TextView = itemView.findViewById(R.id.companyNameTextView)
-        private val locationTextView: TextView = itemView.findViewById(R.id.locationTextView)
+        private val titleTextView: TextView = itemView.findViewById(R.id.jobTitleText)
+        private val companyTextView: TextView = itemView.findViewById(R.id.companyNameText)
+        private val locationTextView: TextView = itemView.findViewById(R.id.locationText)
         private val cardView: MaterialCardView = itemView.findViewById(R.id.jobCard)
-        private val jobTypeChip: Chip = itemView.findViewById(R.id.jobTypeChip)
-        private val postedDateText: TextView = itemView.findViewById(R.id.postedDateText)
+        private val jobTypeText: TextView = itemView.findViewById(R.id.jobTypeText)
 
         fun bind(job: Job) {
             titleTextView.text = job.title
             companyTextView.text = job.companyName
             locationTextView.text = job.location
-            jobTypeChip.text = job.type
-
-            // Format the posted date
-            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            val postedDate = Date(job.getPostedDateMillis())
-            val daysAgo = calculateDaysAgo(job.getPostedDateMillis())
-            postedDateText.text = if (daysAgo == 0) "Posted today" else "Posted $daysAgo days ago"
+            jobTypeText.text = job.type
 
             cardView.setOnClickListener { onJobClick(job) }
-        }
-
-        private fun calculateDaysAgo(timestamp: Long): Int {
-            val currentTime = System.currentTimeMillis()
-            val diff = currentTime - timestamp
-            return (diff / (1000 * 60 * 60 * 24)).toInt()
         }
     }
 

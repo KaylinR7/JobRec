@@ -131,15 +131,28 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Add Candidate Search Activity -->
-        <activity
-            android:name=".CandidateSearchActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
         <!-- Job Alerts Activity -->
         <activity
             android:name=".JobAlertsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Application Details Activities -->
+        <activity
+            android:name=".StudentApplicationDetailsActivity"
+            android:exported="false"
+            android:label="Application Details"
+            android:parentActivityName=".MyApplicationsActivity" />
+
+        <activity
+            android:name=".CompanyApplicationDetailsActivity"
+            android:exported="false"
+            android:label="Application Review"
+            android:parentActivityName=".ApplicationsActivity" />
+
+        <!-- Add ViewCvActivity -->
+        <activity
+            android:name=".ViewCvActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 

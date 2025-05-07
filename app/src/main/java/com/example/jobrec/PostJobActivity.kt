@@ -3,10 +3,10 @@ package com.example.jobrec
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Date
@@ -22,7 +22,7 @@ class PostJobActivity : AppCompatActivity() {
     private lateinit var salaryInput: TextInputEditText
     private lateinit var descriptionInput: TextInputEditText
     private lateinit var requirementsInput: TextInputEditText
-    private lateinit var postJobButton: Button
+    private lateinit var postButton: MaterialButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +51,7 @@ class PostJobActivity : AppCompatActivity() {
         // Initialize UI elements
         initializeViews()
         setupJobTypeDropdown()
-        setupPostJobButton()
+        setupPostButton()
     }
 
     private fun initializeViews() {
@@ -61,7 +61,7 @@ class PostJobActivity : AppCompatActivity() {
         salaryInput = findViewById(R.id.salaryInput)
         descriptionInput = findViewById(R.id.descriptionInput)
         requirementsInput = findViewById(R.id.requirementsInput)
-        postJobButton = findViewById(R.id.postJobButton)
+        postButton = findViewById(R.id.postButton)
     }
 
     private fun setupJobTypeDropdown() {
@@ -70,10 +70,24 @@ class PostJobActivity : AppCompatActivity() {
         jobTypeInput.setAdapter(adapter)
     }
 
-    private fun setupPostJobButton() {
-        postJobButton.setOnClickListener {
+    private fun setupPostButton() {
+        postButton.setOnClickListener {
             if (validateInputs()) {
-                postJob()
+                // First get the company's profile information
+                db.collection("companies")
+                    .document(companyId)
+                    .get()
+                    .addOnSuccessListener { document ->
+                        if (document != null && document.exists()) {
+                            val company = document.toObject(Company::class.java)
+                            company?.let { postJob(it) }
+                        } else {
+                            Toast.makeText(this, "Company profile not found", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Error loading company profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
             }
         }
     }
@@ -114,16 +128,17 @@ class PostJobActivity : AppCompatActivity() {
         return isValid
     }
 
-    private fun postJob() {
+    private fun postJob(company: Company) {
         val job = hashMapOf(
             "title" to jobTitleInput.text.toString(),
-            "type" to jobTypeInput.text.toString(),
+            "companyId" to companyId,
+            "companyName" to company.companyName,
             "location" to locationInput.text.toString(),
             "salary" to salaryInput.text.toString(),
+            "type" to jobTypeInput.text.toString(),
             "description" to descriptionInput.text.toString(),
             "requirements" to requirementsInput.text.toString(),
-            "companyId" to companyId,
-            "postedAt" to Date(),
+            "postedDate" to com.google.firebase.Timestamp.now(),
             "status" to "active"
         )
 
@@ -134,7 +149,7 @@ class PostJobActivity : AppCompatActivity() {
                 finish()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error posting job: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error posting job: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 

@@ -116,7 +116,9 @@ class JobDetailsActivity : AppCompatActivity() {
                 }
             }
             .addOnFailureListener { e ->
+                Log.e("JobDetailsActivity", "Error checking application status", e)
                 Toast.makeText(this, "Error checking application status: ${e.message}", Toast.LENGTH_SHORT).show()
+                applyButton.isEnabled = true
             }
     }
 
@@ -140,9 +142,11 @@ class JobDetailsActivity : AppCompatActivity() {
 
     private fun useProfileAsCv() {
         val userId = auth.currentUser?.uid ?: return
-        // First get the user's ID number from the Users collection using their email
+        val userEmail = auth.currentUser?.email ?: return
+
+        // Simplified query
         db.collection("users")
-            .whereEqualTo("email", auth.currentUser?.email)
+            .whereEqualTo("email", userEmail)
             .get()
             .addOnSuccessListener { documents ->
                 if (!documents.isEmpty) {
@@ -186,6 +190,7 @@ class JobDetailsActivity : AppCompatActivity() {
                             currentCvUrl = cvRef.id
                             showCoverLetterDialog()
                         }.addOnFailureListener { e ->
+                            Log.e("JobDetailsActivity", "Error creating CV from profile", e)
                             Toast.makeText(this, "Error creating CV from profile: ${e.message}", Toast.LENGTH_SHORT).show()
                             applyButton.isEnabled = true
                             applyButton.text = "Apply Now"
@@ -198,7 +203,8 @@ class JobDetailsActivity : AppCompatActivity() {
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error loading profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("JobDetailsActivity", "Error fetching user profile", e)
+                Toast.makeText(this, "Error fetching profile: ${e.message}", Toast.LENGTH_SHORT).show()
                 applyButton.isEnabled = true
                 applyButton.text = "Apply Now"
             }
@@ -266,7 +272,7 @@ class JobDetailsActivity : AppCompatActivity() {
         val companyId = companyId ?: return
         val cvUrl = currentCvUrl ?: return
 
-        // First get the user's name
+        // First get the user's profile information
         db.collection("users")
             .whereEqualTo("email", auth.currentUser?.email)
             .get()
@@ -274,48 +280,36 @@ class JobDetailsActivity : AppCompatActivity() {
                 if (!documents.isEmpty) {
                     val userDoc = documents.documents[0]
                     val user = userDoc.toObject(User::class.java)
-                    val applicantName = "${user?.name} ${user?.surname}"
+                    user?.let {
+                        val application = hashMapOf(
+                            "jobId" to jobId,
+                            "jobTitle" to jobTitle.text.toString(),
+                            "userId" to userId,
+                            "applicantName" to "${it.name} ${it.surname}",
+                            "applicantEmail" to it.email,
+                            "applicantPhone" to it.phoneNumber,
+                            "applicantAddress" to it.address,
+                            "applicantSummary" to it.summary,
+                            "applicantSkills" to it.skills,
+                            "applicantEducation" to it.education,
+                            "applicantExperience" to it.experience,
+                            "companyId" to companyId,
+                            "timestamp" to com.google.firebase.Timestamp.now(),
+                            "status" to "pending",
+                            "resumeUrl" to cvUrl,
+                            "coverLetter" to coverLetter
+                        )
 
-                    val application = JobApplication(
-                        id = "",
-                        jobId = jobId,
-                        jobTitle = jobTitle.text.toString(),
-                        userId = userId,
-                        applicantName = applicantName,
-                        companyId = companyId,
-                        appliedDate = Date(),
-                        status = ApplicationStatus.PENDING.name,
-                        cvUrl = cvUrl,
-                        coverLetter = coverLetter
-                    )
-
-                    db.collection("applications")
-                        .add(application)
-                        .addOnSuccessListener { documentReference ->
-                            // Create notification for company
-                            val notification = hashMapOf(
-                                "type" to "new_application",
-                                "applicationId" to documentReference.id,
-                                "jobId" to jobId,
-                                "userId" to userId,
-                                "companyId" to companyId,
-                                "timestamp" to System.currentTimeMillis(),
-                                "read" to false
-                            )
-
-                            db.collection("notifications")
-                                .add(notification)
-                                .addOnSuccessListener {
-                                    Toast.makeText(this, "Application submitted successfully!", Toast.LENGTH_SHORT).show()
-                                    applyButton.isEnabled = false
-                                    applyButton.text = "Applied"
-                                }
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(this, "Error submitting application: ${e.message}", Toast.LENGTH_SHORT).show()
-                            applyButton.isEnabled = true
-                            applyButton.text = "Apply Now"
-                        }
+                        db.collection("applications")
+                            .add(application)
+                            .addOnSuccessListener { documentReference ->
+                                Toast.makeText(this, "Application submitted successfully", Toast.LENGTH_SHORT).show()
+                                finish()
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "Error submitting application: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    }
                 } else {
                     Toast.makeText(this, "User profile not found", Toast.LENGTH_SHORT).show()
                     applyButton.isEnabled = true
@@ -379,22 +373,106 @@ class JobDetailsActivity : AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { documents ->
                     if (!documents.isEmpty) {
-                        // Hide apply button for company users
+                        // Show management options for company users
                         applyButton.visibility = View.GONE
+                        val managementLayout = findViewById<View>(R.id.jobManagementLayout)
+                        managementLayout.visibility = View.VISIBLE
+                        
+                        // Setup edit button
+                        findViewById<MaterialButton>(R.id.editJobButton).setOnClickListener {
+                            showEditJobDialog(job)
+                        }
+                        
+                        // Setup delete button
+                        findViewById<MaterialButton>(R.id.deleteJobButton).setOnClickListener {
+                            showDeleteConfirmationDialog(job)
+                        }
                     } else {
                         // Show apply button for regular users
                         applyButton.visibility = View.VISIBLE
+                        findViewById<View>(R.id.jobManagementLayout).visibility = View.GONE
                         applyButton.setOnClickListener {
                             if (auth.currentUser != null) {
                                 checkIfAlreadyApplied()
                             } else {
                                 Toast.makeText(this, "Please sign in to apply", Toast.LENGTH_SHORT).show()
-                                // TODO: Navigate to login screen
                             }
                         }
                     }
                 }
         }
+    }
+
+    private fun showEditJobDialog(job: Job) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_job, null)
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setTitle("Edit Job")
+            .setView(dialogView)
+            .setPositiveButton("Save") { dialog, _ ->
+                // Get updated values
+                val updatedTitle = dialogView.findViewById<TextInputEditText>(R.id.editJobTitle).text.toString()
+                val updatedDescription = dialogView.findViewById<TextInputEditText>(R.id.editJobDescription).text.toString()
+                val updatedRequirements = dialogView.findViewById<TextInputEditText>(R.id.editJobRequirements).text.toString()
+                val updatedSalary = dialogView.findViewById<TextInputEditText>(R.id.editJobSalary).text.toString()
+                val updatedLocation = dialogView.findViewById<TextInputEditText>(R.id.editJobLocation).text.toString()
+                val updatedType = dialogView.findViewById<TextInputEditText>(R.id.editJobType).text.toString()
+
+                // Update job in Firestore
+                val jobRef = db.collection("jobs").document(job.id)
+                val updates = mapOf(
+                    "title" to updatedTitle,
+                    "description" to updatedDescription,
+                    "requirements" to updatedRequirements.split("\n"),
+                    "salary" to updatedSalary,
+                    "location" to updatedLocation,
+                    "type" to updatedType,
+                    "lastUpdated" to System.currentTimeMillis()
+                )
+
+                jobRef.update(updates)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Job updated successfully", Toast.LENGTH_SHORT).show()
+                        loadJobDetails(job.id)
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Error updating job: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        // Set current values
+        dialogView.findViewById<TextInputEditText>(R.id.editJobTitle).setText(job.title)
+        dialogView.findViewById<TextInputEditText>(R.id.editJobDescription).setText(job.description)
+        dialogView.findViewById<TextInputEditText>(R.id.editJobRequirements).setText(job.getRequirementsList().joinToString("\n"))
+        dialogView.findViewById<TextInputEditText>(R.id.editJobSalary).setText(job.salary)
+        dialogView.findViewById<TextInputEditText>(R.id.editJobLocation).setText(job.location)
+        dialogView.findViewById<TextInputEditText>(R.id.editJobType).setText(job.type)
+
+        dialog.show()
+    }
+
+    private fun showDeleteConfirmationDialog(job: Job) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Delete Job")
+            .setMessage("Are you sure you want to delete this job posting? This action cannot be undone.")
+            .setPositiveButton("Delete") { _, _ ->
+                deleteJob(job)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun deleteJob(job: Job) {
+        db.collection("jobs").document(job.id)
+            .delete()
+            .addOnSuccessListener {
+                Toast.makeText(this, "Job deleted successfully", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error deleting job: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     override fun onSupportNavigateUp(): Boolean {

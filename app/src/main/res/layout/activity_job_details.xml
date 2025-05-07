@@ -2,20 +2,22 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        app:elevation="2dp">
+        app:elevation="0dp">
 
-        <androidx.appcompat.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/white"
-            app:titleTextColor="@color/black" />
+            app:titleTextColor="@color/black"
+            app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -33,15 +35,17 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E0E0E0">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <TextView
                         android:id="@+id/jobTitleText"
@@ -76,8 +80,8 @@
                         android:layout_height="wrap_content"
                         android:text="Full-time"
                         android:layout_marginTop="8dp"
-                        app:chipBackgroundColor="@color/primary_light"
-                        android:textColor="@color/primary" />
+                        app:chipBackgroundColor="#F5F5F5"
+                        android:textColor="@color/black" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -85,23 +89,26 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E0E0E0">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Job Description"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@color/black" />
+                        android:textColor="@color/black"
+                        android:layout_marginBottom="16dp" />
 
                     <TextView
                         android:id="@+id/jobDescriptionText"
@@ -110,7 +117,7 @@
                         android:text="Job description goes here..."
                         android:textSize="16sp"
                         android:textColor="@color/black"
-                        android:layout_marginTop="8dp" />
+                        android:lineSpacingExtra="4dp" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -118,23 +125,26 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E0E0E0">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Requirements"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@color/black" />
+                        android:textColor="@color/black"
+                        android:layout_marginBottom="16dp" />
 
                     <TextView
                         android:id="@+id/requirementsText"
@@ -143,7 +153,7 @@
                         android:text="Requirements go here..."
                         android:textSize="16sp"
                         android:textColor="@color/black"
-                        android:layout_marginTop="8dp" />
+                        android:lineSpacingExtra="4dp" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -154,8 +164,10 @@
                 android:layout_height="wrap_content"
                 android:text="Apply Now"
                 android:textColor="@color/white"
-                app:backgroundTint="@color/primary"
-                android:layout_marginTop="16dp" />
+                android:padding="12dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="32dp"
+                app:cornerRadius="8dp"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -4,9 +4,12 @@
     android:id="@+id/jobCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
     app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#E0E0E0">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,52 +18,66 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/jobTitleTextView"
+            android:id="@+id/jobTitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="#212121" />
+            android:maxLines="2"
+            android:ellipsize="end"/>
 
         <TextView
-            android:id="@+id/companyNameTextView"
+            android:id="@+id/companyNameText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textSize="16sp"
-            android:textColor="#757575" />
-
-        <TextView
-            android:id="@+id/locationTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:textColor="#757575"
             android:textSize="14sp"
-            android:textColor="#757575" />
+            android:maxLines="1"
+            android:ellipsize="end"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/jobTypeChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="12sp"
-                app:chipBackgroundColor="#E3F2FD"
-                android:textColor="#2196F3" />
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/postedDateText"
+                android:id="@+id/locationText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:textSize="12sp"
-                android:textColor="#757575" />
+                android:drawableStart="@drawable/ic_location"
+                android:drawablePadding="4dp"
+                android:textColor="#757575"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+            <TextView
+                android:id="@+id/salaryText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:drawableStart="@drawable/ic_money"
+                android:drawablePadding="4dp"
+                android:textColor="#757575"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:ellipsize="end"/>
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/jobTypeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_job_type"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:textColor="@color/black"
+            android:textSize="12sp"/>
 
     </LinearLayout>
 

@@ -14,6 +14,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import android.util.Log
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.core.content.ContextCompat
 
 class CompanyDashboardActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
@@ -24,6 +26,7 @@ class CompanyDashboardActivity : AppCompatActivity() {
     private lateinit var applicationsCount: TextView
     private lateinit var recentActivityTitle: TextView
     private lateinit var recentActivityDescription: TextView
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +50,7 @@ class CompanyDashboardActivity : AppCompatActivity() {
             applicationsCount = findViewById(R.id.applicationsCount)
             recentActivityTitle = findViewById(R.id.recentActivityTitle)
             recentActivityDescription = findViewById(R.id.recentActivityDescription)
+            swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
 
             // Setup toolbar
             val toolbar = findViewById<Toolbar>(R.id.toolbar)
@@ -58,6 +62,9 @@ class CompanyDashboardActivity : AppCompatActivity() {
 
             // Setup quick action buttons
             setupQuickActions()
+
+            // Setup swipe refresh
+            setupSwipeRefresh()
 
             // Load dashboard data
             loadDashboardData()
@@ -134,6 +141,17 @@ class CompanyDashboardActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupSwipeRefresh() {
+        swipeRefreshLayout.setColorSchemeColors(
+            ContextCompat.getColor(this, R.color.primary),
+            ContextCompat.getColor(this, R.color.accent),
+            ContextCompat.getColor(this, R.color.primary_dark)
+        )
+        swipeRefreshLayout.setOnRefreshListener {
+            loadDashboardData()
+        }
+    }
+
     private fun loadDashboardData() {
         // Load active jobs count
         db.collection("jobs")
@@ -145,6 +163,7 @@ class CompanyDashboardActivity : AppCompatActivity() {
             }
             .addOnFailureListener { e ->
                 Log.e("CompanyDashboardActivity", "Error loading active jobs", e)
+                activeJobsCount.text = "0"
             }
 
         // Load applications count
@@ -156,23 +175,34 @@ class CompanyDashboardActivity : AppCompatActivity() {
             }
             .addOnFailureListener { e ->
                 Log.e("CompanyDashboardActivity", "Error loading applications", e)
+                applicationsCount.text = "0"
             }
 
-        // Load recent activity
+        // Load recent activity - simplified query
         db.collection("applications")
             .whereEqualTo("companyId", companyId)
-            .orderBy("appliedDate", Query.Direction.DESCENDING)
-            .limit(1)
             .get()
             .addOnSuccessListener { documents ->
                 if (!documents.isEmpty) {
-                    val latestApplication = documents.documents[0]
-                    recentActivityTitle.text = "New Application Received"
-                    recentActivityDescription.text = "Application for ${latestApplication.getString("jobTitle")}"
+                    // Sort in memory instead of using orderBy
+                    val latestApplication = documents.documents
+                        .maxByOrNull { it.getTimestamp("appliedDate")?.seconds ?: 0 }
+                    
+                    latestApplication?.let {
+                        recentActivityTitle.text = "New Application Received"
+                        recentActivityDescription.text = "Application for ${it.getString("jobTitle")}"
+                    }
+                } else {
+                    recentActivityTitle.text = "No Recent Activity"
+                    recentActivityDescription.text = "You haven't received any applications yet"
                 }
+                swipeRefreshLayout.isRefreshing = false
             }
             .addOnFailureListener { e ->
                 Log.e("CompanyDashboardActivity", "Error loading recent activity", e)
+                recentActivityTitle.text = "Error Loading Activity"
+                recentActivityDescription.text = "Please try again later"
+                swipeRefreshLayout.isRefreshing = false
             }
     }
 

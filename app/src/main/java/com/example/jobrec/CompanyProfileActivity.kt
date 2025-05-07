@@ -16,19 +16,14 @@ class CompanyProfileActivity : AppCompatActivity() {
     private lateinit var companyId: String
 
     // UI elements
-    private lateinit var companyLogoImage: ImageView
+    private lateinit var companyLogo: ImageView
     private lateinit var companyNameText: TextView
-    private lateinit var industryText: TextView
-    private lateinit var registrationNumberText: TextView
-    private lateinit var companySizeText: TextView
-    private lateinit var locationText: TextView
-    private lateinit var websiteText: TextView
-    private lateinit var descriptionText: TextView
-    private lateinit var contactPersonNameText: TextView
-    private lateinit var contactPersonEmailText: TextView
-    private lateinit var contactPersonPhoneText: TextView
+    private lateinit var companyIndustryText: TextView
+    private lateinit var companyDescriptionText: TextView
+    private lateinit var companyLocationText: TextView
+    private lateinit var companyEmailText: TextView
+    private lateinit var companyPhoneText: TextView
     private lateinit var editProfileButton: Button
-    private lateinit var postJobButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,19 +68,14 @@ class CompanyProfileActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
-        companyLogoImage = findViewById(R.id.companyLogoImage)
+        companyLogo = findViewById(R.id.companyLogo)
         companyNameText = findViewById(R.id.companyNameText)
-        industryText = findViewById(R.id.industryText)
-        registrationNumberText = findViewById(R.id.registrationNumberText)
-        companySizeText = findViewById(R.id.companySizeText)
-        locationText = findViewById(R.id.locationText)
-        websiteText = findViewById(R.id.websiteText)
-        descriptionText = findViewById(R.id.descriptionText)
-        contactPersonNameText = findViewById(R.id.contactPersonNameText)
-        contactPersonEmailText = findViewById(R.id.contactPersonEmailText)
-        contactPersonPhoneText = findViewById(R.id.contactPersonPhoneText)
+        companyIndustryText = findViewById(R.id.companyIndustryText)
+        companyDescriptionText = findViewById(R.id.companyDescriptionText)
+        companyLocationText = findViewById(R.id.companyLocationText)
+        companyEmailText = findViewById(R.id.companyEmailText)
+        companyPhoneText = findViewById(R.id.companyPhoneText)
         editProfileButton = findViewById(R.id.editProfileButton)
-        postJobButton = findViewById(R.id.postJobButton)
     }
 
     private fun loadCompanyData() {
@@ -116,26 +106,16 @@ class CompanyProfileActivity : AppCompatActivity() {
 
         // Set text fields
         companyNameText.text = company.companyName
-        industryText.text = company.industry
-        registrationNumberText.text = "Registration Number: ${company.registrationNumber}"
-        companySizeText.text = "Company Size: ${company.companySize}"
-        locationText.text = "Location: ${company.location}"
-        websiteText.text = "Website: ${company.website}"
-        descriptionText.text = "Description: ${company.description}"
-        contactPersonNameText.text = "Contact Person: ${company.contactPersonName}"
-        contactPersonEmailText.text = "Email: ${company.contactPersonEmail}"
-        contactPersonPhoneText.text = "Phone: ${company.contactPersonPhone}"
+        companyIndustryText.text = company.industry
+        companyDescriptionText.text = company.description
+        companyLocationText.text = company.location
+        companyEmailText.text = company.contactPersonEmail
+        companyPhoneText.text = company.contactPersonPhone
     }
 
     private fun setupButtonListeners() {
         editProfileButton.setOnClickListener {
             val intent = Intent(this, EditCompanyProfileActivity::class.java)
-            intent.putExtra("companyId", companyId)
-            startActivity(intent)
-        }
-
-        postJobButton.setOnClickListener {
-            val intent = Intent(this, PostJobActivity::class.java)
             intent.putExtra("companyId", companyId)
             startActivity(intent)
         }

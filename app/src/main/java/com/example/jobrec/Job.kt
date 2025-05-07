@@ -16,7 +16,7 @@ data class Job(
     val description: String = "",
     val requirements: String = "",
     val postedDate: Timestamp = Timestamp.now(),
-    val status: String = "Active"
+    val status: String = "active"
 ) {
     @Exclude
     fun getRequirementsList(): List<String> {

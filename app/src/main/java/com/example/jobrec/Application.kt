@@ -9,6 +9,8 @@ data class Application(
     val companyName: String = "",
     val userId: String = "",
     val applicantName: String = "",
+    val applicantEmail: String = "",
+    val applicantPhone: String = "",
     val appliedDate: Timestamp = Timestamp.now(),
     val status: String = "pending",
     val coverLetter: String = "",

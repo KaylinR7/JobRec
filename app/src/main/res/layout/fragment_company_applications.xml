@@ -1,54 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/applicationsRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="8dp"
-        android:clipToPadding="false"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <LinearLayout
-        android:id="@+id/emptyStateLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:orientation="vertical">
 
-        <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/ic_empty_state"
-            android:contentDescription="No applications found"/>
+        <!-- Filter Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#E0E0E0">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/statusChipGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/allChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="All"
+                        android:textColor="@color/black"
+                        app:chipBackgroundColor="#F5F5F5"
+                        app:chipStrokeWidth="1dp"
+                        app:chipStrokeColor="#E0E0E0"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/pendingChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pending"
+                        android:textColor="@color/black"
+                        app:chipBackgroundColor="#F5F5F5"
+                        app:chipStrokeWidth="1dp"
+                        app:chipStrokeColor="#E0E0E0"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/reviewedChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Reviewed"
+                        android:textColor="@color/black"
+                        app:chipBackgroundColor="#F5F5F5"
+                        app:chipStrokeWidth="1dp"
+                        app:chipStrokeColor="#E0E0E0"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/acceptedChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Accepted"
+                        android:textColor="@color/black"
+                        app:chipBackgroundColor="#F5F5F5"
+                        app:chipStrokeWidth="1dp"
+                        app:chipStrokeColor="#E0E0E0"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/rejectedChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rejected"
+                        android:textColor="@color/black"
+                        app:chipBackgroundColor="#F5F5F5"
+                        app:chipStrokeWidth="1dp"
+                        app:chipStrokeColor="#E0E0E0"/>
+
+                </com.google.android.material.chip.ChipGroup>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Applications List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/applicationsRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="16dp"/>
+
+        <!-- Empty State -->
         <TextView
+            android:id="@+id/emptyView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="No applications found"
-            android:textSize="18sp"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Try adjusting your search or check back later"
-            android:textAlignment="center"
-            android:textColor="?android:textColorSecondary"/>
+            android:layout_gravity="center"
+            android:text="No applications yet"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:visibility="gone"/>
 
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout> 
+</androidx.coordinatorlayout.widget.CoordinatorLayout> 
