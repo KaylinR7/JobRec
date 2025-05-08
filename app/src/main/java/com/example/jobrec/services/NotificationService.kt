@@ -7,7 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.example.jobrec.MainActivity
+import com.example.jobrec.HomeActivity
 import com.example.jobrec.R
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.RemoteMessage
@@ -53,7 +53,7 @@ class NotificationService(private val context: Context) {
     }
 
     fun showJobAlertNotification(jobTitle: String, companyName: String) {
-        val intent = Intent(context, MainActivity::class.java).apply {
+        val intent = Intent(context, HomeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         
@@ -80,7 +80,7 @@ class NotificationService(private val context: Context) {
         val title = message.notification?.title ?: "New Job Alert"
         val body = message.notification?.body ?: "Check out new job opportunities"
         
-        val intent = Intent(context, MainActivity::class.java).apply {
+        val intent = Intent(context, HomeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         

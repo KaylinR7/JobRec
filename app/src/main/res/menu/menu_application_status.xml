@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_all"
+        android:icon="@drawable/ic_list"
+        android:title="All"/>
+    <item
+        android:id="@+id/navigation_pending"
+        android:icon="@drawable/ic_pending"
+        android:title="Pending"/>
+    <item
+        android:id="@+id/navigation_reviewed"
+        android:icon="@drawable/ic_reviewed"
+        android:title="Reviewed"/>
+    <item
+        android:id="@+id/navigation_accepted"
+        android:icon="@drawable/ic_accepted"
+        android:title="Accepted"/>
+    <item
+        android:id="@+id/navigation_rejected"
+        android:icon="@drawable/ic_rejected"
+        android:title="Rejected"/>
+</menu> 

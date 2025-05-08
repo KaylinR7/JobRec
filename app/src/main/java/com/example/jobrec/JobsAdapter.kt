@@ -24,11 +24,11 @@ class JobsAdapter(private val onJobClick: (Job) -> Unit) :
     }
 
     inner class JobViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val titleTextView: TextView = itemView.findViewById(R.id.jobTitleTextView)
-        private val companyTextView: TextView = itemView.findViewById(R.id.companyNameTextView)
-        private val locationTextView: TextView = itemView.findViewById(R.id.locationTextView)
-        private val jobTypeChip: Chip = itemView.findViewById(R.id.jobTypeChip)
-        private val postedDateText: TextView = itemView.findViewById(R.id.postedDateText)
+        private val titleTextView: TextView = itemView.findViewById(R.id.jobTitleText)
+        private val companyTextView: TextView = itemView.findViewById(R.id.companyNameText)
+        private val locationTextView: TextView = itemView.findViewById(R.id.locationText)
+        private val jobTypeTextView: TextView = itemView.findViewById(R.id.jobTypeText)
+        private val salaryTextView: TextView = itemView.findViewById(R.id.salaryText)
 
         init {
             itemView.setOnClickListener {
@@ -43,12 +43,8 @@ class JobsAdapter(private val onJobClick: (Job) -> Unit) :
             titleTextView.text = job.title
             companyTextView.text = job.companyName
             locationTextView.text = job.location
-            jobTypeChip.text = job.type
-            // Format the posted date
-            val dateFormat = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
-            val postedDate = java.util.Date(job.getPostedDateMillis())
-            val daysAgo = calculateDaysAgo(job.getPostedDateMillis())
-            postedDateText.text = if (daysAgo == 0) "Posted today" else "Posted $daysAgo days ago"
+            jobTypeTextView.text = job.type
+            salaryTextView.text = job.salary
         }
 
         private fun calculateDaysAgo(timestamp: Long): Int {

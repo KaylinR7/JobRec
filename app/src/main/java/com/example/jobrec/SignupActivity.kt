@@ -16,13 +16,19 @@ import com.google.firebase.firestore.FirebaseFirestore
 import android.view.inputmethod.EditorInfo
 import android.view.KeyEvent
 import android.widget.LinearLayout
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 
 class SignupActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
     private lateinit var nameInput: TextInputEditText
-    private lateinit var cellNumberInput: TextInputEditText
+    private lateinit var surnameInput: TextInputEditText
     private lateinit var emailInput: TextInputEditText
+    private lateinit var cellNumberInput: TextInputEditText
+    private lateinit var provinceInput: AutoCompleteTextView
     private lateinit var passwordInput: TextInputEditText
+    private lateinit var confirmPasswordInput: TextInputEditText
+    private lateinit var signupButton: MaterialButton
     private lateinit var addressInput: TextInputEditText
     private lateinit var summaryInput: TextInputEditText
     private lateinit var skillsInput: TextInputEditText
@@ -59,6 +65,7 @@ class SignupActivity : AppCompatActivity() {
     private fun initializeViews() {
         toolbar = findViewById(R.id.toolbar)
         nameInput = findViewById(R.id.etName)
+        surnameInput = findViewById(R.id.etSurname)
         cellNumberInput = findViewById(R.id.etCellNumber)
         emailInput = findViewById(R.id.etEmail)
         passwordInput = findViewById(R.id.etPassword)

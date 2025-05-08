@@ -36,13 +36,15 @@ import android.widget.AutoCompleteTextView
 import android.view.Menu
 import android.view.MenuItem
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.example.jobrec.databinding.ActivityProfileBinding
 
 class ProfileActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityProfileBinding
     private lateinit var toolbar: MaterialToolbar
     private lateinit var nameInput: TextInputEditText
     private lateinit var emailInput: TextInputEditText
     private lateinit var phoneNumberInput: TextInputEditText
-    private lateinit var addressInput: TextInputEditText
+    private lateinit var provinceInput: AutoCompleteTextView
     private lateinit var summaryInput: TextInputEditText
     private lateinit var skillsInput: TextInputEditText
     private lateinit var linkedinInput: TextInputEditText
@@ -85,10 +87,11 @@ class ProfileActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_profile)
+        binding = ActivityProfileBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Set up toolbar with back button
-        toolbar = findViewById(R.id.toolbar)
+        // Setup toolbar with back button
+        toolbar = binding.toolbar
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -103,6 +106,7 @@ class ProfileActivity : AppCompatActivity() {
 
         // Initialize views
         initializeViews()
+        setupProvinceDropdown()
         
         // Set up back button handling
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -119,25 +123,25 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
-        nameInput = findViewById(R.id.nameInput)
-        emailInput = findViewById(R.id.emailInput)
-        phoneNumberInput = findViewById(R.id.phoneNumberInput)
-        addressInput = findViewById(R.id.addressInput)
-        summaryInput = findViewById(R.id.summaryInput)
-        skillsInput = findViewById(R.id.skillsInput)
-        linkedinInput = findViewById(R.id.linkedinInput)
-        githubInput = findViewById(R.id.githubInput)
-        portfolioInput = findViewById(R.id.portfolioInput)
-        profileImage = findViewById(R.id.profileImage)
-        changePhotoButton = findViewById(R.id.changePhotoButton)
-        saveButton = findViewById(R.id.saveButton)
-        skillsChipGroup = findViewById(R.id.skillsChipGroup)
-        experienceRecyclerView = findViewById(R.id.experienceRecyclerView)
-        educationRecyclerView = findViewById(R.id.educationRecyclerView)
-        addExperienceButton = findViewById(R.id.addExperienceButton)
-        addEducationButton = findViewById(R.id.addEducationButton)
-        referencesContainer = findViewById(R.id.referencesContainer)
-        addReferenceButton = findViewById(R.id.addReferenceButton)
+        nameInput = binding.nameInput
+        emailInput = binding.emailInput
+        phoneNumberInput = binding.phoneNumberInput
+        provinceInput = binding.provinceInput
+        summaryInput = binding.summaryInput
+        skillsInput = binding.skillsInput
+        linkedinInput = binding.linkedinInput
+        githubInput = binding.githubInput
+        portfolioInput = binding.portfolioInput
+        profileImage = binding.profileImage
+        changePhotoButton = binding.changePhotoButton
+        saveButton = binding.saveButton
+        skillsChipGroup = binding.skillsChipGroup
+        experienceRecyclerView = binding.experienceRecyclerView
+        educationRecyclerView = binding.educationRecyclerView
+        addExperienceButton = binding.addExperienceButton
+        addEducationButton = binding.addEducationButton
+        referencesContainer = binding.referencesContainer
+        addReferenceButton = binding.addReferenceButton
 
         // Set up RecyclerViews
         experienceRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -146,6 +150,15 @@ class ProfileActivity : AppCompatActivity() {
         educationAdapter = EducationAdapter()
         experienceRecyclerView.adapter = experienceAdapter
         educationRecyclerView.adapter = educationAdapter
+    }
+
+    private fun setupProvinceDropdown() {
+        val provinces = arrayOf(
+            "Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal",
+            "Limpopo", "Mpumalanga", "Northern Cape", "North West", "Western Cape"
+        )
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, provinces)
+        provinceInput.setAdapter(adapter)
     }
 
     private fun setupClickListeners() {
@@ -231,7 +244,7 @@ class ProfileActivity : AppCompatActivity() {
                         nameInput.setText(document.getString("name"))
                         emailInput.setText(document.getString("email"))
                         phoneNumberInput.setText(document.getString("phoneNumber"))
-                        addressInput.setText(document.getString("address"))
+                        provinceInput.setText(document.getString("province"))
                         summaryInput.setText(document.getString("summary"))
                         
                         // Load social links
@@ -317,7 +330,7 @@ class ProfileActivity : AppCompatActivity() {
                 "name" to nameInput.text.toString().trim(),
                 "email" to emailInput.text.toString().trim(),
                 "phoneNumber" to phoneNumberInput.text.toString().trim(),
-                "address" to addressInput.text.toString().trim(),
+                "province" to provinceInput.text.toString().trim(),
                 "summary" to summaryInput.text.toString().trim(),
                 "linkedin" to linkedinInput.text.toString().trim(),
                 "github" to githubInput.text.toString().trim(),
@@ -406,32 +419,17 @@ class ProfileActivity : AppCompatActivity() {
             }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
-        return true
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            onBackPressed()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.profile_menu, menu)
         return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressed()
-                true
-            }
-            R.id.action_logout -> {
-                showLogoutConfirmationDialog()
-                true
-            }
-            R.id.action_save_profile -> {
-                saveProfile()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
     private fun showLogoutConfirmationDialog() {

@@ -10,8 +10,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import android.content.Intent
 
 class ApplicationsActivity : AppCompatActivity() {
@@ -19,7 +18,7 @@ class ApplicationsActivity : AppCompatActivity() {
     private lateinit var companyId: String
     private lateinit var applicationsRecyclerView: RecyclerView
     private lateinit var emptyView: TextView
-    private lateinit var statusChipGroup: ChipGroup
+    private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var applicationsAdapter: ApplicationAdapter
     private val applications = mutableListOf<Application>()
 
@@ -46,7 +45,7 @@ class ApplicationsActivity : AppCompatActivity() {
         // Initialize views
         applicationsRecyclerView = findViewById(R.id.applicationsRecyclerView)
         emptyView = findViewById(R.id.emptyView)
-        statusChipGroup = findViewById(R.id.statusChipGroup)
+        bottomNavigation = findViewById(R.id.bottomNavigation)
 
         // Setup RecyclerView
         applicationsAdapter = ApplicationAdapter(applications) { application ->
@@ -57,24 +56,24 @@ class ApplicationsActivity : AppCompatActivity() {
             adapter = applicationsAdapter
         }
 
-        // Setup status filter
-        setupStatusFilter()
+        // Setup bottom navigation
+        setupBottomNavigation()
 
         // Load applications
         loadApplications()
     }
 
-    private fun setupStatusFilter() {
-        statusChipGroup.setOnCheckedChangeListener { group, checkedId ->
-            val chip = group.findViewById<Chip>(checkedId)
-            val status = when (chip?.id) {
-                R.id.pendingChip -> "pending"
-                R.id.reviewedChip -> "reviewed"
-                R.id.acceptedChip -> "accepted"
-                R.id.rejectedChip -> "rejected"
+    private fun setupBottomNavigation() {
+        bottomNavigation.setOnItemSelectedListener { item ->
+            val status = when (item.itemId) {
+                R.id.navigation_pending -> "pending"
+                R.id.navigation_reviewed -> "reviewed"
+                R.id.navigation_accepted -> "accepted"
+                R.id.navigation_rejected -> "rejected"
                 else -> null
             }
             loadApplications(status)
+            true
         }
     }
 

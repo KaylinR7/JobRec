@@ -9,15 +9,9 @@
         app:showAsAction="never"/>
 
     <item
-        android:id="@+id/action_analytics"
-        android:title="Analytics"
-        android:icon="@android:drawable/ic_menu_manage"
-        app:showAsAction="never"/>
-
-    <item
         android:id="@+id/action_logout"
         android:title="Logout"
         android:icon="@drawable/ic_logout"
-        app:showAsAction="always"/>
+        app:showAsAction="never"/>
         
 </menu> 

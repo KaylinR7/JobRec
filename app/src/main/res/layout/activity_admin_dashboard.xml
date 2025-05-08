@@ -1,47 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="32dp">
+    android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Admin Dashboard"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp" />
-
-    <Button
-        android:id="@+id/btnManageUsers"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Manage Users"
-        android:layout_marginBottom="16dp" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-    <Button
-        android:id="@+id/btnManageCompanies"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Manage Companies"
-        android:layout_marginBottom="16dp" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp">
 
-    <Button
-        android:id="@+id/btnManageJobs"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Manage Jobs"
-        android:layout_marginBottom="16dp" />
+        <Button
+            android:id="@+id/btnManageUsers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Manage Users"
+            android:layout_marginBottom="16dp" />
 
-    <Button
-        android:id="@+id/btnManageApplications"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Manage Applications"
-        android:layout_marginBottom="16dp" />
+        <Button
+            android:id="@+id/btnManageCompanies"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Manage Companies"
+            android:layout_marginBottom="16dp" />
 
-    <!-- TODO: Add admin dashboard features here -->
+        <Button
+            android:id="@+id/btnManageJobs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Manage Jobs"
+            android:layout_marginBottom="16dp" />
 
+        <Button
+            android:id="@+id/btnManageApplications"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Manage Applications"
+            android:layout_marginBottom="16dp" />
+
+        <!-- TODO: Add admin dashboard features here -->
+
+    </LinearLayout>
 </LinearLayout> 

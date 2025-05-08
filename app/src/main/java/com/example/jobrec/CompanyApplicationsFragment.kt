@@ -7,11 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -22,7 +23,8 @@ class CompanyApplicationsFragment : Fragment() {
     private lateinit var applicationsRecyclerView: RecyclerView
     private lateinit var emptyView: TextView
     private lateinit var applicationsAdapter: ApplicationAdapter
-    private lateinit var statusChipGroup: ChipGroup
+    private lateinit var bottomNavigation: BottomNavigationView
+    private lateinit var toolbar: Toolbar
     private val applications = mutableListOf<ApplicationsActivity.Application>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,11 +46,28 @@ class CompanyApplicationsFragment : Fragment() {
         
         applicationsRecyclerView = view.findViewById(R.id.applicationsRecyclerView)
         emptyView = view.findViewById(R.id.emptyView)
-        statusChipGroup = view.findViewById(R.id.statusChipGroup)
+        bottomNavigation = view.findViewById(R.id.bottomNavigation)
+        toolbar = view.findViewById(R.id.toolbar)
         
+        setupToolbar()
         setupRecyclerView()
-        setupChipGroup()
+        setupBottomNavigation()
         loadApplications()
+    }
+
+    private fun setupToolbar() {
+        (requireActivity() as? AppCompatActivity)?.apply {
+            setSupportActionBar(toolbar)
+            supportActionBar?.apply {
+                setDisplayHomeAsUpEnabled(true)
+                setDisplayShowHomeEnabled(true)
+                title = "Applications"
+            }
+        }
+
+        toolbar.setNavigationOnClickListener {
+            requireActivity().onBackPressed()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -63,17 +82,17 @@ class CompanyApplicationsFragment : Fragment() {
         }
     }
 
-    private fun setupChipGroup() {
-        statusChipGroup.setOnCheckedChangeListener { group, checkedId ->
-            val chip = group.findViewById<Chip>(checkedId)
-            val status = when (chip?.id) {
-                R.id.pendingChip -> "pending"
-                R.id.reviewedChip -> "reviewed"
-                R.id.acceptedChip -> "accepted"
-                R.id.rejectedChip -> "rejected"
+    private fun setupBottomNavigation() {
+        bottomNavigation.setOnItemSelectedListener { item ->
+            val status = when (item.itemId) {
+                R.id.navigation_pending -> "pending"
+                R.id.navigation_reviewed -> "reviewed"
+                R.id.navigation_accepted -> "accepted"
+                R.id.navigation_rejected -> "rejected"
                 else -> null
             }
             loadApplications(status)
+            true
         }
     }
 

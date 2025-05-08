@@ -1,12 +1,10 @@
 package com.example.jobrec
 
 import android.os.Bundle
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.Button
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -15,75 +13,63 @@ class EditJobActivity : AppCompatActivity() {
     private lateinit var jobId: String
     private lateinit var companyId: String
 
-    // UI elements
-    private lateinit var jobTitleInput: TextInputEditText
-    private lateinit var jobTypeInput: AutoCompleteTextView
-    private lateinit var locationInput: TextInputEditText
-    private lateinit var salaryInput: TextInputEditText
+    private lateinit var titleInput: TextInputEditText
     private lateinit var descriptionInput: TextInputEditText
     private lateinit var requirementsInput: TextInputEditText
-    private lateinit var statusInput: AutoCompleteTextView
-    private lateinit var updateJobButton: Button
-    private lateinit var deleteJobButton: Button
+    private lateinit var locationInput: TextInputEditText
+    private lateinit var typeInput: TextInputEditText
+    private lateinit var salaryInput: TextInputEditText
+    private lateinit var saveButton: MaterialButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_job)
 
-        // Initialize Firestore
+        // Setup toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setDisplayShowHomeEnabled(true)
+            title = "Edit Job"
+        }
+
+        // Initialize Firebase
         db = FirebaseFirestore.getInstance()
 
         // Get job ID and company ID from intent
-        jobId = intent.getStringExtra("jobId") ?: ""
-        companyId = intent.getStringExtra("companyId") ?: ""
-        
-        if (jobId.isEmpty() || companyId.isEmpty()) {
-            Toast.makeText(this, "Error: Job ID or Company ID not found", Toast.LENGTH_SHORT).show()
+        jobId = intent.getStringExtra("jobId") ?: run {
+            Toast.makeText(this, "Error: Job ID not found", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+        companyId = intent.getStringExtra("companyId") ?: run {
+            Toast.makeText(this, "Error: Company ID not found", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
-        // Initialize UI elements
-        initializeViews()
-        setupDropdowns()
-        setupButtons()
-        loadJobData()
-    }
-
-    private fun initializeViews() {
-        jobTitleInput = findViewById(R.id.jobTitleInput)
-        jobTypeInput = findViewById(R.id.jobTypeInput)
-        locationInput = findViewById(R.id.locationInput)
-        salaryInput = findViewById(R.id.salaryInput)
+        // Initialize views
+        titleInput = findViewById(R.id.titleInput)
         descriptionInput = findViewById(R.id.descriptionInput)
         requirementsInput = findViewById(R.id.requirementsInput)
-        statusInput = findViewById(R.id.statusInput)
-        updateJobButton = findViewById(R.id.updateJobButton)
-        deleteJobButton = findViewById(R.id.deleteJobButton)
+        locationInput = findViewById(R.id.locationInput)
+        typeInput = findViewById(R.id.typeInput)
+        salaryInput = findViewById(R.id.salaryInput)
+        saveButton = findViewById(R.id.saveButton)
+
+        // Load job data
+        loadJobData()
+
+        // Setup save button
+        saveButton.setOnClickListener {
+            saveJob()
+        }
     }
 
-    private fun setupDropdowns() {
-        // Setup job type dropdown
-        val jobTypes = arrayOf("Full-time", "Part-time", "Contract", "Internship", "Remote")
-        val jobTypeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, jobTypes)
-        jobTypeInput.setAdapter(jobTypeAdapter)
-
-        // Setup status dropdown
-        val statusTypes = arrayOf("active", "closed", "draft")
-        val statusAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, statusTypes)
-        statusInput.setAdapter(statusAdapter)
-    }
-
-    private fun setupButtons() {
-        updateJobButton.setOnClickListener {
-            if (validateInputs()) {
-                updateJob()
-            }
-        }
-
-        deleteJobButton.setOnClickListener {
-            showDeleteConfirmationDialog()
-        }
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     private fun loadJobData() {
@@ -92,119 +78,60 @@ class EditJobActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
-                    val data = document.data
-                    
-                    // Check if the job belongs to the company
-                    if (data?.get("companyId") != companyId) {
-                        Toast.makeText(this, "Error: You don't have permission to edit this job", Toast.LENGTH_SHORT).show()
-                        finish()
-                        return@addOnSuccessListener
+                    val job = document.toObject(Job::class.java)
+                    job?.let {
+                        titleInput.setText(it.title)
+                        descriptionInput.setText(it.description)
+                        requirementsInput.setText(it.requirements)
+                        locationInput.setText(it.location)
+                        typeInput.setText(it.type)
+                        salaryInput.setText(it.salary)
                     }
-                    
-                    // Fill the form with job data
-                    jobTitleInput.setText(data["title"] as? String ?: "")
-                    jobTypeInput.setText(data["type"] as? String ?: "")
-                    locationInput.setText(data["location"] as? String ?: "")
-                    salaryInput.setText(data["salary"] as? String ?: "")
-                    descriptionInput.setText(data["description"] as? String ?: "")
-                    requirementsInput.setText(data["requirements"] as? String ?: "")
-                    statusInput.setText(data["status"] as? String ?: "Active")
                 } else {
-                    Toast.makeText(this, "Error: Job not found", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Job not found", Toast.LENGTH_SHORT).show()
                     finish()
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error loading job: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error loading job: ${e.message}", Toast.LENGTH_SHORT).show()
                 finish()
             }
     }
 
-    private fun validateInputs(): Boolean {
-        var isValid = true
+    private fun saveJob() {
+        val title = titleInput.text.toString().trim()
+        val description = descriptionInput.text.toString().trim()
+        val requirements = requirementsInput.text.toString().trim()
+        val location = locationInput.text.toString().trim()
+        val type = typeInput.text.toString().trim()
+        val salary = salaryInput.text.toString().trim()
 
-        if (jobTitleInput.text.isNullOrBlank()) {
-            jobTitleInput.error = "Job title is required"
-            isValid = false
+        if (title.isEmpty() || description.isEmpty() || requirements.isEmpty() || 
+            location.isEmpty() || type.isEmpty() || salary.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        if (jobTypeInput.text.isNullOrBlank()) {
-            jobTypeInput.error = "Job type is required"
-            isValid = false
-        }
-
-        if (locationInput.text.isNullOrBlank()) {
-            locationInput.error = "Location is required"
-            isValid = false
-        }
-
-        if (salaryInput.text.isNullOrBlank()) {
-            salaryInput.error = "Salary is required"
-            isValid = false
-        }
-
-        if (descriptionInput.text.isNullOrBlank()) {
-            descriptionInput.error = "Job description is required"
-            isValid = false
-        }
-
-        if (requirementsInput.text.isNullOrBlank()) {
-            requirementsInput.error = "Requirements are required"
-            isValid = false
-        }
-
-        if (statusInput.text.isNullOrBlank()) {
-            statusInput.error = "Status is required"
-            isValid = false
-        }
-
-        return isValid
-    }
-
-    private fun updateJob() {
-        val jobUpdates = hashMapOf<String, Any>(
-            "title" to jobTitleInput.text.toString(),
-            "type" to jobTypeInput.text.toString(),
-            "location" to locationInput.text.toString(),
-            "salary" to salaryInput.text.toString(),
-            "description" to descriptionInput.text.toString(),
-            "requirements" to requirementsInput.text.toString(),
-            "status" to statusInput.text.toString()
+        val jobData = mapOf(
+            "title" to title,
+            "description" to description,
+            "requirements" to requirements,
+            "location" to location,
+            "type" to type,
+            "salary" to salary,
+            "companyId" to companyId,
+            "status" to "active"
         )
 
         db.collection("jobs")
             .document(jobId)
-            .update(jobUpdates)
+            .update(jobData)
             .addOnSuccessListener {
                 Toast.makeText(this, "Job updated successfully", Toast.LENGTH_SHORT).show()
                 finish()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error updating job: ${e.message}", Toast.LENGTH_LONG).show()
-            }
-    }
-
-    private fun showDeleteConfirmationDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("Delete Job")
-            .setMessage("Are you sure you want to delete this job? This action cannot be undone.")
-            .setPositiveButton("Delete") { _, _ ->
-                deleteJob()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun deleteJob() {
-        db.collection("jobs")
-            .document(jobId)
-            .delete()
-            .addOnSuccessListener {
-                Toast.makeText(this, "Job deleted successfully", Toast.LENGTH_SHORT).show()
-                finish()
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(this, "Error deleting job: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error updating job: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 } 

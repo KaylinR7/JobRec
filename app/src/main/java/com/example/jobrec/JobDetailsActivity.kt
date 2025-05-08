@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -22,8 +23,10 @@ import java.util.Date
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
+import com.example.jobrec.databinding.ActivityJobDetailsBinding
 
 class JobDetailsActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityJobDetailsBinding
     private lateinit var jobTitle: TextView
     private lateinit var companyName: TextView
     private lateinit var jobLocation: TextView
@@ -50,11 +53,11 @@ class JobDetailsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_job_detail)
+        binding = ActivityJobDetailsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Set up toolbar with back button
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        // Setup toolbar with back button
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
@@ -62,14 +65,7 @@ class JobDetailsActivity : AppCompatActivity() {
         }
 
         // Initialize views
-        jobTitle = findViewById(R.id.jobTitle)
-        companyName = findViewById(R.id.companyName)
-        jobLocation = findViewById(R.id.jobLocation)
-        jobType = findViewById(R.id.jobType)
-        jobSalary = findViewById(R.id.jobSalary)
-        jobDescription = findViewById(R.id.jobDescription)
-        jobRequirements = findViewById(R.id.jobRequirements)
-        applyButton = findViewById(R.id.applyButton)
+        initializeViews()
 
         // Set up back button handling
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -96,6 +92,17 @@ class JobDetailsActivity : AppCompatActivity() {
                 // TODO: Navigate to login screen
             }
         }
+    }
+
+    private fun initializeViews() {
+        jobTitle = binding.jobTitle
+        companyName = binding.companyName
+        jobLocation = binding.jobLocation
+        jobType = binding.jobType
+        jobSalary = binding.jobSalary
+        jobDescription = binding.jobDescription
+        jobRequirements = binding.jobRequirements
+        applyButton = binding.applyButton
     }
 
     private fun checkIfAlreadyApplied() {
@@ -475,8 +482,11 @@ class JobDetailsActivity : AppCompatActivity() {
             }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
-        return true
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            onBackPressed()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 } 

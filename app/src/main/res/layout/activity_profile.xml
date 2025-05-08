@@ -143,17 +143,19 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/provinceLayout"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        android:layout_marginTop="8dp"
+                        android:hint="Province">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/addressInput"
+                        <AutoCompleteTextView
+                            android:id="@+id/provinceInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Address"
-                            android:textColor="@color/black"
-                            android:inputType="textPostalAddress"/>
+                            android:inputType="none" />
+
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>

@@ -34,6 +34,15 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_employer_analytics)
 
+        // Setup toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setDisplayShowHomeEnabled(true)
+            title = "Analytics"
+        }
+
         // Initialize Firebase
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
@@ -45,14 +54,13 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
         applicationsChart = findViewById(R.id.applicationsChart)
         demographicsChart = findViewById(R.id.demographicsChart)
 
-        // Setup toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = "Analytics Dashboard"
-
         // Load analytics data
         loadAnalyticsData()
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     private fun loadAnalyticsData() {

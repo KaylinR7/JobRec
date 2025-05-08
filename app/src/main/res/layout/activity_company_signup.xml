@@ -1,266 +1,281 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
-    android:fillViewport="true">
+    android:orientation="vertical">
 
-    <LinearLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Company Registration"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:layout_marginBottom="8dp"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:fillViewport="true">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Create your company account"
-            android:textSize="16sp"
-            android:textColor="@android:color/darker_gray"
-            android:layout_marginBottom="32dp"/>
-
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+            android:orientation="vertical"
+            android:padding="24dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/companyNameInput"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Company Registration"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Create your company account"
+                android:textSize="16sp"
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginBottom="32dp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Company Name"
-                android:textColor="@android:color/black"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@android:color/black"
+                app:hintTextColor="@android:color/black">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/companyNameInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Company Name"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/registrationNumberInput"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Registration Number"
-                android:textColor="@android:color/black"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@android:color/black"
+                app:hintTextColor="@android:color/black">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/registrationNumberInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Registration Number"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/industryInput"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Industry"
-                android:textColor="@android:color/black"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@android:color/black"
+                app:hintTextColor="@android:color/black">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/industryInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Industry"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/companySizeInput"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Company Size"
-                android:textColor="@android:color/black"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@android:color/black"
+                app:hintTextColor="@android:color/black">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/companySizeInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Company Size"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/locationInput"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Location"
-                android:textColor="@android:color/black"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@android:color/black"
+                app:hintTextColor="@android:color/black">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/locationInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Location"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/websiteInput"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Website"
-                android:inputType="textUri"
-                android:textColor="@android:color/black"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@android:color/black"
+                app:hintTextColor="@android:color/black">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/websiteInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Website"
+                    android:inputType="textUri"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/descriptionInput"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Company Description"
-                android:inputType="textMultiLine"
-                android:minLines="3"
-                android:gravity="top"
-                android:textColor="@android:color/black"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@android:color/black"
+                app:hintTextColor="@android:color/black">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Contact Person Details"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"/>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/descriptionInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Company Description"
+                    android:inputType="textMultiLine"
+                    android:minLines="3"
+                    android:gravity="top"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Contact Person Details"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"/>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/contactPersonNameInput"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Contact Person Name"
-                android:textColor="@android:color/black"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@android:color/black"
+                app:hintTextColor="@android:color/black">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/contactPersonNameInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Contact Person Name"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/contactPersonEmailInput"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Contact Person Email"
-                android:inputType="textEmailAddress"
-                android:textColor="@android:color/black"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@android:color/black"
+                app:hintTextColor="@android:color/black">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/contactPersonEmailInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Contact Person Email"
+                    android:inputType="textEmailAddress"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/contactPersonPhoneInput"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Contact Person Phone"
-                android:inputType="phone"
-                android:textColor="@android:color/black"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@android:color/black"
+                app:hintTextColor="@android:color/black">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/contactPersonPhoneInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Contact Person Phone"
+                    android:inputType="phone"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/emailInput"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Company Email"
-                android:inputType="textEmailAddress"
-                android:textColor="@android:color/black"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@android:color/black"
+                app:hintTextColor="@android:color/black">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black"
-            app:passwordToggleEnabled="true"
-            app:passwordToggleTint="@android:color/black">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/emailInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Company Email"
+                    android:inputType="textEmailAddress"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/passwordInput"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Password"
-                android:inputType="textPassword"
-                android:textColor="@android:color/black"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="24dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@android:color/black"
+                app:hintTextColor="@android:color/black"
+                app:passwordToggleEnabled="true"
+                app:passwordToggleTint="@android:color/black">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/registerButton"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="Register Company"
-            android:textSize="16sp"
-            android:textColor="@android:color/white"
-            app:backgroundTint="@android:color/black"
-            android:layout_marginBottom="24dp"/>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/passwordInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:id="@+id/backToLoginLink"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Already have an account? Sign in"
-            android:textColor="@android:color/black"
-            android:textSize="14sp"
-            android:padding="8dp"
-            android:layout_gravity="center"
-            android:background="?attr/selectableItemBackground"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/registerButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Register Company"
+                android:textSize="16sp"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@android:color/black"
+                android:layout_marginBottom="24dp"/>
 
-    </LinearLayout>
-</ScrollView> 
+            <TextView
+                android:id="@+id/backToLoginLink"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Already have an account? Sign in"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:layout_gravity="center"
+                android:background="?attr/selectableItemBackground"/>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout> 

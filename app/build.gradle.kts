@@ -88,6 +88,8 @@ dependencies {
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
+    implementation ("de.hdodenhof:circleimageview:3.1.0")
 }
 
 

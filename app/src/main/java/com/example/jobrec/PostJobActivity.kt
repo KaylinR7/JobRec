@@ -1,6 +1,7 @@
 package com.example.jobrec
 
 import android.os.Bundle
+import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Toast
@@ -10,10 +11,12 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Date
+import com.example.jobrec.databinding.ActivityPostJobBinding
 
 class PostJobActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private lateinit var companyId: String
+    private lateinit var binding: ActivityPostJobBinding
 
     // UI elements
     private lateinit var jobTitleInput: TextInputEditText
@@ -26,15 +29,15 @@ class PostJobActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_post_job)
+        binding = ActivityPostJobBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Set up toolbar with back button
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        // Setup toolbar with back button
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
-            title = "Post a Job"
+            title = "Post New Job"
         }
 
         // Initialize Firestore
@@ -55,13 +58,13 @@ class PostJobActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
-        jobTitleInput = findViewById(R.id.jobTitleInput)
-        jobTypeInput = findViewById(R.id.jobTypeInput)
-        locationInput = findViewById(R.id.locationInput)
-        salaryInput = findViewById(R.id.salaryInput)
-        descriptionInput = findViewById(R.id.descriptionInput)
-        requirementsInput = findViewById(R.id.requirementsInput)
-        postButton = findViewById(R.id.postButton)
+        jobTitleInput = binding.jobTitleInput
+        jobTypeInput = binding.jobTypeInput
+        locationInput = binding.locationInput
+        salaryInput = binding.salaryInput
+        descriptionInput = binding.descriptionInput
+        requirementsInput = binding.requirementsInput
+        postButton = binding.postButton
     }
 
     private fun setupJobTypeDropdown() {
@@ -153,8 +156,11 @@ class PostJobActivity : AppCompatActivity() {
             }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
-        return true
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            onBackPressed()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 } 

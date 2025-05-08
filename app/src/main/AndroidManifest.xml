@@ -86,6 +86,11 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".JobsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".PostJobActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -204,6 +209,16 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CompanyDashboardActivity" />
         </activity>
+
+        <activity
+            android:name=".EmployerJobsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".EditJobActivity"
+            android:exported="false" />
+
+        <activity android:name=".CompanyAnalyticsActivity" />
 
     </application>
 

@@ -238,8 +238,6 @@ class HomeActivity : AppCompatActivity() {
         Log.d(TAG, "Loading recent jobs...")
         db.collection("jobs")
             .whereEqualTo("status", "active")
-            .orderBy("postedDate", Query.Direction.DESCENDING)
-            .limit(10)
             .get()
             .addOnSuccessListener { documents ->
                 Log.d(TAG, "Found ${documents.size()} jobs")
@@ -266,8 +264,6 @@ class HomeActivity : AppCompatActivity() {
         Log.d(TAG, "Loading recommended jobs...")
         db.collection("jobs")
             .whereEqualTo("status", "active")
-            .orderBy("postedDate", Query.Direction.DESCENDING)
-            .limit(10)
             .get()
             .addOnSuccessListener { documents ->
                 Log.d(TAG, "Found ${documents.size()} recommended jobs")

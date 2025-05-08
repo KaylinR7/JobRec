@@ -35,7 +35,7 @@ class JobsActivity : AppCompatActivity() {
         // Setup RecyclerView
         jobsAdapter = JobsAdapter { job ->
             // Handle job item click
-            val intent = Intent(this, JobDetailActivity::class.java)
+            val intent = Intent(this, JobDetailsActivity::class.java)
             intent.putExtra("jobId", job.id)
             startActivity(intent)
         }

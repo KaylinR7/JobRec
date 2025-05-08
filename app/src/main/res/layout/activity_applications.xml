@@ -24,89 +24,12 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Filter Section -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="#E0E0E0">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/statusChipGroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:singleSelection="true">
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/allChip"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="All"
-                        android:textColor="@color/black"
-                        app:chipBackgroundColor="#F5F5F5"
-                        app:chipStrokeWidth="1dp"
-                        app:chipStrokeColor="#E0E0E0"/>
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/pendingChip"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Pending"
-                        android:textColor="@color/black"
-                        app:chipBackgroundColor="#F5F5F5"
-                        app:chipStrokeWidth="1dp"
-                        app:chipStrokeColor="#E0E0E0"/>
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/reviewedChip"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Reviewed"
-                        android:textColor="@color/black"
-                        app:chipBackgroundColor="#F5F5F5"
-                        app:chipStrokeWidth="1dp"
-                        app:chipStrokeColor="#E0E0E0"/>
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/acceptedChip"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Accepted"
-                        android:textColor="@color/black"
-                        app:chipBackgroundColor="#F5F5F5"
-                        app:chipStrokeWidth="1dp"
-                        app:chipStrokeColor="#E0E0E0"/>
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/rejectedChip"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rejected"
-                        android:textColor="@color/black"
-                        app:chipBackgroundColor="#F5F5F5"
-                        app:chipStrokeWidth="1dp"
-                        app:chipStrokeColor="#E0E0E0"/>
-
-                </com.google.android.material.chip.ChipGroup>
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
         <!-- Applications List -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/applicationsRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:clipToPadding="false"
             android:paddingBottom="16dp"/>
 
@@ -122,5 +45,13 @@
             android:visibility="gone"/>
 
     </LinearLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/white"
+        app:menu="@menu/menu_application_status"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout> 

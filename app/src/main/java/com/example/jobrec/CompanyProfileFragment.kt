@@ -5,19 +5,24 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.button.MaterialButton
+import android.widget.TextView
+import de.hdodenhof.circleimageview.CircleImageView
 
 class CompanyProfileFragment : Fragment() {
     private lateinit var db: FirebaseFirestore
-    private lateinit var companyId: String
+    private lateinit var auth: FirebaseAuth
+    private lateinit var bottomNav: BottomNavigationView
 
-    // UI elements
-    private lateinit var companyLogoImage: ImageView
+    // Profile views
+    private lateinit var companyLogo: CircleImageView
     private lateinit var companyNameText: TextView
     private lateinit var industryText: TextView
     private lateinit var registrationNumberText: TextView
@@ -28,48 +33,37 @@ class CompanyProfileFragment : Fragment() {
     private lateinit var contactPersonNameText: TextView
     private lateinit var contactPersonEmailText: TextView
     private lateinit var contactPersonPhoneText: TextView
-    private lateinit var editProfileButton: Button
 
-    companion object {
-        private const val ARG_COMPANY_ID = "company_id"
-
-        fun newInstance(companyId: String): CompanyProfileFragment {
-            val fragment = CompanyProfileFragment()
-            val args = Bundle()
-            args.putString(ARG_COMPANY_ID, companyId)
-            fragment.arguments = args
-            return fragment
-        }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            companyId = it.getString(ARG_COMPANY_ID) ?: ""
-        }
-    }
+    // Analytics views
+    private lateinit var totalApplicationsText: TextView
+    private lateinit var activeJobsText: TextView
+    private lateinit var viewDetailedAnalyticsButton: MaterialButton
+    private lateinit var editProfileButton: MaterialButton
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_company_profile, container, false)
-        
-        // Initialize Firestore
+        return inflater.inflate(R.layout.fragment_company_profile, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Initialize Firebase
         db = FirebaseFirestore.getInstance()
-        
-        // Initialize UI elements
+        auth = FirebaseAuth.getInstance()
+
+        // Initialize views
         initializeViews(view)
-        
-        // Load company data
-        loadCompanyData()
-        
-        return view
+        setupBottomNavigation()
+        loadCompanyProfile()
     }
 
     private fun initializeViews(view: View) {
-        companyLogoImage = view.findViewById(R.id.companyLogoImage)
+        // Profile views
+        companyLogo = view.findViewById(R.id.companyLogo)
         companyNameText = view.findViewById(R.id.companyNameText)
         industryText = view.findViewById(R.id.industryText)
         registrationNumberText = view.findViewById(R.id.registrationNumberText)
@@ -80,48 +74,95 @@ class CompanyProfileFragment : Fragment() {
         contactPersonNameText = view.findViewById(R.id.contactPersonNameText)
         contactPersonEmailText = view.findViewById(R.id.contactPersonEmailText)
         contactPersonPhoneText = view.findViewById(R.id.contactPersonPhoneText)
+
+        // Analytics views
+        totalApplicationsText = view.findViewById(R.id.totalApplicationsText)
+        activeJobsText = view.findViewById(R.id.activeJobsText)
+        viewDetailedAnalyticsButton = view.findViewById(R.id.viewDetailedAnalyticsButton)
         editProfileButton = view.findViewById(R.id.editProfileButton)
 
+        // Set up click listeners
+        viewDetailedAnalyticsButton.setOnClickListener {
+            startActivity(Intent(requireContext(), CompanyAnalyticsActivity::class.java))
+        }
+
         editProfileButton.setOnClickListener {
-            val intent = Intent(requireContext(), EditCompanyProfileActivity::class.java)
-            intent.putExtra("companyId", companyId)
-            startActivity(intent)
+            startActivity(Intent(requireContext(), EditCompanyProfileActivity::class.java))
         }
     }
 
-    private fun loadCompanyData() {
-        db.collection("companies")
-            .document(companyId)
+    private fun setupBottomNavigation() {
+        bottomNav = requireView().findViewById(R.id.bottomNavigation)
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_profile -> {
+                    // Already on profile, do nothing
+                    true
+                }
+                R.id.navigation_analytics -> {
+                    startActivity(Intent(requireContext(), CompanyAnalyticsActivity::class.java))
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun loadCompanyProfile() {
+        val userId = auth.currentUser?.uid ?: return
+
+        db.collection("companies").document(userId)
             .get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
-                    val company = document.toObject(Company::class.java)
-                    company?.let { displayCompanyData(it) }
+                    // Load profile data
+                    companyNameText.text = document.getString("companyName") ?: "Not set"
+                    industryText.text = document.getString("industry") ?: "Not set"
+                    registrationNumberText.text = document.getString("registrationNumber") ?: "Not set"
+                    companySizeText.text = document.getString("companySize") ?: "Not set"
+                    locationText.text = document.getString("location") ?: "Not set"
+                    websiteText.text = document.getString("website") ?: "Not set"
+                    descriptionText.text = document.getString("description") ?: "Not set"
+                    contactPersonNameText.text = document.getString("contactPersonName") ?: "Not set"
+                    contactPersonEmailText.text = document.getString("contactPersonEmail") ?: "Not set"
+                    contactPersonPhoneText.text = document.getString("contactPersonPhone") ?: "Not set"
+
+                    // Load company logo
+                    document.getString("logoUrl")?.let { logoUrl ->
+                        Glide.with(this)
+                            .load(logoUrl)
+                            .placeholder(R.drawable.ic_company_placeholder)
+                            .error(R.drawable.ic_company_placeholder)
+                            .into(companyLogo)
+                    }
+
+                    // Load analytics
+                    loadAnalytics(userId)
                 } else {
-                    Toast.makeText(requireContext(), "Company data not found", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Company profile not found", Toast.LENGTH_SHORT).show()
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Error loading company data: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Error loading profile: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
-    private fun displayCompanyData(company: Company) {
-        // Set company logo if available
-        if (company.profileImageUrl.isNotEmpty()) {
-            // TODO: Load company logo using Glide or Picasso
-        }
+    private fun loadAnalytics(companyId: String) {
+        // Load total applications
+        db.collection("applications")
+            .whereEqualTo("companyId", companyId)
+            .get()
+            .addOnSuccessListener { documents ->
+                totalApplicationsText.text = documents.size().toString()
+            }
 
-        // Set text fields
-        companyNameText.text = company.companyName
-        industryText.text = company.industry
-        registrationNumberText.text = "Registration Number: ${company.registrationNumber}"
-        companySizeText.text = "Company Size: ${company.companySize}"
-        locationText.text = "Location: ${company.location}"
-        websiteText.text = "Website: ${company.website}"
-        descriptionText.text = "Description: ${company.description}"
-        contactPersonNameText.text = "Contact Person: ${company.contactPersonName}"
-        contactPersonEmailText.text = "Email: ${company.contactPersonEmail}"
-        contactPersonPhoneText.text = "Phone: ${company.contactPersonPhone}"
+        // Load active jobs
+        db.collection("jobs")
+            .whereEqualTo("companyId", companyId)
+            .whereEqualTo("status", "active")
+            .get()
+            .addOnSuccessListener { documents ->
+                activeJobsText.text = documents.size().toString()
+            }
     }
 } 
