@@ -241,6 +241,12 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Chatbot Activity -->
+        <activity
+            android:name=".chatbot.ChatbotActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
     </application>
 
 </manifest>

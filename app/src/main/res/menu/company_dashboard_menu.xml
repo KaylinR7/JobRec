@@ -21,6 +21,12 @@
         app:showAsAction="never"/>
 
     <item
+        android:id="@+id/action_chatbot"
+        android:title="Get Help"
+        android:icon="@drawable/ic_chatbot"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/action_logout"
         android:title="Logout"
         android:icon="@drawable/ic_logout"

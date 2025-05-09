@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import androidx.core.content.ContextCompat
+import com.example.jobrec.chatbot.ChatbotHelper
 import com.example.jobrec.databinding.ActivityHomeBinding
 
 class HomeActivity : AppCompatActivity() {
@@ -73,6 +74,9 @@ class HomeActivity : AppCompatActivity() {
             adapter = recommendedJobsAdapter
             addItemDecoration(SpacingItemDecoration(16))
         }
+
+        // Add chatbot button
+        ChatbotHelper.addChatbotButton(this)
 
         // Apply entrance animations
         applyEntranceAnimations()
@@ -368,6 +372,10 @@ class HomeActivity : AppCompatActivity() {
             }
             R.id.action_profile -> {
                 startActivity(Intent(this, ProfileActivity::class.java))
+                true
+            }
+            R.id.action_chatbot -> {
+                startActivity(Intent(this, com.example.jobrec.chatbot.ChatbotActivity::class.java))
                 true
             }
             R.id.action_logout -> {

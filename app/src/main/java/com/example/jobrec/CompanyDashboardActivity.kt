@@ -17,6 +17,7 @@ import com.google.firebase.firestore.Query
 import android.util.Log
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.core.content.ContextCompat
+import com.example.jobrec.chatbot.ChatbotHelper
 
 class CompanyDashboardActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
@@ -105,6 +106,9 @@ class CompanyDashboardActivity : AppCompatActivity() {
         recentActivityTitle = findViewById(R.id.recentActivityTitle)
         recentActivityDescription = findViewById(R.id.recentActivityDescription)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
+
+        // Add chatbot button
+        ChatbotHelper.addChatbotButton(this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -120,6 +124,10 @@ class CompanyDashboardActivity : AppCompatActivity() {
             }
             R.id.action_messages -> {
                 startActivity(Intent(this, ConversationsActivity::class.java))
+                true
+            }
+            R.id.action_chatbot -> {
+                startActivity(Intent(this, com.example.jobrec.chatbot.ChatbotActivity::class.java))
                 true
             }
             R.id.action_switch_to_student -> {
