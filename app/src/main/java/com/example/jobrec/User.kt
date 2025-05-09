@@ -20,7 +20,11 @@ data class User(
     val achievements: String = "",
     val linkedin: String = "",
     val github: String = "",
-    val portfolio: String = ""
+    val portfolio: String = "",
+    val yearsOfExperience: String = "",
+    val certificate: String = "",
+    val expectedSalary: String = "",
+    val field: String = ""
 )
 
 data class Education(
@@ -51,4 +55,4 @@ data class Reference(
     val company: String = "",
     val email: String = "",
     val phone: String = ""
-) 
+)

@@ -46,6 +46,10 @@ class SignupActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private val TAG = "SignupActivity"
+    private lateinit var yearsOfExperienceInput: AutoCompleteTextView
+    private lateinit var certificateInput: AutoCompleteTextView
+    private lateinit var expectedSalaryInput: AutoCompleteTextView
+    private lateinit var fieldInput: AutoCompleteTextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +64,7 @@ class SignupActivity : AppCompatActivity() {
         setupToolbar()
         setupClickListeners()
         setupSkillsInput()
+        setupDropdowns()
     }
 
     private fun initializeViews() {
@@ -83,6 +88,10 @@ class SignupActivity : AppCompatActivity() {
         addReferenceButton = findViewById(R.id.btnAddReference)
         addExperienceButton = findViewById(R.id.btnAddExperience)
         addEducationButton = findViewById(R.id.btnAddEducation)
+        yearsOfExperienceInput = findViewById(R.id.yearsOfExperienceInput)
+        certificateInput = findViewById(R.id.certificateInput)
+        expectedSalaryInput = findViewById(R.id.expectedSalaryInput)
+        fieldInput = findViewById(R.id.fieldInput)
     }
 
     private fun setupToolbar() {
@@ -140,34 +149,34 @@ class SignupActivity : AppCompatActivity() {
 
     private fun addReferenceField() {
         val referenceLayout = layoutInflater.inflate(R.layout.item_reference, referencesContainer, false)
-        
+
         // Set up remove button
         referenceLayout.findViewById<MaterialButton>(R.id.btnRemoveReference).setOnClickListener {
             referencesContainer.removeView(referenceLayout)
         }
-        
+
         referencesContainer.addView(referenceLayout)
     }
 
     private fun addExperienceField() {
         val experienceLayout = layoutInflater.inflate(R.layout.item_experience, experienceContainer, false)
-        
+
         // Set up remove button
         experienceLayout.findViewById<MaterialButton>(R.id.btnRemoveExperience).setOnClickListener {
             experienceContainer.removeView(experienceLayout)
         }
-        
+
         experienceContainer.addView(experienceLayout)
     }
 
     private fun addEducationField() {
         val educationLayout = layoutInflater.inflate(R.layout.item_education, educationContainer, false)
-        
+
         // Set up remove button
         educationLayout.findViewById<MaterialButton>(R.id.btnRemoveEducation).setOnClickListener {
             educationContainer.removeView(educationLayout)
         }
-        
+
         educationContainer.addView(educationLayout)
     }
 
@@ -189,7 +198,7 @@ class SignupActivity : AppCompatActivity() {
             val company = referenceView.findViewById<TextInputEditText>(R.id.etReferenceCompany).text.toString()
             val email = referenceView.findViewById<TextInputEditText>(R.id.etReferenceEmail).text.toString()
             val phone = referenceView.findViewById<TextInputEditText>(R.id.etReferencePhone).text.toString()
-            
+
             if (name.isNotEmpty() || position.isNotEmpty() || company.isNotEmpty() || email.isNotEmpty() || phone.isNotEmpty()) {
                 references.add(mapOf(
                     "name" to name,
@@ -212,7 +221,7 @@ class SignupActivity : AppCompatActivity() {
             val startDate = experienceView.findViewById<TextInputEditText>(R.id.etExperienceStartDate).text.toString()
             val endDate = experienceView.findViewById<TextInputEditText>(R.id.etExperienceEndDate).text.toString()
             val description = experienceView.findViewById<TextInputEditText>(R.id.etExperienceDescription).text.toString()
-            
+
             if (title.isNotEmpty() || company.isNotEmpty() || startDate.isNotEmpty() || endDate.isNotEmpty() || description.isNotEmpty()) {
                 experiences.add(mapOf(
                     "title" to title,
@@ -235,7 +244,7 @@ class SignupActivity : AppCompatActivity() {
             val startDate = educationView.findViewById<TextInputEditText>(R.id.etEducationStartDate).text.toString()
             val endDate = educationView.findViewById<TextInputEditText>(R.id.etEducationEndDate).text.toString()
             val description = educationView.findViewById<TextInputEditText>(R.id.etEducationDescription).text.toString()
-            
+
             if (institution.isNotEmpty() || degree.isNotEmpty() || startDate.isNotEmpty() || endDate.isNotEmpty() || description.isNotEmpty()) {
                 educations.add(mapOf(
                     "institution" to institution,
@@ -277,7 +286,11 @@ class SignupActivity : AppCompatActivity() {
             linkedin = linkedin,
             github = github,
             portfolio = portfolio,
-            role = "user" // Set default role
+            role = "user", // Set default role
+            yearsOfExperience = yearsOfExperienceInput.text.toString().trim(),
+            certificate = certificateInput.text.toString().trim(),
+            expectedSalary = expectedSalaryInput.text.toString().trim(),
+            field = fieldInput.text.toString().trim()
         )
 
         // Add user to Firebase
@@ -290,5 +303,59 @@ class SignupActivity : AppCompatActivity() {
                 Toast.makeText(this, "Registration failed: $error", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun setupDropdowns() {
+        // Years of Experience options
+        val yearsOptions = arrayOf("0-1 years", "1-3 years", "3-5 years", "5-10 years", "10+ years")
+        val yearsAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, yearsOptions)
+        yearsOfExperienceInput.setAdapter(yearsAdapter)
+
+        // Certificate options
+        val certificateOptions = arrayOf(
+            "None",
+            "High School Diploma",
+            "Associate's Degree",
+            "Bachelor's Degree",
+            "Master's Degree",
+            "PhD",
+            "Professional Certification",
+            "Technical Certification"
+        )
+        val certificateAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, certificateOptions)
+        certificateInput.setAdapter(certificateAdapter)
+
+        // Expected Salary options
+        val salaryOptions = arrayOf(
+            "R0 - R10,000",
+            "R10,000 - R20,000",
+            "R20,000 - R30,000",
+            "R30,000 - R40,000",
+            "R40,000 - R50,000",
+            "R50,000+"
+        )
+        val salaryAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, salaryOptions)
+        expectedSalaryInput.setAdapter(salaryAdapter)
+
+        // Field options
+        val fieldOptions = arrayOf(
+            "Information Technology",
+            "Healthcare",
+            "Law",
+            "Education",
+            "Engineering",
+            "Business",
+            "Finance",
+            "Marketing",
+            "Sales",
+            "Customer Service",
+            "Manufacturing",
+            "Construction",
+            "Transportation",
+            "Hospitality",
+            "Other"
+        )
+        val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, fieldOptions)
+        fieldInput.setAdapter(fieldAdapter)
     }
 }
