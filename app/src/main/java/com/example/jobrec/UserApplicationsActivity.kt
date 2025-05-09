@@ -55,8 +55,9 @@ class UserApplicationsActivity : AppCompatActivity() {
         })
 
         // Add tabs
-        ApplicationStatus.values().forEach { status ->
-            tabLayout.addTab(tabLayout.newTab().setText(status.name))
+        val statuses = arrayOf("PENDING", "REVIEWING", "SHORTLISTED", "INTERVIEWING", "OFFERED", "REJECTED")
+        statuses.forEach { status ->
+            tabLayout.addTab(tabLayout.newTab().setText(status))
         }
 
         // Load initial applications
@@ -64,17 +65,20 @@ class UserApplicationsActivity : AppCompatActivity() {
     }
 
     private fun loadApplications(statusIndex: Int) {
-        val status = ApplicationStatus.values()[statusIndex]
-        
+        val statuses = arrayOf("PENDING", "REVIEWING", "SHORTLISTED", "INTERVIEWING", "OFFERED", "REJECTED")
+        val status = statuses[statusIndex]
+
         db.collection("applications")
             .whereEqualTo("userId", userId)
-            .whereEqualTo("status", status.name)
+            .whereEqualTo("status", status)
             .orderBy("appliedDate", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
                 val applications = documents.mapNotNull { document ->
                     try {
-                        document.toObject(JobApplication::class.java).copy(id = document.id)
+                        val app = document.toObject(Application::class.java)
+                        app.id = document.id
+                        app
                     } catch (e: Exception) {
                         null
                     }
@@ -86,9 +90,9 @@ class UserApplicationsActivity : AppCompatActivity() {
             }
     }
 
-    private fun showApplicationDetails(application: JobApplication) {
+    private fun showApplicationDetails(application: Application) {
         // Create a dialog to show application details
         val dialog = UserApplicationDetailsDialog.newInstance(application)
         dialog.show(supportFragmentManager, "ApplicationDetails")
     }
-} 
+}

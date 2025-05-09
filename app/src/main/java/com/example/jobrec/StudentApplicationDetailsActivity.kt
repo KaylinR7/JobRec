@@ -1,8 +1,12 @@
 package com.example.jobrec
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.google.firebase.firestore.FirebaseFirestore
@@ -17,7 +21,11 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
     private lateinit var appliedDateText: TextView
     private lateinit var lastUpdatedText: TextView
+    private lateinit var chatButton: Button
     private var applicationId: String? = null
+    private var jobId: String? = null
+    private var companyId: String? = null
+    private var companyName: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,10 +50,12 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
         statusText = findViewById(R.id.statusText)
         appliedDateText = findViewById(R.id.appliedDateText)
         lastUpdatedText = findViewById(R.id.lastUpdatedText)
+        chatButton = findViewById(R.id.chatButton)
 
         // Initialize Firestore
         db = FirebaseFirestore.getInstance()
         loadApplicationDetails()
+        setupChatButton()
     }
 
     private fun loadApplicationDetails() {
@@ -56,12 +66,16 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
                     if (document != null && document.exists()) {
                         // Update UI with application details
                         jobTitleText.text = document.getString("jobTitle")
-                        companyNameText.text = document.getString("companyName")
-                        
+
+                        companyName = document.getString("companyName")
+                        companyNameText.text = companyName
+
                         // Get job location from the job document
-                        val jobId = document.getString("jobId")
+                        jobId = document.getString("jobId")
+                        companyId = document.getString("companyId")
+
                         if (!jobId.isNullOrEmpty()) {
-                            db.collection("jobs").document(jobId)
+                            db.collection("jobs").document(jobId!!)
                                 .get()
                                 .addOnSuccessListener { jobDoc ->
                                     if (jobDoc != null && jobDoc.exists()) {
@@ -69,18 +83,25 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
                                     }
                                 }
                         }
-                        
+
                         val status = document.getString("status") ?: "pending"
                         statusText.text = status.capitalize()
                         statusText.setTextColor(getStatusColor(status))
-                        
+
+                        // Show chat button only if application is accepted
+                        if (status == "accepted") {
+                            chatButton.visibility = View.VISIBLE
+                        } else {
+                            chatButton.visibility = View.GONE
+                        }
+
                         // Format dates
                         val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                        
+
                         // Applied date (timestamp)
                         val timestamp = document.getTimestamp("timestamp")?.toDate()
                         appliedDateText.text = timestamp?.let { dateFormat.format(it) } ?: "Not available"
-                        
+
                         // Last updated date
                         val lastUpdated = document.getTimestamp("lastUpdated")?.toDate()
                         lastUpdatedText.text = lastUpdated?.let { dateFormat.format(it) } ?: "Not available"
@@ -101,6 +122,20 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupChatButton() {
+        chatButton.setOnClickListener {
+            if (applicationId != null) {
+                // Open chat activity with this application
+                val intent = Intent(this, ChatActivity::class.java).apply {
+                    putExtra("applicationId", applicationId)
+                }
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "Cannot start chat: Missing application information", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             onBackPressed()
@@ -108,4 +143,4 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-} 
+}

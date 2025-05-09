@@ -5,41 +5,10 @@
     android:layout_height="match_parent"
     android:background="#F5F5F5">
 
-    <!-- Top Bar with Title -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="16dp"
-        android:background="#FFFFFF"
-        android:elevation="4dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="JobRec"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="#000000"/>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
-
-        <ImageView
-            android:id="@+id/logoutIcon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_logout"
-            android:tint="#FF0000"
-            android:padding="4dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackgroundBorderless" />
-
-    </LinearLayout>
+    <!-- Include the toolbar -->
+    <include
+        android:id="@+id/toolbar_layout"
+        layout="@layout/toolbar_main" />
 
     <!-- Main Content -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -59,15 +28,31 @@
                 android:padding="16dp">
 
                 <!-- Welcome Section -->
-                <TextView
-                    android:id="@+id/welcomeText"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Welcome back!"
-                    android:textSize="28sp"
-                    android:textStyle="bold"
-                    android:textColor="#000000"
-                    android:layout_marginBottom="24dp"/>
+                    android:orientation="vertical"
+                    android:layout_marginBottom="24dp">
+
+                    <TextView
+                        android:id="@+id/welcomeText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Welcome back!"
+                        android:textSize="28sp"
+                        android:textStyle="bold"
+                        android:textColor="#000000"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/returnToCompanyView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Return to Company View"
+                        android:layout_marginTop="8dp"
+                        android:visibility="gone"
+                        app:backgroundTint="#000000"
+                        app:cornerRadius="8dp"/>
+                </LinearLayout>
 
                 <!-- Search Bar -->
                 <com.google.android.material.card.MaterialCardView
@@ -149,6 +134,7 @@
 
                     <!-- Saved Jobs Card -->
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/savedJobsCard"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -328,4 +314,4 @@
         app:itemTextColor="@color/bottom_nav_item_color"
         app:elevation="8dp"/>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout> 
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

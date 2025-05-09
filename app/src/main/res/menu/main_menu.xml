@@ -14,6 +14,28 @@
         android:icon="@drawable/ic_notifications"
         app:showAsAction="never" />
 
-    <!-- Add other menu items here -->
+    <item
+        android:id="@+id/action_saved_jobs"
+        android:title="Saved Jobs"
+        android:icon="@drawable/ic_bookmark"
+        app:showAsAction="never" />
 
-</menu> 
+    <item
+        android:id="@+id/action_messages"
+        android:title="Messages"
+        android:icon="@android:drawable/ic_dialog_email"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_profile"
+        android:title="My Profile"
+        android:icon="@drawable/ic_person"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_logout"
+        android:title="Logout"
+        android:icon="@drawable/ic_logout"
+        app:showAsAction="never" />
+
+</menu>

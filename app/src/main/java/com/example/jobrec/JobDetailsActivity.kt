@@ -34,7 +34,13 @@ class JobDetailsActivity : AppCompatActivity() {
     private lateinit var jobSalary: TextView
     private lateinit var jobDescription: TextView
     private lateinit var jobRequirements: TextView
+    private lateinit var jobField: TextView
+    private lateinit var jobProvince: TextView
+    private lateinit var jobExperience: TextView
+    private lateinit var jobPostedDate: TextView
     private lateinit var applyButton: MaterialButton
+    private lateinit var saveJobButton: MaterialButton
+    private var isJobSaved = false
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -102,7 +108,17 @@ class JobDetailsActivity : AppCompatActivity() {
         jobSalary = binding.jobSalary
         jobDescription = binding.jobDescription
         jobRequirements = binding.jobRequirements
+        jobField = binding.jobField
+        jobProvince = binding.jobProvince
+        jobExperience = binding.jobExperience
+        jobPostedDate = binding.jobPostedDate
         applyButton = binding.applyButton
+        saveJobButton = binding.saveJobButton
+
+        // Setup save job button
+        saveJobButton.setOnClickListener {
+            toggleSaveJob()
+        }
     }
 
     private fun checkIfAlreadyApplied() {
@@ -166,19 +182,19 @@ class JobDetailsActivity : AppCompatActivity() {
                             append("${it.email}\n")
                             append("${it.phoneNumber}\n")
                             append("${it.address}\n\n")
-                            
+
                             append("SUMMARY\n")
                             append("${it.summary}\n\n")
-                            
+
                             append("SKILLS\n")
                             append(it.skills.joinToString(", ").plus("\n\n"))
-                            
+
                             append("EDUCATION\n")
                             it.education.forEach { education ->
                                 append("${education.institution} - ${education.degree}\n")
                                 append("${education.startDate} to ${education.endDate}\n\n")
                             }
-                            
+
                             append("EXPERIENCE\n")
                             it.experience.forEach { experience ->
                                 append("${experience.position} at ${experience.company}\n")
@@ -186,7 +202,7 @@ class JobDetailsActivity : AppCompatActivity() {
                                 append("${experience.description}\n\n")
                             }
                         }
-                        
+
                         // Store the CV content in Firestore
                         val cvRef = db.collection("cvs").document()
                         cvRef.set(hashMapOf(
@@ -345,7 +361,7 @@ class JobDetailsActivity : AppCompatActivity() {
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     val job = document.toObject(Job::class.java)
-                    job?.let { 
+                    job?.let {
                         Log.d("JobDetailsActivity", "Successfully loaded job: ${it.title}")
                         displayJobDetails(it)
                         companyId = it.companyId
@@ -372,6 +388,18 @@ class JobDetailsActivity : AppCompatActivity() {
         jobDescription.text = job.description
         jobRequirements.text = job.getRequirementsList().joinToString("\n• ", "• ")
 
+        // Set the new fields
+        jobField.text = job.jobField.ifEmpty { "Not specified" }
+        jobProvince.text = job.province.ifEmpty { "Not specified" }
+        jobExperience.text = job.experienceLevel.ifEmpty { "Not specified" }
+
+        // Format and display the posted date
+        val dateFormat = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
+        jobPostedDate.text = dateFormat.format(job.postedDate.toDate())
+
+        // Check if this job is saved
+        checkIfJobIsSaved()
+
         // Check if current user is a company
         val currentUser = auth.currentUser
         if (currentUser != null) {
@@ -384,12 +412,12 @@ class JobDetailsActivity : AppCompatActivity() {
                         applyButton.visibility = View.GONE
                         val managementLayout = findViewById<View>(R.id.jobManagementLayout)
                         managementLayout.visibility = View.VISIBLE
-                        
+
                         // Setup edit button
                         findViewById<MaterialButton>(R.id.editJobButton).setOnClickListener {
                             showEditJobDialog(job)
                         }
-                        
+
                         // Setup delete button
                         findViewById<MaterialButton>(R.id.deleteJobButton).setOnClickListener {
                             showDeleteConfirmationDialog(job)
@@ -489,4 +517,88 @@ class JobDetailsActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-} 
+
+    private fun checkIfJobIsSaved() {
+        val userId = auth.currentUser?.uid ?: return
+        val jobId = jobId ?: return
+
+        db.collection("savedJobs")
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("jobId", jobId)
+            .get()
+            .addOnSuccessListener { documents ->
+                isJobSaved = !documents.isEmpty
+                updateSaveButtonIcon()
+            }
+            .addOnFailureListener { e ->
+                Log.e("JobDetailsActivity", "Error checking if job is saved", e)
+                isJobSaved = false
+                updateSaveButtonIcon()
+            }
+    }
+
+    private fun updateSaveButtonIcon() {
+        if (isJobSaved) {
+            saveJobButton.setIconResource(R.drawable.ic_bookmark)
+        } else {
+            saveJobButton.setIconResource(R.drawable.ic_bookmark_border)
+        }
+    }
+
+    private fun toggleSaveJob() {
+        val userId = auth.currentUser?.uid
+        val jobId = jobId
+
+        if (userId == null || jobId == null) {
+            Toast.makeText(this, "Please sign in to save jobs", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (isJobSaved) {
+            // Unsave the job
+            db.collection("savedJobs")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("jobId", jobId)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (!documents.isEmpty) {
+                        val document = documents.documents[0]
+                        db.collection("savedJobs").document(document.id)
+                            .delete()
+                            .addOnSuccessListener {
+                                isJobSaved = false
+                                updateSaveButtonIcon()
+                                Toast.makeText(this, "Job removed from saved jobs", Toast.LENGTH_SHORT).show()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("JobDetailsActivity", "Error removing job from saved jobs", e)
+                                Toast.makeText(this, "Error removing job from saved jobs", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("JobDetailsActivity", "Error finding saved job", e)
+                    Toast.makeText(this, "Error removing job from saved jobs", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            // Save the job
+            val savedJob = hashMapOf(
+                "userId" to userId,
+                "jobId" to jobId,
+                "savedAt" to com.google.firebase.Timestamp.now()
+            )
+
+            db.collection("savedJobs")
+                .add(savedJob)
+                .addOnSuccessListener {
+                    isJobSaved = true
+                    updateSaveButtonIcon()
+                    Toast.makeText(this, "Job saved successfully", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+                    Log.e("JobDetailsActivity", "Error saving job", e)
+                    Toast.makeText(this, "Error saving job", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+}

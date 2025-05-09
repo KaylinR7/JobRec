@@ -16,13 +16,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class EditApplicationDialog : DialogFragment() {
-    private lateinit var application: JobApplication
+    private lateinit var application: Application
     private val db = FirebaseFirestore.getInstance()
 
     companion object {
         private const val ARG_APPLICATION_ID = "application_id"
 
-        fun newInstance(application: JobApplication): EditApplicationDialog {
+        fun newInstance(application: Application): EditApplicationDialog {
             val args = Bundle()
             args.putString(ARG_APPLICATION_ID, application.id)
             val fragment = EditApplicationDialog()
@@ -41,7 +41,8 @@ class EditApplicationDialog : DialogFragment() {
         db.collection("applications").document(applicationId)
             .get()
             .addOnSuccessListener { document ->
-                application = document.toObject(JobApplication::class.java)?.copy(id = document.id) ?: return@addOnSuccessListener
+                application = document.toObject(Application::class.java) ?: return@addOnSuccessListener
+                application.id = document.id
                 updateUI()
             }
     }
@@ -59,12 +60,12 @@ class EditApplicationDialog : DialogFragment() {
 
             // Set initial values
             jobTitleTextView.text = application.jobTitle
-            companyNameTextView.text = application.companyId // TODO: Load company name
+            companyNameTextView.text = application.companyName
             applicantNameTextView.text = application.applicantName
-            
+
             val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            dateTextView.text = dateFormat.format(application.appliedDate)
-            
+            dateTextView.text = dateFormat.format(application.appliedDate.toDate())
+
             notesEditText.setText(application.notes)
 
             // Setup status dropdown
@@ -115,4 +116,4 @@ class EditApplicationDialog : DialogFragment() {
             )
         }
     }
-} 
+}

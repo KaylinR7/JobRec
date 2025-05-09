@@ -27,4 +27,12 @@
         <item name="cardBackgroundColor">@color/surface</item>
         <item name="cardForegroundColor">@color/on_surface</item>
     </style>
+
+    <!-- Splash Screen Theme -->
+    <style name="Theme.JobRec.Splash" parent="Theme.JobRec">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
 </resources>

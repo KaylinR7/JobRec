@@ -1,5 +1,6 @@
 package com.example.jobrec
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -117,7 +118,27 @@ class CompanyDashboardActivity : AppCompatActivity() {
                 startActivity(Intent(this, CandidateSearchActivity::class.java))
                 true
             }
+            R.id.action_messages -> {
+                startActivity(Intent(this, ConversationsActivity::class.java))
+                true
+            }
+            R.id.action_switch_to_student -> {
+                // Enable student view override
+                val sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
+                sharedPreferences.edit().putBoolean("override_to_student", true).apply()
+
+                // Restart the app to apply the change
+                val intent = Intent(this, SplashActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                finish()
+                true
+            }
             R.id.action_logout -> {
+                // Clear any overrides when logging out
+                val sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
+                sharedPreferences.edit().putBoolean("override_to_student", false).apply()
+
                 auth.signOut()
                 val intent = Intent(this, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -169,6 +190,11 @@ class CompanyDashboardActivity : AppCompatActivity() {
         findViewById<View>(R.id.btnViewApplications).setOnClickListener {
             val intent = Intent(this, ApplicationsActivity::class.java)
             intent.putExtra("companyId", companyId)
+            startActivity(intent)
+        }
+
+        findViewById<View>(R.id.btnSearchCandidates).setOnClickListener {
+            val intent = Intent(this, CandidateSearchActivity::class.java)
             startActivity(intent)
         }
     }
@@ -225,4 +251,4 @@ class CompanyDashboardActivity : AppCompatActivity() {
         super.onResume()
         loadDashboardData() // Refresh data when returning to dashboard
     }
-} 
+}

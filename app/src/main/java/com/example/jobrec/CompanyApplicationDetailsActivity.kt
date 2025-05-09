@@ -24,9 +24,15 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
     private lateinit var acceptButton: Button
     private lateinit var rejectButton: Button
     private lateinit var viewResumeButton: Button
+    private lateinit var chatButton: Button
     private var applicationId: String? = null
     private var resumeUrl: String? = null
     private var applicantId: String? = null
+    private var jobId: String? = null
+    private var jobTitle: String? = null
+    private var companyId: String? = null
+    private var companyName: String? = null
+    private var applicantName: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +60,7 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
         acceptButton = findViewById(R.id.acceptButton)
         rejectButton = findViewById(R.id.rejectButton)
         viewResumeButton = findViewById(R.id.viewResumeButton)
+        chatButton = findViewById(R.id.chatButton)
 
         // Initialize Firestore
         db = FirebaseFirestore.getInstance()
@@ -81,6 +88,18 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                 }
             } else {
                 Toast.makeText(this, "No resume available", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        chatButton.setOnClickListener {
+            if (applicationId != null && applicantId != null) {
+                // Open chat activity with this application
+                val intent = Intent(this, ChatActivity::class.java).apply {
+                    putExtra("applicationId", applicationId)
+                }
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "Cannot start chat: Missing application information", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -132,19 +151,26 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                 .addOnSuccessListener { document ->
                     if (document != null && document.exists()) {
                         // Update UI with application details
-                        jobTitleText.text = document.getString("jobTitle")
-                        applicantNameText.text = document.getString("applicantName")
+                        jobTitle = document.getString("jobTitle")
+                        jobTitleText.text = jobTitle
+
+                        applicantName = document.getString("applicantName")
+                        applicantNameText.text = applicantName
+
                         applicantEmailText.text = document.getString("applicantEmail") ?: "Not provided"
                         applicantPhoneText.text = document.getString("applicantPhone") ?: "Not provided"
-                        
+
                         val status = document.getString("status") ?: "pending"
                         statusText.text = status.capitalize()
                         statusText.setTextColor(getStatusColor(status))
-                        
+
                         // Get resume URL and applicant ID
                         resumeUrl = document.getString("resumeUrl")
                         applicantId = document.getString("userId")
-                        
+                        jobId = document.getString("jobId")
+                        companyId = document.getString("companyId")
+                        companyName = document.getString("companyName")
+
                         // Format the date
                         val timestamp = document.getTimestamp("timestamp")?.toDate()
                         val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
@@ -154,7 +180,14 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                         val isActionable = status == "pending" || status == "reviewed"
                         acceptButton.isEnabled = isActionable
                         rejectButton.isEnabled = isActionable
-                        
+
+                        // Show chat button only if application is accepted
+                        if (status == "accepted") {
+                            chatButton.visibility = android.view.View.VISIBLE
+                        } else {
+                            chatButton.visibility = android.view.View.GONE
+                        }
+
                         // Always enable the view resume button
                         viewResumeButton.isEnabled = true
                     }
@@ -200,4 +233,4 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-} 
+}

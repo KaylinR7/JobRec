@@ -11,13 +11,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 
-class UserApplicationsAdapter(private val onItemClick: (JobApplication) -> Unit) : 
+class UserApplicationsAdapter(private val onItemClick: (Application) -> Unit) :
     RecyclerView.Adapter<UserApplicationsAdapter.ApplicationViewHolder>() {
 
-    private var applications: List<JobApplication> = emptyList()
+    private var applications: List<Application> = emptyList()
     private val db = FirebaseFirestore.getInstance()
 
-    fun updateApplications(newApplications: List<JobApplication>) {
+    fun updateApplications(newApplications: List<Application>) {
         applications = newApplications
         notifyDataSetChanged()
     }
@@ -40,27 +40,17 @@ class UserApplicationsAdapter(private val onItemClick: (JobApplication) -> Unit)
         private val appliedDate: TextView = itemView.findViewById(R.id.appliedDate)
         private val statusChip: Chip = itemView.findViewById(R.id.statusChip)
 
-        fun bind(application: JobApplication) {
-            // Load job details
-            db.collection("jobs")
-                .document(application.jobId)
-                .get()
-                .addOnSuccessListener { document: DocumentSnapshot ->
-                    jobTitle.text = document.getString("title") ?: "Unknown Job"
-                }
+        fun bind(application: Application) {
+            // Set job title directly
+            jobTitle.text = application.jobTitle
 
-            // Load company details
-            db.collection("companies")
-                .document(application.companyId)
-                .get()
-                .addOnSuccessListener { document: DocumentSnapshot ->
-                    companyName.text = document.getString("companyName") ?: "Unknown Company"
-                }
+            // Set company name directly
+            companyName.text = application.companyName
 
             // Format date
             val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            appliedDate.text = "Applied: ${dateFormat.format(application.appliedDate)}"
-            
+            appliedDate.text = "Applied: ${dateFormat.format(application.appliedDate.toDate())}"
+
             // Set status
             statusChip.text = application.status
             statusChip.setChipBackgroundColorResource(
@@ -78,4 +68,4 @@ class UserApplicationsAdapter(private val onItemClick: (JobApplication) -> Unit)
             itemView.setOnClickListener { onItemClick(application) }
         }
     }
-} 
+}

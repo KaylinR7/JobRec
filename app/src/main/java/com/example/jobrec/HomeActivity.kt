@@ -1,5 +1,6 @@
 package com.example.jobrec
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -48,6 +49,11 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
+        // Setup toolbar
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.title = "Student Dashboard"
+
         // Setup RecyclerViews with animations
         recentJobsAdapter = RecentJobsAdapter { job ->
             navigateToJobDetails(job.id)
@@ -112,8 +118,11 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        binding.logoutIcon.setOnClickListener {
-            logout()
+        // Add click listener for the saved jobs card
+        findViewById<View>(R.id.savedJobsCard).setOnClickListener {
+            animateClick(findViewById(R.id.savedJobsCard)) {
+                startActivity(Intent(this, SavedJobsActivity::class.java))
+            }
         }
     }
 
@@ -171,9 +180,34 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun loadUserData() {
+        // Check if this is a default student view (company user viewing as student)
+        val isDefaultStudent = intent.getBooleanExtra("isDefaultStudent", false)
+
+        if (isDefaultStudent) {
+            Log.d(TAG, "Using default student view")
+            binding.welcomeText.text = "Welcome to Student View!"
+
+            // Add a button to return to company view
+            binding.returnToCompanyView.visibility = View.VISIBLE
+            binding.returnToCompanyView.setOnClickListener {
+                // Disable student view override
+                val sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
+                sharedPreferences.edit().putBoolean("override_to_student", false).apply()
+
+                // Restart the app to apply the change
+                val intent = Intent(this, SplashActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                finish()
+            }
+            return
+        } else {
+            binding.returnToCompanyView.visibility = View.GONE
+        }
+
         val userId = intent.getStringExtra("userId") ?: FirebaseAuth.getInstance().currentUser?.uid
         Log.d(TAG, "Loading user data for userId: $userId")
-        
+
         if (userId != null) {
             db.collection("users")
                 .document(userId)
@@ -183,7 +217,7 @@ class HomeActivity : AppCompatActivity() {
                     if (document != null && document.exists()) {
                         val name = document.getString("name")
                         Log.d(TAG, "Retrieved name: $name")
-                        
+
                         val displayName = if (!name.isNullOrEmpty()) {
                             name.trim()
                         } else {
@@ -314,11 +348,27 @@ class HomeActivity : AppCompatActivity() {
                 startActivity(Intent(this, JobAlertsActivity::class.java))
                 true
             }
+            R.id.action_saved_jobs -> {
+                startActivity(Intent(this, SavedJobsActivity::class.java))
+                true
+            }
+            R.id.action_messages -> {
+                startActivity(Intent(this, ConversationsActivity::class.java))
+                true
+            }
+            R.id.action_profile -> {
+                startActivity(Intent(this, ProfileActivity::class.java))
+                true
+            }
             R.id.action_logout -> {
+                // Clear any overrides when logging out
+                val sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
+                sharedPreferences.edit().putBoolean("override_to_student", false).apply()
+
                 logout()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
-} 
+}

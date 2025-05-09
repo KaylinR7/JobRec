@@ -24,6 +24,8 @@ class JobsActivity : AppCompatActivity() {
     private lateinit var jobsAdapter: JobsAdapter
     private val db = FirebaseFirestore.getInstance()
     private var currentQuery: Query = db.collection("jobs")
+        .whereEqualTo("status", "active")
+        .orderBy("postedDate", Query.Direction.DESCENDING)
     private lateinit var fieldFilterInput: MaterialAutoCompleteTextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -124,6 +126,9 @@ class JobsActivity : AppCompatActivity() {
         if (selectedField.isNotEmpty()) {
             query = query.whereEqualTo("field", selectedField)
         }
+
+        // Add explicit ordering to match the index
+        query = query.orderBy("postedDate", Query.Direction.DESCENDING)
 
         query.get()
             .addOnSuccessListener { documents ->

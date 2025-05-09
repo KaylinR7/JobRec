@@ -5,7 +5,11 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
     app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+    app:cardElevation="2dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:contentDescription="Long press to edit application">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -66,11 +70,12 @@
                 android:id="@+id/viewDetailsButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="View Details"
+                android:text="Edit"
+                app:icon="@android:drawable/ic_menu_edit"
                 style="@style/Widget.MaterialComponents.Button.TextButton"/>
 
         </LinearLayout>
 
     </LinearLayout>
 
-</androidx.cardview.widget.CardView> 
+</androidx.cardview.widget.CardView>

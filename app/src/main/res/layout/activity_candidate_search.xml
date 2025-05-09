@@ -93,20 +93,31 @@
 
                     <!-- Skills Filter -->
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/skillsFilterLayout"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:hint="Skills">
 
-                        <com.google.android.material.textfield.TextInputEditText
+                        <AutoCompleteTextView
                             android:id="@+id/skillsFilter"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="text" />
+                            android:inputType="none" />
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Selected Skills Chips -->
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/selectedSkillsChipGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp" />
 
                     <!-- Education Level Filter -->
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/educationFilterLayout"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
@@ -121,6 +132,8 @@
 
                     <!-- Experience Level Filter -->
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/experienceFilterLayout"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
@@ -135,25 +148,61 @@
 
                     <!-- Location Filter -->
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/locationFilterLayout"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:hint="Location">
 
-                        <com.google.android.material.textfield.TextInputEditText
+                        <AutoCompleteTextView
                             android:id="@+id/locationFilter"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="text" />
+                            android:inputType="none" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Search Button -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/searchButton"
+                    <!-- Field/Industry Filter -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/fieldFilterLayout"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Search"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginBottom="8dp"
+                        android:hint="Field/Industry">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/fieldFilter"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Button Row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp">
+
+                        <!-- Clear Filters Button -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/clearFiltersButton"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            android:text="Clear Filters" />
+
+                        <!-- Search Button -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/searchButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Search" />
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -176,4 +225,4 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout> 
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

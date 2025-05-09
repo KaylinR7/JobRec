@@ -51,6 +51,11 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var profileImage: ShapeableImageView
     private lateinit var changePhotoButton: MaterialButton
     private lateinit var saveButton: MaterialButton
+    private lateinit var provinceInput: AutoCompleteTextView
+    private lateinit var yearsOfExperienceInput: AutoCompleteTextView
+    private lateinit var certificateInput: AutoCompleteTextView
+    private lateinit var expectedSalaryInput: AutoCompleteTextView
+    private lateinit var fieldInput: AutoCompleteTextView
     private lateinit var skillsChipGroup: ChipGroup
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -114,6 +119,9 @@ class ProfileActivity : AppCompatActivity() {
         // Set up button click listeners
         setupClickListeners()
 
+        // Setup dropdown menus
+        setupDropdowns()
+
         // Load user data
         loadUserData()
     }
@@ -138,6 +146,13 @@ class ProfileActivity : AppCompatActivity() {
         addEducationButton = findViewById(R.id.addEducationButton)
         referencesContainer = findViewById(R.id.referencesContainer)
         addReferenceButton = findViewById(R.id.addReferenceButton)
+
+        // Initialize dropdown fields
+        provinceInput = findViewById(R.id.provinceInput)
+        yearsOfExperienceInput = findViewById(R.id.yearsOfExperienceInput)
+        certificateInput = findViewById(R.id.certificateInput)
+        expectedSalaryInput = findViewById(R.id.expectedSalaryInput)
+        fieldInput = findViewById(R.id.fieldInput)
 
         // Set up RecyclerViews
         experienceRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -217,6 +232,68 @@ class ProfileActivity : AppCompatActivity() {
         return references
     }
 
+    private fun setupDropdowns() {
+        // Province options
+        val provinces = arrayOf(
+            "Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal",
+            "Limpopo", "Mpumalanga", "Northern Cape", "North West", "Western Cape"
+        )
+        val provinceAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, provinces)
+        provinceInput.setAdapter(provinceAdapter)
+
+        // Years of Experience options
+        val yearsOptions = arrayOf("0-1 years", "1-3 years", "3-5 years", "5-10 years", "10+ years")
+        val yearsAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, yearsOptions)
+        yearsOfExperienceInput.setAdapter(yearsAdapter)
+
+        // Certificate options
+        val certificateOptions = arrayOf(
+            "None",
+            "High School Diploma",
+            "Associate's Degree",
+            "Bachelor's Degree",
+            "Master's Degree",
+            "PhD",
+            "Professional Certification",
+            "Technical Certification"
+        )
+        val certificateAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, certificateOptions)
+        certificateInput.setAdapter(certificateAdapter)
+
+        // Expected Salary options
+        val salaryOptions = arrayOf(
+            "R0 - R10,000",
+            "R10,000 - R20,000",
+            "R20,000 - R30,000",
+            "R30,000 - R40,000",
+            "R40,000 - R50,000",
+            "R50,000+"
+        )
+        val salaryAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, salaryOptions)
+        expectedSalaryInput.setAdapter(salaryAdapter)
+
+        // Field options
+        val fieldOptions = arrayOf(
+            "Information Technology",
+            "Healthcare",
+            "Law",
+            "Education",
+            "Engineering",
+            "Business",
+            "Finance",
+            "Marketing",
+            "Sales",
+            "Customer Service",
+            "Manufacturing",
+            "Construction",
+            "Transportation",
+            "Hospitality",
+            "Other"
+        )
+        val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, fieldOptions)
+        fieldInput.setAdapter(fieldAdapter)
+    }
+
     private fun loadUserData() {
         val userId = auth.currentUser?.uid
         if (userId != null) {
@@ -233,6 +310,13 @@ class ProfileActivity : AppCompatActivity() {
                         phoneNumberInput.setText(document.getString("phoneNumber"))
                         addressInput.setText(document.getString("address"))
                         summaryInput.setText(document.getString("summary"))
+
+                        // Load dropdown values
+                        provinceInput.setText(document.getString("province") ?: "")
+                        yearsOfExperienceInput.setText(document.getString("yearsOfExperience") ?: "")
+                        certificateInput.setText(document.getString("certificate") ?: "")
+                        expectedSalaryInput.setText(document.getString("expectedSalary") ?: "")
+                        fieldInput.setText(document.getString("field") ?: "")
 
                         // Load social links
                         linkedinInput.setText(document.getString("linkedin"))
@@ -325,7 +409,12 @@ class ProfileActivity : AppCompatActivity() {
                 "skills" to getSkillsList(),
                 "experience" to experienceAdapter.getExperienceList(),
                 "education" to educationAdapter.getEducationList(),
-                "references" to getReferencesList()
+                "references" to getReferencesList(),
+                "province" to provinceInput.text.toString().trim(),
+                "yearsOfExperience" to yearsOfExperienceInput.text.toString().trim(),
+                "certificate" to certificateInput.text.toString().trim(),
+                "expectedSalary" to expectedSalaryInput.text.toString().trim(),
+                "field" to fieldInput.text.toString().trim()
             )
 
             db.collection("users").document(userId)

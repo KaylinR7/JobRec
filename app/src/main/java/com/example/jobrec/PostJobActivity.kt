@@ -20,9 +20,12 @@ class PostJobActivity : AppCompatActivity() {
 
     // UI elements
     private lateinit var jobTitleInput: TextInputEditText
+    private lateinit var jobFieldInput: AutoCompleteTextView
     private lateinit var jobTypeInput: AutoCompleteTextView
+    private lateinit var provinceInput: AutoCompleteTextView
     private lateinit var locationInput: TextInputEditText
-    private lateinit var salaryInput: TextInputEditText
+    private lateinit var salaryRangeInput: AutoCompleteTextView
+    private lateinit var experienceInput: AutoCompleteTextView
     private lateinit var descriptionInput: TextInputEditText
     private lateinit var requirementsInput: TextInputEditText
     private lateinit var postButton: MaterialButton
@@ -59,18 +62,68 @@ class PostJobActivity : AppCompatActivity() {
 
     private fun initializeViews() {
         jobTitleInput = binding.jobTitleInput
+        jobFieldInput = binding.jobFieldInput
         jobTypeInput = binding.jobTypeInput
+        provinceInput = binding.provinceInput
         locationInput = binding.locationInput
-        salaryInput = binding.salaryInput
+        salaryRangeInput = binding.salaryRangeInput
+        experienceInput = binding.experienceInput
         descriptionInput = binding.descriptionInput
         requirementsInput = binding.requirementsInput
         postButton = binding.postButton
     }
 
     private fun setupJobTypeDropdown() {
+        // Job Field options - same as in signup
+        val fieldOptions = arrayOf(
+            "Information Technology",
+            "Healthcare",
+            "Law",
+            "Education",
+            "Engineering",
+            "Business",
+            "Finance",
+            "Marketing",
+            "Sales",
+            "Customer Service",
+            "Manufacturing",
+            "Construction",
+            "Transportation",
+            "Hospitality",
+            "Other"
+        )
+        val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, fieldOptions)
+        jobFieldInput.setAdapter(fieldAdapter)
+
+        // Job Type options
         val jobTypes = arrayOf("Full-time", "Part-time", "Contract", "Internship", "Remote")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, jobTypes)
-        jobTypeInput.setAdapter(adapter)
+        val typeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, jobTypes)
+        jobTypeInput.setAdapter(typeAdapter)
+
+        // Province options - same as in signup
+        val provinces = arrayOf(
+            "Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal",
+            "Limpopo", "Mpumalanga", "Northern Cape", "North West", "Western Cape"
+        )
+        val provinceAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, provinces)
+        provinceInput.setAdapter(provinceAdapter)
+
+        // Salary Range options - same as in signup
+        val salaryOptions = arrayOf(
+            "R0 - R10,000",
+            "R10,000 - R20,000",
+            "R20,000 - R30,000",
+            "R30,000 - R40,000",
+            "R40,000 - R50,000",
+            "R50,000+"
+        )
+        val salaryAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, salaryOptions)
+        salaryRangeInput.setAdapter(salaryAdapter)
+
+        // Experience Level options - same as in signup
+        val yearsOptions = arrayOf("0-1 years", "1-3 years", "3-5 years", "5-10 years", "10+ years")
+        val experienceAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, yearsOptions)
+        experienceInput.setAdapter(experienceAdapter)
     }
 
     private fun setupPostButton() {
@@ -103,18 +156,33 @@ class PostJobActivity : AppCompatActivity() {
             isValid = false
         }
 
+        if (jobFieldInput.text.isNullOrBlank()) {
+            jobFieldInput.error = "Job field is required"
+            isValid = false
+        }
+
         if (jobTypeInput.text.isNullOrBlank()) {
             jobTypeInput.error = "Job type is required"
             isValid = false
         }
 
-        if (locationInput.text.isNullOrBlank()) {
-            locationInput.error = "Location is required"
+        if (provinceInput.text.isNullOrBlank()) {
+            provinceInput.error = "Province is required"
             isValid = false
         }
 
-        if (salaryInput.text.isNullOrBlank()) {
-            salaryInput.error = "Salary is required"
+        if (locationInput.text.isNullOrBlank()) {
+            locationInput.error = "Specific location is required"
+            isValid = false
+        }
+
+        if (salaryRangeInput.text.isNullOrBlank()) {
+            salaryRangeInput.error = "Salary range is required"
+            isValid = false
+        }
+
+        if (experienceInput.text.isNullOrBlank()) {
+            experienceInput.error = "Experience level is required"
             isValid = false
         }
 
@@ -136,9 +204,12 @@ class PostJobActivity : AppCompatActivity() {
             "title" to jobTitleInput.text.toString(),
             "companyId" to companyId,
             "companyName" to company.companyName,
+            "jobField" to jobFieldInput.text.toString(),
+            "province" to provinceInput.text.toString(),
             "location" to locationInput.text.toString(),
-            "salary" to salaryInput.text.toString(),
+            "salary" to salaryRangeInput.text.toString(),
             "type" to jobTypeInput.text.toString(),
+            "experienceLevel" to experienceInput.text.toString(),
             "description" to descriptionInput.text.toString(),
             "requirements" to requirementsInput.text.toString(),
             "postedDate" to com.google.firebase.Timestamp.now(),
@@ -163,4 +234,4 @@ class PostJobActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-} 
+}

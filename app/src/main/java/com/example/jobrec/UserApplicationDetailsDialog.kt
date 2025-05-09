@@ -24,14 +24,14 @@ class UserApplicationDetailsDialog : DialogFragment() {
 
     private val db = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
-    private lateinit var application: JobApplication
+    private lateinit var application: Application
 
     companion object {
         private const val ARG_APPLICATION = "application"
 
-        fun newInstance(application: JobApplication): UserApplicationDetailsDialog {
+        fun newInstance(application: Application): UserApplicationDetailsDialog {
             val args = Bundle().apply {
-                putSerializable(ARG_APPLICATION, application as Serializable)
+                putString("applicationId", application.id)
             }
             return UserApplicationDetailsDialog().apply {
                 arguments = args
@@ -41,7 +41,29 @@ class UserApplicationDetailsDialog : DialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        application = arguments?.getSerializable(ARG_APPLICATION) as JobApplication
+        val applicationId = arguments?.getString("applicationId")
+        if (applicationId != null) {
+            loadApplication(applicationId)
+        } else {
+            dismiss()
+        }
+    }
+
+    private fun loadApplication(applicationId: String) {
+        db.collection("applications").document(applicationId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    application = document.toObject(Application::class.java) ?: return@addOnSuccessListener
+                    application.id = document.id
+                    updateUI()
+                } else {
+                    dismiss()
+                }
+            }
+            .addOnFailureListener {
+                dismiss()
+            }
     }
 
     override fun onCreateView(
@@ -63,41 +85,33 @@ class UserApplicationDetailsDialog : DialogFragment() {
         coverLetter = view.findViewById(R.id.coverLetter)
         downloadCvButton = view.findViewById(R.id.downloadCvButton)
 
-        // Load job details
-        loadJobDetails()
-        // Load company details
-        loadCompanyDetails()
-        // Set up cover letter
-        coverLetter.text = application.coverLetter
-        // Format date
-        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-        appliedDate.text = "Applied: ${dateFormat.format(application.appliedDate)}"
-        // Set status
-        status.text = "Status: ${application.status}"
-
         // Set up download CV button
         downloadCvButton.setOnClickListener {
             downloadCv()
         }
     }
 
-    private fun loadJobDetails() {
-        db.collection("jobs")
-            .document(application.jobId)
-            .get()
-            .addOnSuccessListener { document ->
-                jobTitle.text = document.getString("title") ?: "Unknown Job"
-            }
+    private fun updateUI() {
+        if (!this::application.isInitialized) return
+
+        // Set job title directly
+        jobTitle.text = application.jobTitle
+
+        // Set company name directly
+        companyName.text = application.companyName
+
+        // Set up cover letter
+        coverLetter.text = application.coverLetter
+
+        // Format date
+        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        appliedDate.text = "Applied: ${dateFormat.format(application.appliedDate.toDate())}"
+
+        // Set status
+        status.text = "Status: ${application.status}"
     }
 
-    private fun loadCompanyDetails() {
-        db.collection("companies")
-            .document(application.companyId)
-            .get()
-            .addOnSuccessListener { document ->
-                companyName.text = document.getString("companyName") ?: "Unknown Company"
-            }
-    }
+    // These methods are no longer needed as we're using the data directly from the application object
 
     private fun downloadCv() {
         if (application.cvUrl.isEmpty()) {
@@ -108,4 +122,4 @@ class UserApplicationDetailsDialog : DialogFragment() {
         // TODO: Implement CV download
         Toast.makeText(context, "Downloading CV...", Toast.LENGTH_SHORT).show()
     }
-} 
+}

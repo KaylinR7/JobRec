@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    
+    <item
+        android:id="@+id/action_view_as_student"
+        android:title="View as Student"
+        android:icon="@android:drawable/ic_menu_view"
+        app:showAsAction="never"/>
+        
+    <item
+        android:id="@+id/action_view_as_company"
+        android:title="View as Company"
+        android:icon="@android:drawable/ic_menu_view"
+        app:showAsAction="never"/>
+        
+    <item
+        android:id="@+id/action_logout"
+        android:title="Logout"
+        android:icon="@drawable/ic_logout"
+        app:showAsAction="never"/>
+        
+</menu>

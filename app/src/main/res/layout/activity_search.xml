@@ -43,6 +43,24 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- Search Bar -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/searchLayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:hint="Search jobs"
+                    app:startIconDrawable="@drawable/ic_search">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/searchInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:imeOptions="actionSearch"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/jobFieldLayout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -107,13 +125,87 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/searchButton"
+                <!-- Job Type Filter -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Job Type"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/jobTypeChipGroup"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Search Jobs"
-                    android:padding="12dp"
-                    app:cornerRadius="8dp"/>
+                    android:layout_marginBottom="16dp"
+                    app:singleSelection="false">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipFullTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Full-time"
+                        android:checkable="true"
+                        app:chipBackgroundColor="@color/chip_background_color"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipPartTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Part-time"
+                        android:checkable="true"
+                        app:chipBackgroundColor="@color/chip_background_color"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipContract"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Contract"
+                        android:checkable="true"
+                        app:chipBackgroundColor="@color/chip_background_color"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipRemote"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Remote"
+                        android:checkable="true"
+                        app:chipBackgroundColor="@color/chip_background_color"/>
+                </com.google.android.material.chip.ChipGroup>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/clearFiltersButton"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Clear Filters"
+                        android:layout_marginEnd="8dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/searchButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Search Jobs"
+                        app:cornerRadius="8dp"/>
+                </LinearLayout>
+
+                <!-- Results Count -->
+                <TextView
+                    android:id="@+id/resultsCountText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="0 jobs found"
+                    android:textStyle="italic"
+                    android:gravity="end"
+                    android:visibility="gone"/>
 
             </LinearLayout>
 
@@ -128,4 +220,4 @@
 
     </LinearLayout>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout> 
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
