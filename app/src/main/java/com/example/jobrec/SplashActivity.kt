@@ -58,18 +58,40 @@ class SplashActivity : AppCompatActivity() {
         // Check if user is already logged in
         val currentUser = auth.currentUser
 
-        // Check if we should override to student view
-        val overrideToStudent = sharedPreferences.getBoolean("override_to_student", false)
+        // Check for saved user type in SharedPreferences
+        val savedUserType = sharedPreferences.getString("user_type", null)
+        val savedUserId = sharedPreferences.getString("user_id", null)
+
+        Log.d(TAG, "Saved user type: $savedUserType, Saved user ID: $savedUserId")
 
         if (currentUser != null) {
             Log.d(TAG, "User is logged in, checking user type")
 
-            if (overrideToStudent) {
-                Log.d(TAG, "Override to student view is enabled, redirecting to HomeActivity")
-                // Navigate to student view with default student
-                navigateToStudentView()
+            // If we have a saved user type, use it for faster startup
+            if (savedUserType != null && savedUserId != null) {
+                Log.d(TAG, "Using saved user type: $savedUserType")
+                when (savedUserType) {
+                    "company" -> {
+                        val intent = Intent(this, CompanyDashboardActivity::class.java)
+                        intent.putExtra("companyId", savedUserId)
+                        startActivity(intent)
+                        finish()
+                    }
+                    "admin" -> {
+                        startActivity(Intent(this, AdminDashboardActivity::class.java))
+                        finish()
+                    }
+                    "student" -> {
+                        startActivity(Intent(this, HomeActivity::class.java))
+                        finish()
+                    }
+                    else -> {
+                        // If saved type is invalid, check from server
+                        checkUserTypeAndRedirect(currentUser.email ?: "", currentUser.uid)
+                    }
+                }
             } else {
-                // User is logged in, check user type and redirect normally
+                // No saved user type, check from server
                 checkUserTypeAndRedirect(currentUser.email ?: "", currentUser.uid)
             }
         } else {
@@ -97,26 +119,40 @@ class SplashActivity : AppCompatActivity() {
                     val role = document.getString("role") ?: ""
                     Log.d(TAG, "User role: $role")
 
+                    // Save user type and ID to SharedPreferences for faster startup next time
+                    val editor = sharedPreferences.edit()
+
                     when (role) {
                         "company" -> {
-                            // Company user - check if we should override to student view
+                            // Company user
+                            editor.putString("user_type", "company")
+                            editor.putString("user_id", userId)
+                            editor.apply()
+
                             val intent = Intent(this, CompanyDashboardActivity::class.java)
                             intent.putExtra("companyId", userId)
                             startActivity(intent)
                         }
                         "admin" -> {
                             // Admin user
+                            editor.putString("user_type", "admin")
+                            editor.putString("user_id", userId)
+                            editor.apply()
+
                             startActivity(Intent(this, AdminDashboardActivity::class.java))
                         }
                         else -> {
-                            // Regular user
+                            // Regular user (student)
+                            editor.putString("user_type", "student")
+                            editor.putString("user_id", userId)
+                            editor.apply()
+
                             startActivity(Intent(this, HomeActivity::class.java))
                         }
                     }
                 } else {
-                    // Fallback to email check if document doesn't exist
-                    Log.d(TAG, "User document not found, falling back to email check")
-                    fallbackEmailCheck(email)
+                    // Check if this is a company account
+                    checkCompanyAccount(email, userId)
                 }
                 finish()
             }
@@ -128,23 +164,62 @@ class SplashActivity : AppCompatActivity() {
             }
     }
 
-    private fun fallbackEmailCheck(email: String) {
-        // Check if we should override to student view
-        val overrideToStudent = sharedPreferences.getBoolean("override_to_student", false)
+    private fun checkCompanyAccount(email: String, userId: String) {
+        // Check if this is a company account by querying the companies collection
+        db.collection("companies")
+            .whereEqualTo("email", email)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (!documents.isEmpty) {
+                    // It's a company
+                    Log.d(TAG, "User is a company, redirecting to CompanyDashboardActivity")
+                    val companyId = documents.documents[0].id
 
-        if (overrideToStudent) {
-            navigateToStudentView()
-            return
-        }
+                    // Save user type and ID to SharedPreferences
+                    val editor = sharedPreferences.edit()
+                    editor.putString("user_type", "company")
+                    editor.putString("user_id", companyId)
+                    editor.apply()
+
+                    val intent = Intent(this, CompanyDashboardActivity::class.java)
+                    intent.putExtra("companyId", companyId)
+                    startActivity(intent)
+                } else {
+                    // Fallback to email check if not found in companies collection
+                    Log.d(TAG, "User not found in companies collection, falling back to email check")
+                    fallbackEmailCheck(email)
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Error checking company account", e)
+                fallbackEmailCheck(email)
+            }
+    }
+
+    private fun fallbackEmailCheck(email: String) {
+        // Save user type based on email pattern
+        val editor = sharedPreferences.edit()
 
         if (email.endsWith("@company.com")) {
             // Company user
+            editor.putString("user_type", "company")
+            editor.putString("user_id", auth.currentUser?.uid ?: "")
+            editor.apply()
+
             startActivity(Intent(this, CompanyDashboardActivity::class.java))
         } else if (email == "admin@jobrec.com") {
             // Admin user
+            editor.putString("user_type", "admin")
+            editor.putString("user_id", auth.currentUser?.uid ?: "")
+            editor.apply()
+
             startActivity(Intent(this, AdminDashboardActivity::class.java))
         } else {
-            // Regular user
+            // Regular user (student)
+            editor.putString("user_type", "student")
+            editor.putString("user_id", auth.currentUser?.uid ?: "")
+            editor.apply()
+
             startActivity(Intent(this, HomeActivity::class.java))
         }
     }

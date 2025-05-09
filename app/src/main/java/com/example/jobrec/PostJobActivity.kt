@@ -12,6 +12,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Date
 import com.example.jobrec.databinding.ActivityPostJobBinding
+import com.example.jobrec.models.FieldCategories
 
 class PostJobActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
@@ -21,6 +22,7 @@ class PostJobActivity : AppCompatActivity() {
     // UI elements
     private lateinit var jobTitleInput: TextInputEditText
     private lateinit var jobFieldInput: AutoCompleteTextView
+    private lateinit var jobSpecializationInput: AutoCompleteTextView
     private lateinit var jobTypeInput: AutoCompleteTextView
     private lateinit var provinceInput: AutoCompleteTextView
     private lateinit var locationInput: TextInputEditText
@@ -63,6 +65,7 @@ class PostJobActivity : AppCompatActivity() {
     private fun initializeViews() {
         jobTitleInput = binding.jobTitleInput
         jobFieldInput = binding.jobFieldInput
+        jobSpecializationInput = binding.jobSpecializationInput
         jobTypeInput = binding.jobTypeInput
         provinceInput = binding.provinceInput
         locationInput = binding.locationInput
@@ -95,6 +98,15 @@ class PostJobActivity : AppCompatActivity() {
         val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, fieldOptions)
         jobFieldInput.setAdapter(fieldAdapter)
 
+        // Initially disable specialization dropdown
+        jobSpecializationInput.isEnabled = false
+
+        // Setup field selection listener to update specializations
+        jobFieldInput.setOnItemClickListener { _, _, position, _ ->
+            val selectedField = fieldOptions[position]
+            updateSpecializationDropdown(selectedField)
+        }
+
         // Job Type options
         val jobTypes = arrayOf("Full-time", "Part-time", "Contract", "Internship", "Remote")
         val typeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, jobTypes)
@@ -124,6 +136,22 @@ class PostJobActivity : AppCompatActivity() {
         val yearsOptions = arrayOf("0-1 years", "1-3 years", "3-5 years", "5-10 years", "10+ years")
         val experienceAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, yearsOptions)
         experienceInput.setAdapter(experienceAdapter)
+    }
+
+    private fun updateSpecializationDropdown(field: String) {
+        // Get subcategories for the selected field from FieldCategories
+        val subFields = FieldCategories.fields[field] ?: listOf()
+
+        if (subFields.isNotEmpty()) {
+            val subFieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, subFields)
+            jobSpecializationInput.setAdapter(subFieldAdapter)
+            jobSpecializationInput.isEnabled = true
+            jobSpecializationInput.setText("", false) // Clear previous selection
+        } else {
+            // If no subcategories exist for this field
+            jobSpecializationInput.setText("")
+            jobSpecializationInput.isEnabled = false
+        }
     }
 
     private fun setupPostButton() {
@@ -158,6 +186,11 @@ class PostJobActivity : AppCompatActivity() {
 
         if (jobFieldInput.text.isNullOrBlank()) {
             jobFieldInput.error = "Job field is required"
+            isValid = false
+        }
+
+        if (jobSpecializationInput.isEnabled && jobSpecializationInput.text.isNullOrBlank()) {
+            jobSpecializationInput.error = "Specialization is required"
             isValid = false
         }
 
@@ -205,6 +238,7 @@ class PostJobActivity : AppCompatActivity() {
             "companyId" to companyId,
             "companyName" to company.companyName,
             "jobField" to jobFieldInput.text.toString(),
+            "specialization" to jobSpecializationInput.text.toString(),
             "province" to provinceInput.text.toString(),
             "location" to locationInput.text.toString(),
             "salary" to salaryRangeInput.text.toString(),

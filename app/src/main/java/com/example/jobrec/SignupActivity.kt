@@ -18,6 +18,7 @@ import android.view.KeyEvent
 import android.widget.LinearLayout
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import com.example.jobrec.models.FieldCategories
 
 class SignupActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
@@ -50,6 +51,7 @@ class SignupActivity : AppCompatActivity() {
     private lateinit var certificateInput: AutoCompleteTextView
     private lateinit var expectedSalaryInput: AutoCompleteTextView
     private lateinit var fieldInput: AutoCompleteTextView
+    private lateinit var subFieldInput: AutoCompleteTextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,6 +94,7 @@ class SignupActivity : AppCompatActivity() {
         certificateInput = findViewById(R.id.certificateInput)
         expectedSalaryInput = findViewById(R.id.expectedSalaryInput)
         fieldInput = findViewById(R.id.fieldInput)
+        subFieldInput = findViewById(R.id.subFieldInput)
     }
 
     private fun setupToolbar() {
@@ -290,7 +293,8 @@ class SignupActivity : AppCompatActivity() {
             yearsOfExperience = yearsOfExperienceInput.text.toString().trim(),
             certificate = certificateInput.text.toString().trim(),
             expectedSalary = expectedSalaryInput.text.toString().trim(),
-            field = fieldInput.text.toString().trim()
+            field = fieldInput.text.toString().trim(),
+            subField = subFieldInput.text.toString().trim()
         )
 
         // Add user to Firebase
@@ -357,5 +361,30 @@ class SignupActivity : AppCompatActivity() {
         )
         val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, fieldOptions)
         fieldInput.setAdapter(fieldAdapter)
+
+        // Initially disable subfield dropdown
+        subFieldInput.isEnabled = false
+
+        // Setup field selection listener to update subfields
+        fieldInput.setOnItemClickListener { _, _, _, _ ->
+            val selectedField = fieldInput.text.toString()
+            updateSubFieldDropdown(selectedField)
+        }
+    }
+
+    private fun updateSubFieldDropdown(field: String) {
+        // Get subcategories for the selected field from FieldCategories
+        val subFields = FieldCategories.fields[field] ?: listOf()
+
+        if (subFields.isNotEmpty()) {
+            val subFieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, subFields)
+            subFieldInput.setAdapter(subFieldAdapter)
+            subFieldInput.isEnabled = true
+            subFieldInput.setText("", false) // Clear previous selection
+        } else {
+            // If no subcategories exist for this field
+            subFieldInput.setText("")
+            subFieldInput.isEnabled = false
+        }
     }
 }

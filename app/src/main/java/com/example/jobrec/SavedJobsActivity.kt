@@ -74,7 +74,7 @@ class SavedJobsActivity : AppCompatActivity() {
 
                 // Extract job IDs from saved jobs documents
                 val jobIds = documents.mapNotNull { it.getString("jobId") }
-                
+
                 if (jobIds.isEmpty()) {
                     showEmptyState("You haven't saved any jobs yet")
                     return@addOnSuccessListener
@@ -106,7 +106,7 @@ class SavedJobsActivity : AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { document ->
                     fetchCount++
-                    
+
                     if (document.exists()) {
                         val job = document.toObject(Job::class.java)
                         job?.let {
@@ -123,7 +123,7 @@ class SavedJobsActivity : AppCompatActivity() {
                 .addOnFailureListener { e ->
                     fetchCount++
                     Log.e(TAG, "Error fetching job details for ID: $jobId", e)
-                    
+
                     // If we've fetched all jobs, update the UI
                     if (fetchCount == jobIds.size) {
                         updateUI(jobs)
@@ -134,7 +134,7 @@ class SavedJobsActivity : AppCompatActivity() {
 
     private fun updateUI(jobs: List<Job>) {
         hideLoading()
-        
+
         if (jobs.isEmpty()) {
             showEmptyState("You haven't saved any jobs yet")
             return
@@ -142,7 +142,7 @@ class SavedJobsActivity : AppCompatActivity() {
 
         // Sort jobs by posted date (newest first)
         val sortedJobs = jobs.sortedByDescending { it.postedDate.toDate() }
-        
+
         // Update the adapter
         jobsAdapter.submitList(sortedJobs)
         recyclerView.visibility = View.VISIBLE
@@ -165,6 +165,8 @@ class SavedJobsActivity : AppCompatActivity() {
     private fun hideLoading() {
         loadingView.visibility = View.GONE
     }
+
+
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()

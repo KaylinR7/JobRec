@@ -19,6 +19,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.example.jobrec.models.FieldCategories
 
 class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
@@ -159,9 +160,13 @@ class SearchActivity : AppCompatActivity() {
             // Clear all filters
             binding.searchInput.text?.clear()
             binding.jobFieldDropdown.text?.clear()
+            binding.jobSpecializationDropdown.text?.clear()
             binding.provinceDropdown.text?.clear()
             binding.salaryRangeDropdown.text?.clear()
             binding.experienceDropdown.text?.clear()
+
+            // Disable specialization dropdown
+            binding.jobSpecializationDropdown.isEnabled = false
 
             // Uncheck all chips
             binding.chipFullTime.isChecked = false
@@ -207,6 +212,34 @@ class SearchActivity : AppCompatActivity() {
         // Setup Job Field dropdown
         val jobFieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, jobFields)
         (binding.jobFieldLayout.editText as? AutoCompleteTextView)?.setAdapter(jobFieldAdapter)
+
+        // Initially disable specialization dropdown
+        binding.jobSpecializationDropdown.isEnabled = false
+
+        // Setup field selection listener to update specializations
+        binding.jobFieldDropdown.setOnItemClickListener { _, _, position, _ ->
+            val selectedField = jobFields[position]
+            updateSpecializationDropdown(selectedField)
+        }
+    }
+
+    private fun updateSpecializationDropdown(field: String) {
+        // Get subcategories for the selected field from FieldCategories
+        val subFields = FieldCategories.fields[field] ?: listOf()
+
+        if (subFields.isNotEmpty()) {
+            // Create a list with "Any" option first, then all subcategories
+            val options = listOf("Any") + subFields
+
+            val subFieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, options)
+            binding.jobSpecializationDropdown.setAdapter(subFieldAdapter)
+            binding.jobSpecializationDropdown.isEnabled = true
+            binding.jobSpecializationDropdown.setText("", false) // Clear previous selection
+        } else {
+            // If no subcategories exist for this field
+            binding.jobSpecializationDropdown.setText("")
+            binding.jobSpecializationDropdown.isEnabled = false
+        }
     }
 
     private fun setupSearchButton() {
@@ -222,6 +255,7 @@ class SearchActivity : AppCompatActivity() {
         // Get search parameters
         val searchText = binding.searchInput.text.toString().trim()
         val selectedField = (binding.jobFieldLayout.editText as? AutoCompleteTextView)?.text.toString()
+        val selectedSpecialization = (binding.jobSpecializationLayout.editText as? AutoCompleteTextView)?.text.toString()
         val selectedProvince = (binding.provinceLayout.editText as? AutoCompleteTextView)?.text.toString()
         val selectedSalary = (binding.salaryRangeLayout.editText as? AutoCompleteTextView)?.text.toString()
         val selectedExperience = (binding.experienceLayout.editText as? AutoCompleteTextView)?.text.toString()
@@ -256,6 +290,11 @@ class SearchActivity : AppCompatActivity() {
                     // Filter by job field
                     if (selectedField.isNotEmpty() && selectedField != "Any") {
                         matches = matches && job.jobField.equals(selectedField, ignoreCase = true)
+
+                        // Filter by specialization (only if field matches)
+                        if (matches && selectedSpecialization.isNotEmpty() && selectedSpecialization != "Any") {
+                            matches = matches && job.specialization.equals(selectedSpecialization, ignoreCase = true)
+                        }
                     }
 
                     // Filter by province

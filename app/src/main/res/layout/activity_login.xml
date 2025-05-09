@@ -77,37 +77,40 @@
         android:orientation="vertical"
         android:gravity="center">
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/signupLink"
-            android:layout_width="wrap_content"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Don't have an account? Sign up"
             android:textColor="@android:color/black"
             android:textSize="14sp"
-            android:padding="8dp"
-            android:background="?attr/selectableItemBackground"/>
+            app:strokeColor="@android:color/black"
+            app:strokeWidth="1dp"
+            android:layout_marginBottom="8dp"/>
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/companySignupLink"
-            android:layout_width="wrap_content"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Are you a company? Register here"
             android:textColor="@android:color/black"
             android:textSize="14sp"
-            android:padding="8dp"
-            android:layout_marginTop="8dp"
-            android:background="?attr/selectableItemBackground"/>
+            app:strokeColor="@android:color/black"
+            app:strokeWidth="1dp"
+            android:layout_marginBottom="8dp"/>
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/adminLoginLink"
-            android:layout_width="wrap_content"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Admin Login"
             android:textColor="@android:color/black"
             android:textSize="14sp"
-            android:padding="8dp"
-            android:layout_marginTop="8dp"
-            android:background="?attr/selectableItemBackground"/>
+            app:strokeColor="@android:color/black"
+            app:strokeWidth="1dp"/>
     </LinearLayout>
 
-</LinearLayout> 
+</LinearLayout>

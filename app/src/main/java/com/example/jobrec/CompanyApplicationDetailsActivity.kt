@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -78,7 +79,10 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
         }
 
         viewResumeButton.setOnClickListener {
-            if (!resumeUrl.isNullOrEmpty()) {
+            // If we have the applicant ID, show the full profile directly
+            if (!applicantId.isNullOrEmpty()) {
+                showApplicantProfile(applicantId!!)
+            } else if (!resumeUrl.isNullOrEmpty()) {
                 if (resumeUrl!!.startsWith("http")) {
                     // If it's a direct URL (PDF from storage)
                     openResume(resumeUrl!!)
@@ -105,6 +109,13 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
     }
 
     private fun loadCvContent(cvId: String) {
+        // If we have the applicant ID, show the full profile instead
+        if (!applicantId.isNullOrEmpty()) {
+            showApplicantProfile(applicantId!!)
+            return
+        }
+
+        // Fallback to old CV content if no applicant ID
         db.collection("cvs")
             .document(cvId)
             .get()
@@ -132,7 +143,193 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    private fun showApplicantProfile(userId: String) {
+        db.collection("users")
+            .document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    try {
+                        val user = document.toObject(User::class.java)?.copy(id = document.id)
+                        if (user != null) {
+                            showCandidateProfileDialog(user)
+                        } else {
+                            Toast.makeText(this, "Error loading user profile", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "Error parsing user data: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this, "User profile not found", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error loading user profile: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun showCandidateProfileDialog(candidate: User) {
+        val view = createCandidateProfileView(candidate)
+
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("${candidate.name} ${candidate.surname}")
+            .setView(view)
+            .setPositiveButton("Contact") { dialog, which ->
+                // Contact the candidate
+                contactCandidate(candidate)
+            }
+            .setNegativeButton("Close", null)
+            .create()
+
+        dialog.show()
+    }
+
+    private fun createCandidateProfileView(candidate: User): View {
+        val view = layoutInflater.inflate(R.layout.dialog_candidate_profile, null)
+
+        // Set candidate details
+        val nameText = view.findViewById<TextView>(R.id.nameText)
+        nameText.text = "${candidate.name} ${candidate.surname}"
+
+        val emailText = view.findViewById<TextView>(R.id.emailText)
+        emailText.text = candidate.email
+
+        val phoneText = view.findViewById<TextView>(R.id.phoneText)
+        phoneText.text = candidate.phoneNumber
+
+        val locationText = view.findViewById<TextView>(R.id.locationText)
+        locationText.text = candidate.address
+
+        val summaryText = view.findViewById<TextView>(R.id.summaryText)
+        summaryText.text = candidate.summary
+
+        // Set skills
+        val skillsText = view.findViewById<TextView>(R.id.skillsText)
+        if (candidate.skills.isNotEmpty()) {
+            skillsText.text = candidate.skills.joinToString(", ")
+        } else {
+            skillsText.text = "No skills specified"
+        }
+
+        // Set education
+        val educationText = view.findViewById<TextView>(R.id.educationText)
+        if (candidate.education.isNotEmpty()) {
+            val educationList = candidate.education.joinToString("\n") { edu ->
+                "${edu.degree} at ${edu.institution} (${edu.fieldOfStudy})"
+            }
+            educationText.text = educationList
+        } else {
+            educationText.text = "No education specified"
+        }
+
+        // Set experience
+        val experienceText = view.findViewById<TextView>(R.id.experienceText)
+        if (candidate.experience.isNotEmpty()) {
+            val experienceList = candidate.experience.joinToString("\n\n") { exp ->
+                "${exp.position} at ${exp.company}\n" +
+                "${exp.startDate} - ${exp.endDate}\n" +
+                exp.description
+            }
+            experienceText.text = experienceList
+        } else {
+            experienceText.text = "No experience specified"
+        }
+
+        // Set field and specialization
+        val fieldText = view.findViewById<TextView>(R.id.fieldText)
+        if (candidate.field.isNotEmpty()) {
+            val fieldInfo = if (candidate.subField.isNotEmpty()) {
+                "${candidate.field} - ${candidate.subField}"
+            } else {
+                candidate.field
+            }
+            fieldText.text = fieldInfo
+        } else {
+            fieldText.text = "Not specified"
+        }
+
+        // Set years of experience
+        val yearsOfExperienceText = view.findViewById<TextView>(R.id.yearsOfExperienceText)
+        yearsOfExperienceText.text = if (candidate.yearsOfExperience.isNotEmpty()) {
+            candidate.yearsOfExperience
+        } else {
+            "Not specified"
+        }
+
+        // Set certificate
+        val certificateText = view.findViewById<TextView>(R.id.certificateText)
+        certificateText.text = if (candidate.certificate.isNotEmpty()) {
+            candidate.certificate
+        } else {
+            "Not specified"
+        }
+
+        // Set expected salary
+        val expectedSalaryText = view.findViewById<TextView>(R.id.expectedSalaryText)
+        expectedSalaryText.text = if (candidate.expectedSalary.isNotEmpty()) {
+            candidate.expectedSalary
+        } else {
+            "Not specified"
+        }
+
+        // Set social links
+        val socialLinksText = view.findViewById<TextView>(R.id.socialLinksText)
+        val socialLinks = mutableListOf<String>()
+
+        if (candidate.linkedin.isNotEmpty()) {
+            socialLinks.add("LinkedIn: ${candidate.linkedin}")
+        }
+
+        if (candidate.github.isNotEmpty()) {
+            socialLinks.add("GitHub: ${candidate.github}")
+        }
+
+        if (candidate.portfolio.isNotEmpty()) {
+            socialLinks.add("Portfolio: ${candidate.portfolio}")
+        }
+
+        socialLinksText.text = if (socialLinks.isNotEmpty()) {
+            socialLinks.joinToString("\n")
+        } else {
+            "No social links provided"
+        }
+
+        return view
+    }
+
+    private fun contactCandidate(candidate: User) {
+        // Show options to contact the candidate
+        val options = arrayOf("Email", "Phone")
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Contact ${candidate.name}")
+            .setItems(options) { dialog, which ->
+                when (which) {
+                    0 -> { // Email
+                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                            data = Uri.parse("mailto:${candidate.email}")
+                            putExtra(Intent.EXTRA_SUBJECT, "Job Application: $jobTitle")
+                        }
+                        startActivity(intent)
+                    }
+                    1 -> { // Phone
+                        val intent = Intent(Intent.ACTION_DIAL).apply {
+                            data = Uri.parse("tel:${candidate.phoneNumber}")
+                        }
+                        startActivity(intent)
+                    }
+                }
+            }
+            .show()
+    }
+
     private fun openResume(url: String) {
+        // If we have the applicant ID, show the full profile instead
+        if (!applicantId.isNullOrEmpty()) {
+            showApplicantProfile(applicantId!!)
+            return
+        }
+
+        // Fallback to PDF viewer if no applicant ID
         try {
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(Uri.parse(url), "application/pdf")

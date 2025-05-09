@@ -222,7 +222,7 @@
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Job Alerts Card -->
+                    <!-- Messages Card -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/jobAlertsCard"
                         android:layout_width="0dp"
@@ -244,14 +244,14 @@
                             <ImageView
                                 android:layout_width="40dp"
                                 android:layout_height="40dp"
-                                android:src="@drawable/ic_notifications"
+                                android:src="@android:drawable/ic_dialog_email"
                                 android:tint="#000000"
                                 android:layout_marginBottom="12dp"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Job Alerts"
+                                android:text="Messages"
                                 android:textSize="16sp"
                                 android:textColor="#000000"
                                 android:gravity="center"/>

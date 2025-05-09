@@ -24,7 +24,8 @@ data class User(
     val yearsOfExperience: String = "",
     val certificate: String = "",
     val expectedSalary: String = "",
-    val field: String = ""
+    val field: String = "",
+    val subField: String = ""
 )
 
 data class Education(

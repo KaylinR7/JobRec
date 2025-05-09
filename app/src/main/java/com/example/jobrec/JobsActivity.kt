@@ -110,6 +110,8 @@ class JobsActivity : AppCompatActivity() {
             }
     }
 
+
+
     private fun filterJobs() {
         var query: Query = db.collection("jobs")
             .whereEqualTo("status", "active")

@@ -63,4 +63,4 @@ class JobsAdapter(private val onJobClick: (Job) -> Unit) :
             return oldItem == newItem
         }
     }
-} 
+}

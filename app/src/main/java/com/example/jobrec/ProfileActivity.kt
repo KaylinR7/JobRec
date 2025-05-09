@@ -36,6 +36,7 @@ import android.widget.AutoCompleteTextView
 import android.view.Menu
 import android.view.MenuItem
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.example.jobrec.models.FieldCategories
 
 class ProfileActivity : AppCompatActivity() {
     private lateinit var toolbar: MaterialToolbar
@@ -56,6 +57,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var certificateInput: AutoCompleteTextView
     private lateinit var expectedSalaryInput: AutoCompleteTextView
     private lateinit var fieldInput: AutoCompleteTextView
+    private lateinit var subFieldInput: AutoCompleteTextView
     private lateinit var skillsChipGroup: ChipGroup
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -153,6 +155,7 @@ class ProfileActivity : AppCompatActivity() {
         certificateInput = findViewById(R.id.certificateInput)
         expectedSalaryInput = findViewById(R.id.expectedSalaryInput)
         fieldInput = findViewById(R.id.fieldInput)
+        subFieldInput = findViewById(R.id.subFieldInput)
 
         // Set up RecyclerViews
         experienceRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -292,6 +295,15 @@ class ProfileActivity : AppCompatActivity() {
         )
         val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, fieldOptions)
         fieldInput.setAdapter(fieldAdapter)
+
+        // Initially disable subfield dropdown
+        subFieldInput.isEnabled = false
+
+        // Setup field selection listener to update subfields
+        fieldInput.setOnItemClickListener { _, _, _, _ ->
+            val selectedField = fieldInput.text.toString()
+            updateSubFieldDropdown(selectedField)
+        }
     }
 
     private fun loadUserData() {
@@ -316,7 +328,14 @@ class ProfileActivity : AppCompatActivity() {
                         yearsOfExperienceInput.setText(document.getString("yearsOfExperience") ?: "")
                         certificateInput.setText(document.getString("certificate") ?: "")
                         expectedSalaryInput.setText(document.getString("expectedSalary") ?: "")
-                        fieldInput.setText(document.getString("field") ?: "")
+
+                        // Load field and update subfield dropdown
+                        val field = document.getString("field") ?: ""
+                        fieldInput.setText(field)
+                        if (field.isNotEmpty()) {
+                            updateSubFieldDropdown(field)
+                            subFieldInput.setText(document.getString("subField") ?: "")
+                        }
 
                         // Load social links
                         linkedinInput.setText(document.getString("linkedin"))
@@ -414,7 +433,8 @@ class ProfileActivity : AppCompatActivity() {
                 "yearsOfExperience" to yearsOfExperienceInput.text.toString().trim(),
                 "certificate" to certificateInput.text.toString().trim(),
                 "expectedSalary" to expectedSalaryInput.text.toString().trim(),
-                "field" to fieldInput.text.toString().trim()
+                "field" to fieldInput.text.toString().trim(),
+                "subField" to subFieldInput.text.toString().trim()
             )
 
             db.collection("users").document(userId)
@@ -540,5 +560,20 @@ class ProfileActivity : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
+    }
+
+    private fun updateSubFieldDropdown(field: String) {
+        // Get subcategories for the selected field from FieldCategories
+        val subFields = FieldCategories.fields[field] ?: listOf()
+
+        if (subFields.isNotEmpty()) {
+            val subFieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, subFields)
+            subFieldInput.setAdapter(subFieldAdapter)
+            subFieldInput.isEnabled = true
+        } else {
+            // If no subcategories exist for this field
+            subFieldInput.setText("")
+            subFieldInput.isEnabled = false
+        }
     }
 }

@@ -14,24 +14,57 @@ class MessageRepository {
     suspend fun sendMessage(message: Message): String {
         val messageId = UUID.randomUUID().toString()
         val newMessage = message.copy(id = messageId)
-        
+
+        android.util.Log.d("MessageRepo", "Sending message: conversationId=${message.conversationId}, senderId=${message.senderId}, receiverId=${message.receiverId}")
+
         db.collection("messages")
             .document(messageId)
             .set(newMessage)
             .await()
-            
+
+        android.util.Log.d("MessageRepo", "Message saved with ID: $messageId")
+
         // Update conversation last message
-        db.collection("conversations")
+        android.util.Log.d("MessageRepo", "Updating conversation: ${message.conversationId}")
+
+        // First, verify the conversation exists
+        val conversationDoc = db.collection("conversations")
             .document(message.conversationId)
-            .update(
-                mapOf(
-                    "lastMessage" to message.content,
-                    "lastMessageTime" to message.createdAt,
-                    "lastMessageSender" to message.senderId
-                )
-            )
+            .get()
             .await()
-            
+
+        if (!conversationDoc.exists()) {
+            android.util.Log.e("MessageRepo", "ERROR: Conversation ${message.conversationId} does not exist!")
+
+            // Log all conversations for debugging
+            val allConversations = db.collection("conversations").get().await()
+            android.util.Log.d("MessageRepo", "All conversations (${allConversations.size()}):")
+            allConversations.forEach { doc ->
+                android.util.Log.d("MessageRepo", "  ${doc.id}: companyId=${doc.getString("companyId")}, candidateId=${doc.getString("candidateId")}")
+            }
+        } else {
+            android.util.Log.d("MessageRepo", "Conversation exists, updating last message")
+
+            // Log conversation data
+            val companyId = conversationDoc.getString("companyId") ?: "null"
+            val candidateId = conversationDoc.getString("candidateId") ?: "null"
+            android.util.Log.d("MessageRepo", "Conversation data: companyId=$companyId, candidateId=$candidateId")
+
+            db.collection("conversations")
+                .document(message.conversationId)
+                .update(
+                    mapOf(
+                        "lastMessage" to message.content,
+                        "lastMessageTime" to message.createdAt,
+                        "lastMessageSender" to message.senderId,
+                        "updatedAt" to message.createdAt
+                    )
+                )
+                .await()
+
+            android.util.Log.d("MessageRepo", "Conversation updated successfully")
+        }
+
         return messageId
     }
 
@@ -65,7 +98,7 @@ class MessageRepository {
                 type = "interview",
                 interviewDetails = interviewDetails
             )
-            
+
             return sendMessage(message)
         } catch (e: Exception) {
             throw Exception("Failed to schedule interview: ${e.message}")
@@ -80,7 +113,7 @@ class MessageRepository {
             fileUrl = fileUrl,
             fileName = fileName
         )
-        
+
         sendMessage(message)
     }
-} 
+}

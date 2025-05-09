@@ -21,6 +21,7 @@ data class Job(
     val status: String = "active",
     // New fields for enhanced search functionality
     val jobField: String = "",
+    val specialization: String = "",
     val province: String = "",
     val experienceLevel: String = ""
 ) : Parcelable {
@@ -49,6 +50,7 @@ data class Job(
         parcel.readString() ?: "",
         parcel.readString() ?: "",
         parcel.readString() ?: "",
+        parcel.readString() ?: "",
         parcel.readString() ?: ""
     )
 
@@ -67,6 +69,7 @@ data class Job(
         parcel.writeInt(postedDate.nanoseconds)
         parcel.writeString(status)
         parcel.writeString(jobField)
+        parcel.writeString(specialization)
         parcel.writeString(province)
         parcel.writeString(experienceLevel)
     }

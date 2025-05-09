@@ -11,7 +11,7 @@ import com.google.android.material.card.MaterialCardView
 import java.text.SimpleDateFormat
 import java.util.*
 
-class RecentJobsAdapter(private val onJobClick: (Job) -> Unit) : 
+class RecentJobsAdapter(private val onJobClick: (Job) -> Unit) :
     ListAdapter<Job, RecentJobsAdapter.JobViewHolder>(JobDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobViewHolder {
@@ -51,4 +51,4 @@ class RecentJobsAdapter(private val onJobClick: (Job) -> Unit) :
             return oldItem == newItem
         }
     }
-} 
+}

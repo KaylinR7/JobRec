@@ -40,23 +40,25 @@ class CompanyJobsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
         jobsRecyclerView = view.findViewById(R.id.jobsRecyclerView)
         emptyView = view.findViewById(R.id.emptyView)
         addJobFab = view.findViewById(R.id.addJobFab)
-        
+
         setupRecyclerView()
         setupFab()
         loadJobs()
     }
 
     private fun setupRecyclerView() {
-        jobsAdapter = JobsAdapter { job ->
-            val intent = Intent(requireContext(), JobDetailsActivity::class.java)
-            intent.putExtra("jobId", job.id)
-            startActivity(intent)
-        }
-        
+        jobsAdapter = JobsAdapter(
+            onJobClick = { job ->
+                val intent = Intent(requireContext(), JobDetailsActivity::class.java)
+                intent.putExtra("jobId", job.id)
+                startActivity(intent)
+            }
+        )
+
         jobsRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = jobsAdapter
@@ -88,4 +90,4 @@ class CompanyJobsFragment : Fragment() {
                 }
         }
     }
-} 
+}

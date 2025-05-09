@@ -46,7 +46,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var messagesRecyclerView: RecyclerView
     private lateinit var emptyView: TextView
     private lateinit var messageInput: TextInputEditText
-    private lateinit var sendButton: Button
+    private lateinit var sendButton: FloatingActionButton
     private lateinit var scheduleMeetingFab: FloatingActionButton
 
     private lateinit var messageAdapter: MessageAdapter
@@ -180,8 +180,27 @@ class ChatActivity : AppCompatActivity() {
                             val jobTitle = applicationDoc.getString("jobTitle") ?: ""
                             val candidateId = applicationDoc.getString("userId") ?: ""
                             val candidateName = applicationDoc.getString("applicantName") ?: ""
-                            val companyId = applicationDoc.getString("companyId") ?: ""
+                            val companyIdFromApp = applicationDoc.getString("companyId") ?: ""
                             val companyName = applicationDoc.getString("companyName") ?: ""
+
+                            // Log the company ID from the application
+                            android.util.Log.d("ChatActivity", "Company ID from application: $companyIdFromApp")
+
+                            // Look up the company's Firebase Auth user ID
+                            val companyDoc = db.collection("companies")
+                                .whereEqualTo("companyId", companyIdFromApp)
+                                .get()
+                                .await()
+
+                            // Get the company's user ID
+                            val companyUserId = if (!companyDoc.isEmpty) {
+                                val userId = companyDoc.documents[0].getString("userId")
+                                android.util.Log.d("ChatActivity", "Found company user ID: $userId")
+                                userId ?: companyIdFromApp
+                            } else {
+                                android.util.Log.d("ChatActivity", "Company not found, using original ID")
+                                companyIdFromApp
+                            }
 
                             // Create the conversation
                             conversationId = conversationRepository.createConversation(
@@ -190,7 +209,7 @@ class ChatActivity : AppCompatActivity() {
                                 jobTitle = jobTitle,
                                 candidateId = candidateId,
                                 candidateName = candidateName,
-                                companyId = companyId,
+                                companyId = companyUserId,
                                 companyName = companyName
                             )
 
@@ -221,23 +240,27 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun updateConversationUI(conversation: Conversation) {
-        jobTitleText.text = conversation.jobTitle
-
         // Determine if current user is the candidate or the company
         val isCompanyView = currentUserId == conversation.companyId
 
         if (isCompanyView) {
             // Company viewing candidate
+            jobTitleText.text = conversation.candidateName
             participantNameText.text = conversation.candidateName
             receiverId = conversation.candidateId
             // Use a person icon for candidates
             participantImageView.setImageResource(R.drawable.ic_person)
+            // Show schedule meeting button for companies only
+            scheduleMeetingFab.visibility = View.VISIBLE
         } else {
             // Candidate viewing company
+            jobTitleText.text = conversation.companyName
             participantNameText.text = conversation.companyName
             receiverId = conversation.companyId
             // Use a building icon for companies
             participantImageView.setImageResource(R.drawable.ic_company_placeholder)
+            // Hide schedule meeting button for students
+            scheduleMeetingFab.visibility = View.GONE
         }
     }
 

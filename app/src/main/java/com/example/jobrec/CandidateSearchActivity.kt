@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.TextView
 import android.widget.Toast
+import com.example.jobrec.models.FieldCategories
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -36,6 +37,7 @@ class CandidateSearchActivity : AppCompatActivity() {
     private lateinit var experienceFilter: AutoCompleteTextView
     private lateinit var locationFilter: AutoCompleteTextView
     private lateinit var fieldFilter: AutoCompleteTextView
+    private lateinit var subFieldFilter: AutoCompleteTextView
     private lateinit var searchButton: MaterialButton
     private lateinit var clearFiltersButton: MaterialButton
     private lateinit var resultsRecyclerView: RecyclerView
@@ -80,6 +82,7 @@ class CandidateSearchActivity : AppCompatActivity() {
         experienceFilter = findViewById(R.id.experienceFilter)
         locationFilter = findViewById(R.id.locationFilter)
         fieldFilter = findViewById(R.id.fieldFilter)
+        subFieldFilter = findViewById(R.id.subFieldFilter)
         searchButton = findViewById(R.id.searchButton)
         clearFiltersButton = findViewById(R.id.clearFiltersButton)
         resultsRecyclerView = findViewById(R.id.resultsRecyclerView)
@@ -282,6 +285,16 @@ class CandidateSearchActivity : AppCompatActivity() {
             .sortedBy { it.name }
         val fieldsAdapter = FilterDropdownAdapter(this, fieldOptions)
         fieldFilter.setAdapter(fieldsAdapter)
+
+        // Initially disable subfield dropdown
+        subFieldFilter.isEnabled = false
+
+        // Setup field selection listener to update subfields
+        fieldFilter.setOnItemClickListener { _, _, position, _ ->
+            val selectedOption = fieldsAdapter.getItem(position)
+            val selectedField = selectedOption?.name ?: return@setOnItemClickListener
+            updateSubFieldDropdown(selectedField)
+        }
     }
 
     private fun addSkillChip(skill: String) {
@@ -375,6 +388,65 @@ class CandidateSearchActivity : AppCompatActivity() {
             experienceText.text = "No experience specified"
         }
 
+        // Set field and specialization
+        val fieldText = view.findViewById<TextView>(R.id.fieldText)
+        if (candidate.field.isNotEmpty()) {
+            val fieldInfo = if (candidate.subField.isNotEmpty()) {
+                "${candidate.field} - ${candidate.subField}"
+            } else {
+                candidate.field
+            }
+            fieldText.text = fieldInfo
+        } else {
+            fieldText.text = "Not specified"
+        }
+
+        // Set years of experience
+        val yearsOfExperienceText = view.findViewById<TextView>(R.id.yearsOfExperienceText)
+        yearsOfExperienceText.text = if (candidate.yearsOfExperience.isNotEmpty()) {
+            candidate.yearsOfExperience
+        } else {
+            "Not specified"
+        }
+
+        // Set certificate
+        val certificateText = view.findViewById<TextView>(R.id.certificateText)
+        certificateText.text = if (candidate.certificate.isNotEmpty()) {
+            candidate.certificate
+        } else {
+            "Not specified"
+        }
+
+        // Set expected salary
+        val expectedSalaryText = view.findViewById<TextView>(R.id.expectedSalaryText)
+        expectedSalaryText.text = if (candidate.expectedSalary.isNotEmpty()) {
+            candidate.expectedSalary
+        } else {
+            "Not specified"
+        }
+
+        // Set social links
+        val socialLinksText = view.findViewById<TextView>(R.id.socialLinksText)
+        val socialLinks = mutableListOf<String>()
+
+        if (candidate.linkedin.isNotEmpty()) {
+            socialLinks.add("LinkedIn: ${candidate.linkedin}")
+        }
+
+        if (candidate.github.isNotEmpty()) {
+            socialLinks.add("GitHub: ${candidate.github}")
+        }
+
+        if (candidate.portfolio.isNotEmpty()) {
+            socialLinks.add("Portfolio: ${candidate.portfolio}")
+        }
+
+        socialLinksText.text = if (socialLinks.isNotEmpty()) {
+            socialLinks.joinToString("\n")
+        } else {
+            "No social links provided"
+        }
+
         return view
     }
 
@@ -417,6 +489,8 @@ class CandidateSearchActivity : AppCompatActivity() {
             experienceFilter.setText("")
             locationFilter.setText("")
             fieldFilter.setText("")
+            subFieldFilter.setText("")
+            subFieldFilter.isEnabled = false
 
             // Clear selected skills
             selectedSkills.clear()
@@ -426,6 +500,32 @@ class CandidateSearchActivity : AppCompatActivity() {
             resultsAdapter.submitList(emptyList())
 
             Toast.makeText(this, "Filters cleared", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun updateSubFieldDropdown(field: String) {
+        // Get subcategories for the selected field from FieldCategories
+        val subFields = FieldCategories.fields[field] ?: listOf()
+
+        if (subFields.isNotEmpty()) {
+            // Create a list of FilterOption objects with counts
+            val subFieldOptions = listOf(FilterOption("Any", allUsers.size)) +
+                subFields.map { subField ->
+                    // Count users with this subfield
+                    val count = allUsers.count { user ->
+                        user.subField.equals(subField, ignoreCase = true)
+                    }
+                    FilterOption(subField, count)
+                }
+
+            val subFieldAdapter = FilterDropdownAdapter(this, subFieldOptions)
+            subFieldFilter.setAdapter(subFieldAdapter)
+            subFieldFilter.isEnabled = true
+            subFieldFilter.setText("", false) // Clear previous selection
+        } else {
+            // If no subcategories exist for this field
+            subFieldFilter.setText("")
+            subFieldFilter.isEnabled = false
         }
     }
 
@@ -456,6 +556,7 @@ class CandidateSearchActivity : AppCompatActivity() {
         val experience = experienceFilter.text.toString().trim()
         val location = locationFilter.text.toString().trim()
         val field = fieldFilter.text.toString().trim()
+        val subField = subFieldFilter.text.toString().trim()
 
         // Simplified approach: Get all users and filter in memory
         // This reduces the number of indexes needed and simplifies the query logic
@@ -492,6 +593,11 @@ class CandidateSearchActivity : AppCompatActivity() {
                     // Filter by field/industry
                     if (field.isNotEmpty() && field != "Any") {
                         matches = matches && candidate.field.contains(field, ignoreCase = true)
+
+                        // Filter by specialization (only if field matches)
+                        if (matches && subField.isNotEmpty() && subField != "Any") {
+                            matches = matches && candidate.subField.contains(subField, ignoreCase = true)
+                        }
                     }
 
                     // Filter by education level

@@ -62,4 +62,6 @@ class JobsFragment : Fragment() {
                 Toast.makeText(context, "Error loading jobs: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-} 
+
+
+}

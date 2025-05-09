@@ -114,7 +114,7 @@ class HomeActivity : AppCompatActivity() {
 
         binding.jobAlertsCard.setOnClickListener {
             animateClick(binding.jobAlertsCard) {
-                startActivity(Intent(this, JobAlertsActivity::class.java))
+                startActivity(Intent(this, ConversationsActivity::class.java))
             }
         }
 
@@ -127,6 +127,14 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun logout() {
+        // Clear all user session data
+        val sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
+        sharedPreferences.edit()
+            .putBoolean("override_to_student", false)
+            .remove("user_type")
+            .remove("user_id")
+            .apply()
+
         auth.signOut()
         // Navigate to login screen
         val intent = Intent(this, LoginActivity::class.java)
@@ -329,6 +337,8 @@ class HomeActivity : AppCompatActivity() {
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
+
+
     private fun showError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
@@ -361,10 +371,6 @@ class HomeActivity : AppCompatActivity() {
                 true
             }
             R.id.action_logout -> {
-                // Clear any overrides when logging out
-                val sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
-                sharedPreferences.edit().putBoolean("override_to_student", false).apply()
-
                 logout()
                 true
             }

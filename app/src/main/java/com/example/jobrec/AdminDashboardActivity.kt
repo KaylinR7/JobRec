@@ -129,9 +129,13 @@ class AdminDashboardActivity : AppCompatActivity() {
                 true
             }
             R.id.action_logout -> {
-                // Clear any overrides when logging out
+                // Clear all user session data when logging out
                 val sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
-                sharedPreferences.edit().putBoolean("override_to_student", false).apply()
+                sharedPreferences.edit()
+                    .putBoolean("override_to_student", false)
+                    .remove("user_type")
+                    .remove("user_id")
+                    .apply()
 
                 auth.signOut()
                 val intent = Intent(this, LoginActivity::class.java)
