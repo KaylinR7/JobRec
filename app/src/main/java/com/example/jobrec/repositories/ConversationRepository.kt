@@ -1,8 +1,8 @@
 package com.example.jobrec.repositories
 
 import com.example.jobrec.models.Conversation
-import com.example.jobrec.models.InterviewDetails
 import com.example.jobrec.models.Message
+import com.example.jobrec.models.InterviewDetails
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -78,20 +78,21 @@ class ConversationRepository {
     }
 
     suspend fun getUserConversations(userId: String): List<Conversation> {
+        // Get conversations where user is the candidate (without sorting)
         val candidateConversations = db.collection("conversations")
             .whereEqualTo("candidateId", userId)
-            .orderBy("updatedAt", Query.Direction.DESCENDING)
             .get()
             .await()
             .toObjects(Conversation::class.java)
 
+        // Get conversations where user is the company (without sorting)
         val companyConversations = db.collection("conversations")
             .whereEqualTo("companyId", userId)
-            .orderBy("updatedAt", Query.Direction.DESCENDING)
             .get()
             .await()
             .toObjects(Conversation::class.java)
 
+        // Combine and sort in memory
         return (candidateConversations + companyConversations).sortedByDescending { it.updatedAt.seconds }
     }
 
