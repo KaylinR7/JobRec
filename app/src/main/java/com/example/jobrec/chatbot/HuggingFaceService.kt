@@ -1,5 +1,6 @@
 package com.example.jobrec.chatbot
 
+import android.util.Log
 import com.google.gson.annotations.SerializedName
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -10,6 +11,7 @@ import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
+import java.util.concurrent.TimeUnit
 
 /**
  * Service interface for Hugging Face API
@@ -58,9 +60,9 @@ class HuggingFaceService {
 
     private val client = OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
-        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
     private val retrofit = Retrofit.Builder()
@@ -100,11 +102,11 @@ class HuggingFaceService {
                         .trim()
                 }
             } else {
-                android.util.Log.e(TAG, "API Error: ${response.code()} - ${response.message()}")
+                Log.e(TAG, "API Error: ${response.code()} - ${response.message()}")
                 "I'm having trouble understanding that. Could you try asking in a different way?"
             }
         } catch (e: Exception) {
-            android.util.Log.e(TAG, "Exception in generateResponse", e)
+            Log.e(TAG, "Exception in generateResponse", e)
             "I'm sorry, I'm having trouble connecting to my knowledge base right now. Please try again later."
         }
     }

@@ -23,9 +23,6 @@ class JobsActivity : AppCompatActivity() {
     private lateinit var filterChipGroup: ChipGroup
     private lateinit var jobsAdapter: JobsAdapter
     private val db = FirebaseFirestore.getInstance()
-    private var currentQuery: Query = db.collection("jobs")
-        .whereEqualTo("status", "active")
-        .orderBy("postedDate", Query.Direction.DESCENDING)
     private lateinit var fieldFilterInput: MaterialAutoCompleteTextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,10 +96,22 @@ class JobsActivity : AppCompatActivity() {
     }
 
     private fun loadJobs() {
-        currentQuery.get()
+        // Simple query without complex filters or ordering
+        db.collection("jobs")
+            .get()
             .addOnSuccessListener { documents ->
-                val jobs = documents.mapNotNull { it.toObject(Job::class.java) }
-                jobsAdapter.submitList(jobs)
+                val allJobs = documents.mapNotNull { doc ->
+                    try {
+                        val job = doc.toObject(Job::class.java)
+                        job.id = doc.id
+                        // Filter active jobs in memory
+                        if (job.status == "active") job else null
+                    } catch (e: Exception) {
+                        null
+                    }
+                }.sortedByDescending { it.postedDate.toDate() } // Sort in memory
+
+                jobsAdapter.submitList(allJobs)
             }
             .addOnFailureListener { e ->
                 Toast.makeText(this, "Error loading jobs: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -113,39 +122,47 @@ class JobsActivity : AppCompatActivity() {
 
 
     private fun filterJobs() {
-        var query: Query = db.collection("jobs")
-            .whereEqualTo("status", "active")
-
-        // Apply search filter
+        // Get search filter
         val searchText = searchEditText.text.toString().trim().lowercase()
+        val selectedField = fieldFilterInput.text.toString().trim()
 
         // Show loading state
         jobsAdapter.submitList(null)
         findViewById<View>(R.id.progressBar).visibility = View.VISIBLE
 
-        // Apply field filter
-        val selectedField = fieldFilterInput.text.toString().trim()
-        if (selectedField.isNotEmpty()) {
-            query = query.whereEqualTo("field", selectedField)
-        }
-
-        // Add explicit ordering to match the index
-        query = query.orderBy("postedDate", Query.Direction.DESCENDING)
-
-        query.get()
+        // Simple query without complex filters or ordering
+        db.collection("jobs")
+            .get()
             .addOnSuccessListener { documents ->
-                val jobs = documents.mapNotNull { it.toObject(Job::class.java) }
+                // Get all jobs and filter in memory
+                val allJobs = documents.mapNotNull { doc ->
+                    try {
+                        val job = doc.toObject(Job::class.java)
+                        job.id = doc.id
+                        // Only include active jobs
+                        if (job.status == "active") job else null
+                    } catch (e: Exception) {
+                        null
+                    }
+                }.sortedByDescending { it.postedDate.toDate() } // Sort in memory
+
+                // Apply field filter in memory
+                val fieldFilteredJobs = if (selectedField.isNotEmpty()) {
+                    allJobs.filter { job -> job.jobField.equals(selectedField, ignoreCase = true) }
+                } else {
+                    allJobs
+                }
 
                 // Apply search filter in memory
-                val filteredJobs = if (searchText.isNotEmpty()) {
-                    jobs.filter { job ->
+                val searchFilteredJobs = if (searchText.isNotEmpty()) {
+                    fieldFilteredJobs.filter { job ->
                         job.title.lowercase().contains(searchText) ||
                                 job.description.lowercase().contains(searchText) ||
                                 job.location.lowercase().contains(searchText) ||
                                 job.type.lowercase().contains(searchText)
                     }
                 } else {
-                    jobs
+                    fieldFilteredJobs
                 }
 
                 // Apply type filters
@@ -161,12 +178,12 @@ class JobsActivity : AppCompatActivity() {
                     }.filterNotNull()
 
                     if (types.isNotEmpty()) {
-                        filteredJobs.filter { job -> types.contains(job.type) }
+                        searchFilteredJobs.filter { job -> types.contains(job.type) }
                     } else {
-                        filteredJobs
+                        searchFilteredJobs
                     }
                 } else {
-                    filteredJobs
+                    searchFilteredJobs
                 }
 
                 // Update UI

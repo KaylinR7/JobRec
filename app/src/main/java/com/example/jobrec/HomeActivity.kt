@@ -282,19 +282,22 @@ class HomeActivity : AppCompatActivity() {
 
     private fun loadRecentJobs() {
         Log.d(TAG, "Loading recent jobs...")
+        // Simple query without complex filters
         db.collection("jobs")
-            .whereEqualTo("status", "active")
             .get()
             .addOnSuccessListener { documents ->
                 Log.d(TAG, "Found ${documents.size()} jobs")
                 val jobs = documents.mapNotNull { doc ->
                     try {
-                        doc.toObject(Job::class.java).copy(id = doc.id)
+                        val job = doc.toObject(Job::class.java).copy(id = doc.id)
+                        // Filter active jobs in memory
+                        if (job.status == "active") job else null
                     } catch (e: Exception) {
                         Log.e(TAG, "Error converting document to Job object: ${e.message}")
                         null
                     }
-                }
+                }.sortedByDescending { it.postedDate.toDate() } // Sort in memory
+
                 Log.d(TAG, "Successfully mapped ${jobs.size} jobs")
                 recentJobsAdapter.submitList(jobs)
                 binding.swipeRefreshLayout.isRefreshing = false
@@ -308,19 +311,22 @@ class HomeActivity : AppCompatActivity() {
 
     private fun loadRecommendedJobs() {
         Log.d(TAG, "Loading recommended jobs...")
+        // Simple query without complex filters
         db.collection("jobs")
-            .whereEqualTo("status", "active")
             .get()
             .addOnSuccessListener { documents ->
                 Log.d(TAG, "Found ${documents.size()} recommended jobs")
                 val jobs = documents.mapNotNull { doc ->
                     try {
-                        doc.toObject(Job::class.java).copy(id = doc.id)
+                        val job = doc.toObject(Job::class.java).copy(id = doc.id)
+                        // Filter active jobs in memory
+                        if (job.status == "active") job else null
                     } catch (e: Exception) {
                         Log.e(TAG, "Error converting document to Job object: ${e.message}")
                         null
                     }
-                }
+                }.sortedByDescending { it.postedDate.toDate() } // Sort in memory
+
                 Log.d(TAG, "Successfully mapped ${jobs.size} recommended jobs")
                 recommendedJobsAdapter.submitList(jobs)
             }

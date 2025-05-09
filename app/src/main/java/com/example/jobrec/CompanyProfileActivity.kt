@@ -18,7 +18,7 @@ class CompanyProfileActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
     private lateinit var companyId: String
-    
+
     // Profile views
     private lateinit var companyLogo: CircleImageView
     private lateinit var companyNameText: TextView
@@ -46,14 +46,14 @@ class CompanyProfileActivity : AppCompatActivity() {
         // Initialize Firebase
         db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
-        
+
         Log.d("CompanyProfile", "Starting CompanyProfileActivity")
-        
+
         // Get company ID from intent or find it using the current user's email
         companyId = intent.getStringExtra("companyId") ?: run {
             val currentUser = auth.currentUser
             Log.d("CompanyProfile", "Current user email: ${currentUser?.email}")
-            
+
             if (currentUser != null) {
                 // Query companies collection to find the company with matching email
                 db.collection("companies")
@@ -164,7 +164,7 @@ class CompanyProfileActivity : AppCompatActivity() {
 
     private fun loadCompanyData() {
         Log.d("CompanyProfile", "Loading data for company ID: $companyId")
-        
+
         db.collection("companies").document(companyId)
             .get()
             .addOnSuccessListener { document ->
@@ -213,13 +213,16 @@ class CompanyProfileActivity : AppCompatActivity() {
                 totalApplicationsText.text = documents.size().toString()
             }
 
-        // Load active jobs
+        // Load all jobs and filter active ones in memory
         db.collection("jobs")
             .whereEqualTo("companyId", companyId)
-            .whereEqualTo("status", "active")
             .get()
             .addOnSuccessListener { documents ->
-                activeJobsText.text = documents.size().toString()
+                // Count active jobs in memory
+                val activeJobsCount = documents.count { doc ->
+                    doc.getString("status") == "active"
+                }
+                activeJobsText.text = activeJobsCount.toString()
             }
     }
 
@@ -230,4 +233,4 @@ class CompanyProfileActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-} 
+}

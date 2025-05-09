@@ -76,12 +76,30 @@ class CompanyJobsFragment : Fragment() {
 
     private fun loadJobs() {
         companyId?.let { id ->
+            // Simple query without complex ordering
             db.collection("jobs")
                 .whereEqualTo("companyId", id)
-                .orderBy("postedAt", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener { documents ->
-                    val jobs = documents.mapNotNull { it.toObject(Job::class.java) }
+                    val jobs = documents.mapNotNull { doc ->
+                        try {
+                            val job = doc.toObject(Job::class.java)
+                            job.id = doc.id
+                            job
+                        } catch (e: Exception) {
+                            Log.e("CompanyJobsFragment", "Error converting job document", e)
+                            null
+                        }
+                    }.sortedByDescending {
+                        // Sort in memory by posted date
+                        try {
+                            it.postedDate.toDate()
+                        } catch (e: Exception) {
+                            // Fallback if postedDate is not available
+                            java.util.Date()
+                        }
+                    }
+
                     jobsAdapter.submitList(jobs)
                     emptyView.visibility = if (jobs.isEmpty()) View.VISIBLE else View.GONE
                 }

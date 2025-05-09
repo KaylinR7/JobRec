@@ -223,13 +223,16 @@ class CompanyDashboardActivity : AppCompatActivity() {
     }
 
     private fun loadDashboardData() {
-        // Load active jobs count
+        // Load all jobs and filter active ones in memory
         db.collection("jobs")
             .whereEqualTo("companyId", companyId)
-            .whereEqualTo("status", "active")
             .get()
             .addOnSuccessListener { documents ->
-                activeJobsCount.text = documents.size().toString()
+                // Count active jobs in memory
+                val activeJobsCount = documents.count { doc ->
+                    doc.getString("status") == "active"
+                }
+                this.activeJobsCount.text = activeJobsCount.toString()
             }
 
         // Load applications count

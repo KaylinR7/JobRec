@@ -14,11 +14,14 @@ import com.example.jobrec.models.FieldCategories
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
@@ -38,10 +41,14 @@ class CandidateSearchActivity : AppCompatActivity() {
     private lateinit var locationFilter: AutoCompleteTextView
     private lateinit var fieldFilter: AutoCompleteTextView
     private lateinit var subFieldFilter: AutoCompleteTextView
-    private lateinit var searchButton: MaterialButton
+    private lateinit var applyFiltersButton: MaterialButton
     private lateinit var clearFiltersButton: MaterialButton
     private lateinit var resultsRecyclerView: RecyclerView
     private lateinit var resultsAdapter: CandidateSearchAdapter
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var filterButton: MaterialButton
+    private lateinit var searchFab: FloatingActionButton
+    private lateinit var resultsCountText: TextView
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -69,13 +76,48 @@ class CandidateSearchActivity : AppCompatActivity() {
 
         // Setup UI components
         setupRecyclerView()
-        setupSearchButton()
+        setupFilterButton()
+        setupSearchFab()
+        setupApplyFiltersButton()
         setupClearFiltersButton()
+    }
+
+    private fun setupFilterButton() {
+        filterButton.setOnClickListener {
+            // Open the drawer from the right side
+            drawerLayout.openDrawer(GravityCompat.END)
+        }
+    }
+
+    private fun setupSearchFab() {
+        searchFab.setOnClickListener {
+            performSearch()
+        }
+    }
+
+    private fun setupApplyFiltersButton() {
+        applyFiltersButton.setOnClickListener {
+            // Close drawer and perform search
+            drawerLayout.closeDrawer(GravityCompat.END)
+            performSearch()
+        }
     }
 
     private fun initializeViews() {
         toolbar = findViewById(R.id.toolbar)
         searchInput = findViewById(R.id.searchInput)
+
+        // Initialize drawer layout
+        drawerLayout = findViewById(R.id.drawerLayout)
+
+        // Initialize filter button and search FAB
+        filterButton = findViewById(R.id.filterButton)
+        searchFab = findViewById(R.id.searchFab)
+
+        // Initialize results count text
+        resultsCountText = findViewById(R.id.resultsCountText)
+
+        // Initialize drawer filter controls
         skillsFilter = findViewById(R.id.skillsFilter)
         selectedSkillsChipGroup = findViewById(R.id.selectedSkillsChipGroup)
         educationFilter = findViewById(R.id.educationFilter)
@@ -83,8 +125,12 @@ class CandidateSearchActivity : AppCompatActivity() {
         locationFilter = findViewById(R.id.locationFilter)
         fieldFilter = findViewById(R.id.fieldFilter)
         subFieldFilter = findViewById(R.id.subFieldFilter)
-        searchButton = findViewById(R.id.searchButton)
+
+        // Initialize drawer buttons
+        applyFiltersButton = findViewById(R.id.applyFiltersButton)
         clearFiltersButton = findViewById(R.id.clearFiltersButton)
+
+        // Initialize results recycler view
         resultsRecyclerView = findViewById(R.id.resultsRecyclerView)
     }
 
@@ -105,36 +151,38 @@ class CandidateSearchActivity : AppCompatActivity() {
         allFields.clear()
         allEducationLevels.clear()
 
-        // Load all users to extract filter options
+        // Load all users to extract filter options - using simple query
         db.collection("users")
-            .whereEqualTo("role", "user")
             .get()
             .addOnSuccessListener { documents ->
                 documents.forEach { document ->
                     try {
                         val user = document.toObject(User::class.java).copy(id = document.id)
-                        allUsers.add(user)
+                        // Only process users with role="user"
+                        if (user.role == "user") {
+                            allUsers.add(user)
 
-                        // Count skills
-                        user.skills.forEach { skill ->
-                            allSkills[skill] = allSkills.getOrDefault(skill, 0) + 1
-                        }
+                            // Count skills
+                            user.skills.forEach { skill ->
+                                allSkills[skill] = allSkills.getOrDefault(skill, 0) + 1
+                            }
 
-                        // Count locations
-                        if (user.address.isNotEmpty()) {
-                            allLocations[user.address] = allLocations.getOrDefault(user.address, 0) + 1
-                        }
+                            // Count locations
+                            if (user.address.isNotEmpty()) {
+                                allLocations[user.address] = allLocations.getOrDefault(user.address, 0) + 1
+                            }
 
-                        // Count fields/industries
-                        if (user.field.isNotEmpty()) {
-                            allFields[user.field] = allFields.getOrDefault(user.field, 0) + 1
-                        }
+                            // Count fields/industries
+                            if (user.field.isNotEmpty()) {
+                                allFields[user.field] = allFields.getOrDefault(user.field, 0) + 1
+                            }
 
-                        // Count education levels
-                        user.education.forEach { education ->
-                            if (education.degree.isNotEmpty()) {
-                                allEducationLevels[education.degree] =
-                                    allEducationLevels.getOrDefault(education.degree, 0) + 1
+                            // Count education levels
+                            user.education.forEach { education ->
+                                if (education.degree.isNotEmpty()) {
+                                    allEducationLevels[education.degree] =
+                                        allEducationLevels.getOrDefault(education.degree, 0) + 1
+                                }
                             }
                         }
                     } catch (e: Exception) {
@@ -475,32 +523,31 @@ class CandidateSearchActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun setupSearchButton() {
-        searchButton.setOnClickListener {
-            performSearch()
+    private fun setupClearFiltersButton() {
+        clearFiltersButton.setOnClickListener {
+            clearFilters()
         }
     }
 
-    private fun setupClearFiltersButton() {
-        clearFiltersButton.setOnClickListener {
-            // Clear all filters
-            searchInput.setText("")
-            educationFilter.setText("")
-            experienceFilter.setText("")
-            locationFilter.setText("")
-            fieldFilter.setText("")
-            subFieldFilter.setText("")
-            subFieldFilter.isEnabled = false
+    private fun clearFilters() {
+        // Clear all filters
+        searchInput.setText("")
+        educationFilter.setText("")
+        experienceFilter.setText("")
+        locationFilter.setText("")
+        fieldFilter.setText("")
+        subFieldFilter.setText("")
+        subFieldFilter.isEnabled = false
 
-            // Clear selected skills
-            selectedSkills.clear()
-            selectedSkillsChipGroup.removeAllViews()
+        // Clear selected skills
+        selectedSkills.clear()
+        selectedSkillsChipGroup.removeAllViews()
 
-            // Clear results
-            resultsAdapter.submitList(emptyList())
+        // Clear results
+        resultsAdapter.submitList(emptyList())
+        resultsCountText.visibility = View.GONE
 
-            Toast.makeText(this, "Filters cleared", Toast.LENGTH_SHORT).show()
-        }
+        Toast.makeText(this, "Filters cleared", Toast.LENGTH_SHORT).show()
     }
 
     private fun updateSubFieldDropdown(field: String) {
@@ -558,17 +605,17 @@ class CandidateSearchActivity : AppCompatActivity() {
         val field = fieldFilter.text.toString().trim()
         val subField = subFieldFilter.text.toString().trim()
 
-        // Simplified approach: Get all users and filter in memory
-        // This reduces the number of indexes needed and simplifies the query logic
+        // Super simple query approach - just get all users
+        // This is the simplest possible query with no complex filters
         db.collection("users")
-            .whereEqualTo("role", "user") // Only search for regular users, not companies or admins
             .get()
             .addOnSuccessListener { documents ->
-                // Convert documents to User objects
+                // Convert documents to User objects and filter by role in memory
                 val allUsers = documents.mapNotNull { document ->
                     try {
                         val user = document.toObject(User::class.java)
-                        user.copy(id = document.id)
+                        // Only include regular users, not companies or admins
+                        if (user.role == "user") user.copy(id = document.id) else null
                     } catch (e: Exception) {
                         null
                     }
@@ -644,6 +691,10 @@ class CandidateSearchActivity : AppCompatActivity() {
                 // Update UI with filtered results
                 resultsAdapter.submitList(filteredCandidates)
 
+                // Update results count text
+                resultsCountText.text = "${filteredCandidates.size} candidates found"
+                resultsCountText.visibility = View.VISIBLE
+
                 // Show appropriate message
                 if (filteredCandidates.isEmpty()) {
                     Toast.makeText(this, "No candidates found matching your criteria", Toast.LENGTH_SHORT).show()
@@ -659,5 +710,14 @@ class CandidateSearchActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
+    }
+
+    override fun onBackPressed() {
+        // Close drawer if open, otherwise go back
+        if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
+            drawerLayout.closeDrawer(GravityCompat.END)
+        } else {
+            super.onBackPressed()
+        }
     }
 }

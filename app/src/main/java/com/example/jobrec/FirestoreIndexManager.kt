@@ -7,10 +7,10 @@ import com.google.firebase.firestore.SetOptions
 class FirestoreIndexManager {
     companion object {
         private const val TAG = "FirestoreIndexManager"
-        
+
         fun createIndexes() {
             val db = FirebaseFirestore.getInstance()
-            
+
             // Jobs Collection Indexes
             val jobsIndexes = listOf(
                 // For company jobs listing
@@ -28,7 +28,7 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-                
+
                 // For recent jobs listing
                 hashMapOf(
                     "collectionGroup" to "jobs",
@@ -40,7 +40,7 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-                
+
                 // For job search
                 hashMapOf(
                     "collectionGroup" to "jobs",
@@ -56,7 +56,7 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-                
+
                 // For job type filtering
                 hashMapOf(
                     "collectionGroup" to "jobs",
@@ -71,9 +71,29 @@ class FirestoreIndexManager {
                             "order" to "DESCENDING"
                         )
                     )
+                ),
+
+                // For active jobs filtering with sorting
+                hashMapOf(
+                    "collectionGroup" to "jobs",
+                    "queryScope" to "COLLECTION",
+                    "fields" to listOf(
+                        hashMapOf(
+                            "fieldPath" to "status",
+                            "order" to "ASCENDING"
+                        ),
+                        hashMapOf(
+                            "fieldPath" to "postedDate",
+                            "order" to "DESCENDING"
+                        ),
+                        hashMapOf(
+                            "fieldPath" to "__name__",
+                            "order" to "DESCENDING"
+                        )
+                    )
                 )
             )
-            
+
             // Applications Collection Indexes
             val applicationsIndexes = listOf(
                 // For user's applications
@@ -91,7 +111,7 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-                
+
                 // For company's applications
                 hashMapOf(
                     "collectionGroup" to "applications",
@@ -107,7 +127,7 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-                
+
                 // For application status filtering
                 hashMapOf(
                     "collectionGroup" to "applications",
@@ -124,7 +144,7 @@ class FirestoreIndexManager {
                     )
                 )
             )
-            
+
             // Users Collection Indexes
             val usersIndexes = listOf(
                 // For email lookup
@@ -138,7 +158,7 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-                
+
                 // For user type filtering
                 hashMapOf(
                     "collectionGroup" to "Users",
@@ -151,7 +171,7 @@ class FirestoreIndexManager {
                     )
                 )
             )
-            
+
             // Companies Collection Indexes
             val companiesIndexes = listOf(
                 // For company search
@@ -165,7 +185,7 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-                
+
                 // For company location filtering
                 hashMapOf(
                     "collectionGroup" to "Companies",
@@ -178,7 +198,7 @@ class FirestoreIndexManager {
                     )
                 )
             )
-            
+
             // Create all indexes
             try {
                 // Create jobs indexes
@@ -193,7 +213,7 @@ class FirestoreIndexManager {
                             Log.e(TAG, "Error creating jobs index $index", e)
                         }
                 }
-                
+
                 // Create applications indexes
                 applicationsIndexes.forEachIndexed { index, applicationsIndex ->
                     db.collection("indexes")
@@ -206,7 +226,7 @@ class FirestoreIndexManager {
                             Log.e(TAG, "Error creating applications index $index", e)
                         }
                 }
-                
+
                 // Create users indexes
                 usersIndexes.forEachIndexed { index, usersIndex ->
                     db.collection("indexes")
@@ -219,7 +239,7 @@ class FirestoreIndexManager {
                             Log.e(TAG, "Error creating users index $index", e)
                         }
                 }
-                
+
                 // Create companies indexes
                 companiesIndexes.forEachIndexed { index, companiesIndex ->
                     db.collection("indexes")
@@ -237,4 +257,4 @@ class FirestoreIndexManager {
             }
         }
     }
-} 
+}

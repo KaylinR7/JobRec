@@ -3,30 +3,33 @@
     <!-- Base colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    
+
     <!-- Theme colors -->
     <color name="primary">#000000</color>
     <color name="primary_dark">#212121</color>
     <color name="primary_light">#757575</color>
     <color name="accent">#757575</color>
     <color name="accent_dark">#616161</color>
-    
+
     <!-- Background colors -->
     <color name="background">#FFFFFF</color>
     <color name="surface">#FFFFFF</color>
     <color name="on_background">#000000</color>
     <color name="on_surface">#000000</color>
-    
+
     <!-- Text colors -->
     <color name="text_primary">#000000</color>
     <color name="text_secondary">#757575</color>
-    
+
     <!-- Error colors -->
     <color name="error">#B00020</color>
-    
+
     <!-- Application Status Colors -->
     <color name="status_pending">#FFA500</color>
     <color name="status_reviewed">#2196F3</color>
     <color name="status_accepted">#4CAF50</color>
     <color name="status_rejected">#F44336</color>
+
+    <!-- Chip Colors -->
+    <color name="custom_chip_background">#EFEFEF</color>
 </resources>

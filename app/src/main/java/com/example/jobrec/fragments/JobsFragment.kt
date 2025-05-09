@@ -51,11 +51,27 @@ class JobsFragment : Fragment() {
     }
 
     private fun loadJobs() {
+        // Simple query without complex ordering
         db.collection("jobs")
-            .orderBy("postedAt", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
-                val jobs = documents.mapNotNull { it.toObject(Job::class.java) }
+                val jobs = documents.mapNotNull { doc ->
+                    try {
+                        val job = doc.toObject(Job::class.java)
+                        job.id = doc.id
+                        job
+                    } catch (e: Exception) {
+                        null
+                    }
+                }.sortedByDescending {
+                    // Sort in memory by posted date
+                    try {
+                        it.postedDate.toDate()
+                    } catch (e: Exception) {
+                        // Fallback if postedDate is not available
+                        java.util.Date()
+                    }
+                }
                 jobsAdapter.submitList(jobs)
             }
             .addOnFailureListener { e ->

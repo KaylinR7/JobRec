@@ -13,6 +13,8 @@ import android.widget.AutoCompleteTextView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.jobrec.databinding.ActivitySearchBinding
 import com.google.android.material.chip.Chip
@@ -28,6 +30,7 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var jobTypeChipGroup: ChipGroup
     private lateinit var noResultsView: View
+    private lateinit var drawerLayout: DrawerLayout
 
     // South African provinces
     private val provinces = arrayOf(
@@ -93,8 +96,11 @@ class SearchActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Search Jobs"
 
+        // Initialize drawer layout
+        drawerLayout = binding.drawerLayout
+
         // Initialize views
-        jobTypeChipGroup = binding.jobTypeChipGroup
+        jobTypeChipGroup = findViewById(R.id.jobTypeChipGroup)
 
         // Initialize "no results" view
         noResultsView = layoutInflater.inflate(R.layout.layout_no_search_results, binding.root, false)
@@ -111,11 +117,36 @@ class SearchActivity : AppCompatActivity() {
         // Setup job type chips
         setupJobTypeChips()
 
-        // Setup search button
-        setupSearchButton()
+        // Setup filter button
+        setupFilterButton()
+
+        // Setup search FAB
+        setupSearchFab()
+
+        // Setup apply filters button
+        findViewById<View>(R.id.applyFiltersButton).setOnClickListener {
+            // Close drawer and perform search
+            drawerLayout.closeDrawer(GravityCompat.END)
+            performSearch()
+        }
 
         // Setup clear filters button
-        setupClearFiltersButton()
+        findViewById<View>(R.id.clearFiltersButton).setOnClickListener {
+            clearFilters()
+        }
+    }
+
+    private fun setupFilterButton() {
+        binding.filterButton.setOnClickListener {
+            // Open the drawer from the right side
+            drawerLayout.openDrawer(GravityCompat.END)
+        }
+    }
+
+    private fun setupSearchFab() {
+        binding.searchFab.setOnClickListener {
+            performSearch()
+        }
     }
 
     private fun setupSearchInput() {
@@ -140,46 +171,63 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun setupJobTypeChips() {
+        // Get chip references from the drawer layout
+        val chipFullTime = findViewById<Chip>(R.id.chipFullTime)
+        val chipPartTime = findViewById<Chip>(R.id.chipPartTime)
+        val chipContract = findViewById<Chip>(R.id.chipContract)
+        val chipRemote = findViewById<Chip>(R.id.chipRemote)
+
         // Set click listeners for job type chips
-        binding.chipFullTime.setOnCheckedChangeListener { _, _ ->
+        chipFullTime.setOnCheckedChangeListener { _, _ ->
             // Optional: Auto-search when chip selection changes
         }
-        binding.chipPartTime.setOnCheckedChangeListener { _, _ ->
+        chipPartTime.setOnCheckedChangeListener { _, _ ->
             // Optional: Auto-search when chip selection changes
         }
-        binding.chipContract.setOnCheckedChangeListener { _, _ ->
+        chipContract.setOnCheckedChangeListener { _, _ ->
             // Optional: Auto-search when chip selection changes
         }
-        binding.chipRemote.setOnCheckedChangeListener { _, _ ->
+        chipRemote.setOnCheckedChangeListener { _, _ ->
             // Optional: Auto-search when chip selection changes
         }
     }
 
-    private fun setupClearFiltersButton() {
-        binding.clearFiltersButton.setOnClickListener {
-            // Clear all filters
-            binding.searchInput.text?.clear()
-            binding.jobFieldDropdown.text?.clear()
-            binding.jobSpecializationDropdown.text?.clear()
-            binding.provinceDropdown.text?.clear()
-            binding.salaryRangeDropdown.text?.clear()
-            binding.experienceDropdown.text?.clear()
+    private fun clearFilters() {
+        // Clear all filters
+        binding.searchInput.text?.clear()
 
-            // Disable specialization dropdown
-            binding.jobSpecializationDropdown.isEnabled = false
+        // Clear drawer dropdowns
+        val jobFieldDropdown = findViewById<AutoCompleteTextView>(R.id.jobFieldDropdown)
+        val jobSpecializationDropdown = findViewById<AutoCompleteTextView>(R.id.jobSpecializationDropdown)
+        val provinceDropdown = findViewById<AutoCompleteTextView>(R.id.provinceDropdown)
+        val salaryRangeDropdown = findViewById<AutoCompleteTextView>(R.id.salaryRangeDropdown)
+        val experienceDropdown = findViewById<AutoCompleteTextView>(R.id.experienceDropdown)
 
-            // Uncheck all chips
-            binding.chipFullTime.isChecked = false
-            binding.chipPartTime.isChecked = false
-            binding.chipContract.isChecked = false
-            binding.chipRemote.isChecked = false
+        jobFieldDropdown.text?.clear()
+        jobSpecializationDropdown.text?.clear()
+        provinceDropdown.text?.clear()
+        salaryRangeDropdown.text?.clear()
+        experienceDropdown.text?.clear()
 
-            // Clear results
-            jobsAdapter.submitList(emptyList())
-            binding.resultsCountText.visibility = View.GONE
+        // Disable specialization dropdown
+        jobSpecializationDropdown.isEnabled = false
 
-            Toast.makeText(this, "Filters cleared", Toast.LENGTH_SHORT).show()
-        }
+        // Uncheck all chips
+        val chipFullTime = findViewById<Chip>(R.id.chipFullTime)
+        val chipPartTime = findViewById<Chip>(R.id.chipPartTime)
+        val chipContract = findViewById<Chip>(R.id.chipContract)
+        val chipRemote = findViewById<Chip>(R.id.chipRemote)
+
+        chipFullTime.isChecked = false
+        chipPartTime.isChecked = false
+        chipContract.isChecked = false
+        chipRemote.isChecked = false
+
+        // Clear results
+        jobsAdapter.submitList(emptyList())
+        binding.resultsCountText.visibility = View.GONE
+
+        Toast.makeText(this, "Filters cleared", Toast.LENGTH_SHORT).show()
     }
 
     private fun setupRecyclerView() {
@@ -197,27 +245,34 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun setupDropdowns() {
+        // Get drawer dropdowns
+        val provinceDropdown = findViewById<AutoCompleteTextView>(R.id.provinceDropdown)
+        val salaryRangeDropdown = findViewById<AutoCompleteTextView>(R.id.salaryRangeDropdown)
+        val experienceDropdown = findViewById<AutoCompleteTextView>(R.id.experienceDropdown)
+        val jobFieldDropdown = findViewById<AutoCompleteTextView>(R.id.jobFieldDropdown)
+        val jobSpecializationDropdown = findViewById<AutoCompleteTextView>(R.id.jobSpecializationDropdown)
+
         // Setup Province dropdown
         val provinceAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, provinces)
-        (binding.provinceLayout.editText as? AutoCompleteTextView)?.setAdapter(provinceAdapter)
+        provinceDropdown.setAdapter(provinceAdapter)
 
         // Setup Salary Range dropdown
         val salaryAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, salaryRanges)
-        (binding.salaryRangeLayout.editText as? AutoCompleteTextView)?.setAdapter(salaryAdapter)
+        salaryRangeDropdown.setAdapter(salaryAdapter)
 
         // Setup Experience Level dropdown
         val experienceAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, experienceLevels)
-        (binding.experienceLayout.editText as? AutoCompleteTextView)?.setAdapter(experienceAdapter)
+        experienceDropdown.setAdapter(experienceAdapter)
 
         // Setup Job Field dropdown
         val jobFieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, jobFields)
-        (binding.jobFieldLayout.editText as? AutoCompleteTextView)?.setAdapter(jobFieldAdapter)
+        jobFieldDropdown.setAdapter(jobFieldAdapter)
 
         // Initially disable specialization dropdown
-        binding.jobSpecializationDropdown.isEnabled = false
+        jobSpecializationDropdown.isEnabled = false
 
         // Setup field selection listener to update specializations
-        binding.jobFieldDropdown.setOnItemClickListener { _, _, position, _ ->
+        jobFieldDropdown.setOnItemClickListener { _, _, position, _ ->
             val selectedField = jobFields[position]
             updateSpecializationDropdown(selectedField)
         }
@@ -226,27 +281,25 @@ class SearchActivity : AppCompatActivity() {
     private fun updateSpecializationDropdown(field: String) {
         // Get subcategories for the selected field from FieldCategories
         val subFields = FieldCategories.fields[field] ?: listOf()
+        val jobSpecializationDropdown = findViewById<AutoCompleteTextView>(R.id.jobSpecializationDropdown)
 
         if (subFields.isNotEmpty()) {
             // Create a list with "Any" option first, then all subcategories
             val options = listOf("Any") + subFields
 
             val subFieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, options)
-            binding.jobSpecializationDropdown.setAdapter(subFieldAdapter)
-            binding.jobSpecializationDropdown.isEnabled = true
-            binding.jobSpecializationDropdown.setText("", false) // Clear previous selection
+            jobSpecializationDropdown.setAdapter(subFieldAdapter)
+            jobSpecializationDropdown.isEnabled = true
+            jobSpecializationDropdown.setText("", false) // Clear previous selection
         } else {
             // If no subcategories exist for this field
-            binding.jobSpecializationDropdown.setText("")
-            binding.jobSpecializationDropdown.isEnabled = false
+            jobSpecializationDropdown.setText("")
+            jobSpecializationDropdown.isEnabled = false
         }
     }
 
-    private fun setupSearchButton() {
-        binding.searchButton.setOnClickListener {
-            performSearch()
-        }
-    }
+    // We don't need this method anymore as we're using the search FAB
+    // and the apply filters button in the drawer
 
     private fun performSearch() {
         // Show loading state
@@ -254,34 +307,47 @@ class SearchActivity : AppCompatActivity() {
 
         // Get search parameters
         val searchText = binding.searchInput.text.toString().trim()
-        val selectedField = (binding.jobFieldLayout.editText as? AutoCompleteTextView)?.text.toString()
-        val selectedSpecialization = (binding.jobSpecializationLayout.editText as? AutoCompleteTextView)?.text.toString()
-        val selectedProvince = (binding.provinceLayout.editText as? AutoCompleteTextView)?.text.toString()
-        val selectedSalary = (binding.salaryRangeLayout.editText as? AutoCompleteTextView)?.text.toString()
-        val selectedExperience = (binding.experienceLayout.editText as? AutoCompleteTextView)?.text.toString()
+
+        // Get drawer filter values
+        val jobFieldDropdown = findViewById<AutoCompleteTextView>(R.id.jobFieldDropdown)
+        val jobSpecializationDropdown = findViewById<AutoCompleteTextView>(R.id.jobSpecializationDropdown)
+        val provinceDropdown = findViewById<AutoCompleteTextView>(R.id.provinceDropdown)
+        val salaryRangeDropdown = findViewById<AutoCompleteTextView>(R.id.salaryRangeDropdown)
+        val experienceDropdown = findViewById<AutoCompleteTextView>(R.id.experienceDropdown)
+
+        val selectedField = jobFieldDropdown.text.toString()
+        val selectedSpecialization = jobSpecializationDropdown.text.toString()
+        val selectedProvince = provinceDropdown.text.toString()
+        val selectedSalary = salaryRangeDropdown.text.toString()
+        val selectedExperience = experienceDropdown.text.toString()
 
         // Get selected job types
         val selectedJobTypes = mutableListOf<String>()
-        if (binding.chipFullTime.isChecked) selectedJobTypes.add("Full-time")
-        if (binding.chipPartTime.isChecked) selectedJobTypes.add("Part-time")
-        if (binding.chipContract.isChecked) selectedJobTypes.add("Contract")
-        if (binding.chipRemote.isChecked) selectedJobTypes.add("Remote")
+        val chipFullTime = findViewById<Chip>(R.id.chipFullTime)
+        val chipPartTime = findViewById<Chip>(R.id.chipPartTime)
+        val chipContract = findViewById<Chip>(R.id.chipContract)
+        val chipRemote = findViewById<Chip>(R.id.chipRemote)
 
-        // Simplified approach: Get all active jobs and filter in memory
+        if (chipFullTime.isChecked) selectedJobTypes.add("Full-time")
+        if (chipPartTime.isChecked) selectedJobTypes.add("Part-time")
+        if (chipContract.isChecked) selectedJobTypes.add("Contract")
+        if (chipRemote.isChecked) selectedJobTypes.add("Remote")
+
+        // Even simpler approach: Get all jobs and filter status in memory
         db.collection("jobs")
-            .whereEqualTo("status", "active")
-            .orderBy("postedDate", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
-                // Convert documents to Job objects
+                // Convert documents to Job objects and filter active jobs
                 val allJobs = documents.mapNotNull { doc ->
                     try {
-                        doc.toObject(Job::class.java).copy(id = doc.id)
+                        val job = doc.toObject(Job::class.java).copy(id = doc.id)
+                        // Only include active jobs
+                        if (job.status == "active") job else null
                     } catch (e: Exception) {
                         Log.e("SearchActivity", "Error converting document to Job object: ${e.message}")
                         null
                     }
-                }
+                }.sortedByDescending { it.postedDate.toDate() } // Sort in memory
 
                 // Apply all filters in memory
                 val filteredJobs = allJobs.filter { job ->
@@ -387,5 +453,14 @@ class SearchActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
+    }
+
+    override fun onBackPressed() {
+        // Close drawer if open, otherwise go back
+        if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
+            drawerLayout.closeDrawer(GravityCompat.END)
+        } else {
+            super.onBackPressed()
+        }
     }
 }
