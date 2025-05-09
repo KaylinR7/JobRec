@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import de.hdodenhof.circleimageview.CircleImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -41,6 +42,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
     private lateinit var jobTitleText: TextView
     private lateinit var participantNameText: TextView
+    private lateinit var participantImageView: CircleImageView
     private lateinit var messagesRecyclerView: RecyclerView
     private lateinit var emptyView: TextView
     private lateinit var messageInput: TextInputEditText
@@ -95,6 +97,7 @@ class ChatActivity : AppCompatActivity() {
         toolbar = findViewById(R.id.toolbar)
         jobTitleText = findViewById(R.id.jobTitleText)
         participantNameText = findViewById(R.id.participantNameText)
+        participantImageView = findViewById(R.id.participantImageView)
         messagesRecyclerView = findViewById(R.id.messagesRecyclerView)
         emptyView = findViewById(R.id.emptyView)
         messageInput = findViewById(R.id.messageInput)
@@ -221,12 +224,20 @@ class ChatActivity : AppCompatActivity() {
         jobTitleText.text = conversation.jobTitle
 
         // Determine if current user is the candidate or the company
-        if (currentUserId == conversation.candidateId) {
-            participantNameText.text = conversation.companyName
-            receiverId = conversation.companyId
-        } else {
+        val isCompanyView = currentUserId == conversation.companyId
+
+        if (isCompanyView) {
+            // Company viewing candidate
             participantNameText.text = conversation.candidateName
             receiverId = conversation.candidateId
+            // Use a person icon for candidates
+            participantImageView.setImageResource(R.drawable.ic_person)
+        } else {
+            // Candidate viewing company
+            participantNameText.text = conversation.companyName
+            receiverId = conversation.companyId
+            // Use a building icon for companies
+            participantImageView.setImageResource(R.drawable.ic_company_placeholder)
         }
     }
 
@@ -237,7 +248,6 @@ class ChatActivity : AppCompatActivity() {
         // Start new listener
         messagesListener = db.collection("messages")
             .whereEqualTo("conversationId", conversationId)
-            .orderBy("createdAt", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Toast.makeText(this, "Error loading messages: ${error.message}", Toast.LENGTH_SHORT).show()
@@ -246,6 +256,8 @@ class ChatActivity : AppCompatActivity() {
 
                 if (snapshot != null && !snapshot.isEmpty) {
                     val messages = snapshot.toObjects(Message::class.java)
+                        .sortedBy { it.createdAt.seconds } // Sort in memory
+
                     messageAdapter.submitList(messages)
                     messagesRecyclerView.scrollToPosition(messages.size - 1)
                     emptyView.visibility = View.GONE

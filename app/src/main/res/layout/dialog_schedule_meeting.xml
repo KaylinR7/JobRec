@@ -20,7 +20,9 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Date">
+        android:hint="Date"
+        app:boxStrokeColor="#000000"
+        app:hintTextColor="#757575">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/dateInput"
@@ -38,7 +40,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="Time">
+        android:hint="Time"
+        app:boxStrokeColor="#000000"
+        app:hintTextColor="#757575">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/timeInput"
@@ -56,7 +60,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="Duration">
+        android:hint="Duration"
+        app:boxStrokeColor="#000000"
+        app:hintTextColor="#757575">
 
         <AutoCompleteTextView
             android:id="@+id/durationInput"
@@ -73,7 +79,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="Meeting Type">
+        android:hint="Meeting Type"
+        app:boxStrokeColor="#000000"
+        app:hintTextColor="#757575">
 
         <AutoCompleteTextView
             android:id="@+id/meetingTypeInput"
@@ -91,7 +99,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:hint="Location"
-        android:visibility="gone">
+        android:visibility="gone"
+        app:boxStrokeColor="#000000"
+        app:hintTextColor="#757575">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/locationInput"
@@ -109,7 +119,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:hint="Meeting Link"
-        android:visibility="gone">
+        android:visibility="gone"
+        app:boxStrokeColor="#000000"
+        app:hintTextColor="#757575">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/meetingLinkInput"
@@ -133,13 +145,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="Cancel" />
+            android:text="Cancel"
+            android:textColor="#000000" />
 
         <Button
             android:id="@+id/scheduleButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Schedule" />
+            android:backgroundTint="#000000"
+            android:text="Schedule"
+            android:textColor="#FFFFFF" />
 
     </LinearLayout>
 

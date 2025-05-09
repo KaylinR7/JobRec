@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:paddingStart="60dp"
+    android:paddingTop="4dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="4dp">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/messageCard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:maxWidth="260dp"
-        app:cardBackgroundColor="#E1F5FE"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="1dp"
+        android:maxWidth="280dp"
+        app:cardBackgroundColor="#E6E6E6"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -22,15 +24,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:padding="10dp">
 
             <!-- Regular message content -->
             <TextView
                 android:id="@+id/messageText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/black"
-                android:textSize="16sp" />
+                android:textColor="#000000"
+                android:textSize="16sp"
+                tools:text="Hello, how are you doing today?" />
 
             <!-- Meeting details (visible only for meeting messages) -->
             <LinearLayout
@@ -38,16 +41,29 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:background="#F5F5F5"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:padding="8dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Meeting Invitation"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/meetingDateText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:drawablePadding="4dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="14sp" />
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    tools:text="Date: May 15, 2023" />
 
                 <TextView
                     android:id="@+id/meetingTimeText"
@@ -55,8 +71,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:drawablePadding="4dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="14sp" />
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    tools:text="Time: 10:30 AM" />
 
                 <TextView
                     android:id="@+id/meetingTypeText"
@@ -64,8 +81,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:drawablePadding="4dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="14sp" />
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    tools:text="Type: Online" />
 
                 <TextView
                     android:id="@+id/meetingLocationText"
@@ -73,9 +91,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:drawablePadding="4dp"
-                    android:textColor="@android:color/black"
+                    android:textColor="#000000"
                     android:textSize="14sp"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    tools:text="Location: 123 Main St"
+                    tools:visibility="visible" />
 
                 <TextView
                     android:id="@+id/meetingLinkText"
@@ -84,18 +104,21 @@
                     android:layout_marginTop="4dp"
                     android:autoLink="web"
                     android:drawablePadding="4dp"
-                    android:textColor="@android:color/black"
+                    android:textColor="#1976D2"
                     android:textSize="14sp"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    tools:text="Link: https://meet.google.com/abc-def-ghi"
+                    tools:visibility="visible" />
 
                 <TextView
                     android:id="@+id/meetingStatusText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:textColor="@android:color/black"
+                    android:textColor="#757575"
                     android:textSize="14sp"
-                    android:textStyle="italic" />
+                    android:textStyle="italic"
+                    tools:text="Pending response" />
 
             </LinearLayout>
 
@@ -106,7 +129,8 @@
                 android:layout_gravity="end"
                 android:layout_marginTop="4dp"
                 android:textColor="#757575"
-                android:textSize="12sp" />
+                android:textSize="11sp"
+                tools:text="10:30 AM" />
 
         </LinearLayout>
 

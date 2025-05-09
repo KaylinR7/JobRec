@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.jobrec.R
 import com.example.jobrec.models.Conversation
 import com.google.firebase.auth.FirebaseAuth
+import de.hdodenhof.circleimageview.CircleImageView
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -41,6 +42,7 @@ class ConversationAdapter(
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val profileImageView: CircleImageView = itemView.findViewById(R.id.profileImageView)
         private val participantNameText: TextView = itemView.findViewById(R.id.participantNameText)
         private val jobTitleText: TextView = itemView.findViewById(R.id.jobTitleText)
         private val lastMessageText: TextView = itemView.findViewById(R.id.lastMessageText)
@@ -49,24 +51,37 @@ class ConversationAdapter(
 
         fun bind(conversation: Conversation) {
             // Set participant name based on current user
-            if (currentUserId == conversation.candidateId) {
-                participantNameText.text = conversation.companyName
-            } else {
+            val isCompanyView = currentUserId == conversation.companyId
+
+            if (isCompanyView) {
+                // Company viewing candidate
                 participantNameText.text = conversation.candidateName
+                // Use a person icon for candidates
+                profileImageView.setImageResource(R.drawable.ic_person)
+            } else {
+                // Candidate viewing company
+                participantNameText.text = conversation.companyName
+                // Use a building icon for companies
+                profileImageView.setImageResource(R.drawable.ic_company_placeholder)
             }
 
             // Set job title
             jobTitleText.text = conversation.jobTitle
 
-            // Set last message
-            lastMessageText.text = conversation.lastMessage
+            // Set last message with preview
+            val lastMsg = conversation.lastMessage
+            if (lastMsg.startsWith("Meeting invitation")) {
+                lastMessageText.text = "📅 Meeting invitation"
+            } else {
+                lastMessageText.text = lastMsg
+            }
 
             // Set time
             val messageDate = conversation.lastMessageTime.toDate()
             timeText.text = formatMessageTime(messageDate)
 
             // Set unread count
-            if (conversation.unreadCount > 0 && 
+            if (conversation.unreadCount > 0 &&
                 ((currentUserId == conversation.candidateId && conversation.lastMessageSender == conversation.companyId) ||
                  (currentUserId == conversation.companyId && conversation.lastMessageSender == conversation.candidateId))) {
                 unreadCountText.visibility = View.VISIBLE
@@ -84,7 +99,7 @@ class ConversationAdapter(
         private fun formatMessageTime(date: Date): String {
             calendar.time = date
             val messageCalendar = calendar.clone() as Calendar
-            
+
             return when {
                 // Today
                 messageCalendar.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR) &&

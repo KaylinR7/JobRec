@@ -17,11 +17,11 @@ data class Message(
 )
 
 data class InterviewDetails(
-    val date: Timestamp,
-    val time: String,
-    val duration: Int, // in minutes
-    val type: String, // online, in-person
+    val date: Timestamp = Timestamp.now(),
+    val time: String = "",
+    val duration: Int = 60, // in minutes
+    val type: String = "online", // online, in-person
     val location: String? = null,
     val meetingLink: String? = null,
     val status: String = "pending" // pending, accepted, rejected, completed
-) 
+)
