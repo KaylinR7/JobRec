@@ -64,24 +64,8 @@ class SearchActivity : AppCompatActivity() {
         "10+ years"
     )
 
-    // Job Fields - same as in signup
-    private val jobFields = arrayOf(
-        "Information Technology",
-        "Healthcare",
-        "Law",
-        "Education",
-        "Engineering",
-        "Business",
-        "Finance",
-        "Marketing",
-        "Sales",
-        "Customer Service",
-        "Manufacturing",
-        "Construction",
-        "Transportation",
-        "Hospitality",
-        "Other"
-    )
+    // Job Fields - get directly from FieldCategories to ensure consistency
+    private val jobFields = FieldCategories.fields.keys.toTypedArray()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

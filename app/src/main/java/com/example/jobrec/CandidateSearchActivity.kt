@@ -296,24 +296,8 @@ class CandidateSearchActivity : AppCompatActivity() {
         locationFilter.setAdapter(locationsAdapter)
 
         // Setup field/industry dropdown with custom adapter
-        // Standard field options from signup
-        val standardFields = arrayOf(
-            "Information Technology",
-            "Healthcare",
-            "Law",
-            "Education",
-            "Engineering",
-            "Business",
-            "Finance",
-            "Marketing",
-            "Sales",
-            "Customer Service",
-            "Manufacturing",
-            "Construction",
-            "Transportation",
-            "Hospitality",
-            "Other"
-        )
+        // Standard field options - get directly from FieldCategories to ensure consistency
+        val standardFields = FieldCategories.fields.keys.toTypedArray()
 
         // Create a combined map of all fields
         val allFieldsCombined = mutableMapOf<String, Int>()

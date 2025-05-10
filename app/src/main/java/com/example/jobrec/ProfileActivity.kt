@@ -43,6 +43,7 @@ import com.example.jobrec.adapters.CertificateAdapter
 class ProfileActivity : AppCompatActivity() {
     private lateinit var toolbar: MaterialToolbar
     private lateinit var nameInput: TextInputEditText
+    private lateinit var surnameInput: TextInputEditText
     private lateinit var emailInput: TextInputEditText
     private lateinit var phoneNumberInput: TextInputEditText
     private lateinit var addressInput: TextInputEditText
@@ -56,7 +57,6 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var saveButton: MaterialButton
     private lateinit var provinceInput: AutoCompleteTextView
     private lateinit var yearsOfExperienceInput: AutoCompleteTextView
-    private lateinit var certificateInput: AutoCompleteTextView
     private lateinit var expectedSalaryInput: AutoCompleteTextView
     private lateinit var fieldInput: AutoCompleteTextView
     private lateinit var subFieldInput: AutoCompleteTextView
@@ -136,6 +136,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun initializeViews() {
         nameInput = findViewById(R.id.nameInput)
+        surnameInput = findViewById(R.id.surnameInput)
         emailInput = findViewById(R.id.emailInput)
         phoneNumberInput = findViewById(R.id.phoneNumberInput)
         addressInput = findViewById(R.id.addressInput)
@@ -150,10 +151,8 @@ class ProfileActivity : AppCompatActivity() {
         skillsChipGroup = findViewById(R.id.skillsChipGroup)
         experienceRecyclerView = findViewById(R.id.experienceRecyclerView)
         educationRecyclerView = findViewById(R.id.educationRecyclerView)
-        certificatesRecyclerView = findViewById(R.id.certificatesRecyclerView)
         addExperienceButton = findViewById(R.id.addExperienceButton)
         addEducationButton = findViewById(R.id.addEducationButton)
-        addCertificateButton = findViewById(R.id.addCertificateButton)
         referencesContainer = findViewById(R.id.referencesContainer)
         addReferenceButton = findViewById(R.id.addReferenceButton)
         getSuggestionsButton = findViewById(R.id.getSuggestionsButton)
@@ -161,7 +160,6 @@ class ProfileActivity : AppCompatActivity() {
         // Initialize dropdown fields
         provinceInput = findViewById(R.id.provinceInput)
         yearsOfExperienceInput = findViewById(R.id.yearsOfExperienceInput)
-        certificateInput = findViewById(R.id.certificateInput)
         expectedSalaryInput = findViewById(R.id.expectedSalaryInput)
         fieldInput = findViewById(R.id.fieldInput)
         subFieldInput = findViewById(R.id.subFieldInput)
@@ -169,13 +167,10 @@ class ProfileActivity : AppCompatActivity() {
         // Set up RecyclerViews
         experienceRecyclerView.layoutManager = LinearLayoutManager(this)
         educationRecyclerView.layoutManager = LinearLayoutManager(this)
-        certificatesRecyclerView.layoutManager = LinearLayoutManager(this)
         experienceAdapter = ExperienceAdapter()
         educationAdapter = EducationAdapter()
-        certificateAdapter = CertificateAdapter()
         experienceRecyclerView.adapter = experienceAdapter
         educationRecyclerView.adapter = educationAdapter
-        certificatesRecyclerView.adapter = certificateAdapter
     }
 
     private fun setupClickListeners() {
@@ -193,10 +188,6 @@ class ProfileActivity : AppCompatActivity() {
 
         addEducationButton.setOnClickListener {
             educationAdapter.addNewEducation()
-        }
-
-        addCertificateButton.setOnClickListener {
-            certificateAdapter.addNewCertificate()
         }
 
         addReferenceButton.setOnClickListener {
@@ -264,24 +255,20 @@ class ProfileActivity : AppCompatActivity() {
         val provinceAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, provinces)
         provinceInput.setAdapter(provinceAdapter)
 
+        // Make dropdown show all options when clicked
+        provinceInput.setOnClickListener {
+            provinceInput.showDropDown()
+        }
+
         // Years of Experience options
         val yearsOptions = arrayOf("0-1 years", "1-3 years", "3-5 years", "5-10 years", "10+ years")
         val yearsAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, yearsOptions)
         yearsOfExperienceInput.setAdapter(yearsAdapter)
 
-        // Certificate options
-        val certificateOptions = arrayOf(
-            "None",
-            "High School Diploma",
-            "Associate's Degree",
-            "Bachelor's Degree",
-            "Master's Degree",
-            "PhD",
-            "Professional Certification",
-            "Technical Certification"
-        )
-        val certificateAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, certificateOptions)
-        certificateInput.setAdapter(certificateAdapter)
+        // Make dropdown show all options when clicked
+        yearsOfExperienceInput.setOnClickListener {
+            yearsOfExperienceInput.showDropDown()
+        }
 
         // Expected Salary options
         val salaryOptions = arrayOf(
@@ -295,26 +282,20 @@ class ProfileActivity : AppCompatActivity() {
         val salaryAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, salaryOptions)
         expectedSalaryInput.setAdapter(salaryAdapter)
 
-        // Field options
-        val fieldOptions = arrayOf(
-            "Information Technology",
-            "Healthcare",
-            "Law",
-            "Education",
-            "Engineering",
-            "Business",
-            "Finance",
-            "Marketing",
-            "Sales",
-            "Customer Service",
-            "Manufacturing",
-            "Construction",
-            "Transportation",
-            "Hospitality",
-            "Other"
-        )
+        // Make dropdown show all options when clicked
+        expectedSalaryInput.setOnClickListener {
+            expectedSalaryInput.showDropDown()
+        }
+
+        // Field options - get directly from FieldCategories to ensure consistency
+        val fieldOptions = FieldCategories.fields.keys.toTypedArray()
         val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, fieldOptions)
         fieldInput.setAdapter(fieldAdapter)
+
+        // Make dropdown show all options when clicked
+        fieldInput.setOnClickListener {
+            fieldInput.showDropDown()
+        }
 
         // Initially disable subfield dropdown
         subFieldInput.isEnabled = false
@@ -338,6 +319,7 @@ class ProfileActivity : AppCompatActivity() {
 
                         // Load basic information
                         nameInput.setText(document.getString("name"))
+                        surnameInput.setText(document.getString("surname"))
                         emailInput.setText(document.getString("email"))
                         phoneNumberInput.setText(document.getString("phoneNumber"))
                         addressInput.setText(document.getString("address"))
@@ -346,7 +328,6 @@ class ProfileActivity : AppCompatActivity() {
                         // Load dropdown values
                         provinceInput.setText(document.getString("province") ?: "")
                         yearsOfExperienceInput.setText(document.getString("yearsOfExperience") ?: "")
-                        certificateInput.setText(document.getString("certificate") ?: "")
                         expectedSalaryInput.setText(document.getString("expectedSalary") ?: "")
 
                         // Load field and update subfield dropdown
@@ -396,18 +377,7 @@ class ProfileActivity : AppCompatActivity() {
                             )
                         }
 
-                        // Load certificates
-                        val certificatesList = document.get("certificates") as? List<Map<String, Any>>
-                        certificatesList?.forEach { certificate ->
-                            certificateAdapter.addCertificate(
-                                CertificateAdapter.Certificate(
-                                    certificate["name"] as? String ?: "",
-                                    certificate["issuer"] as? String ?: "",
-                                    certificate["year"] as? String ?: "",
-                                    certificate["description"] as? String ?: ""
-                                )
-                            )
-                        }
+
 
                         // Load references
                         val referencesList = document.get("references") as? List<Map<String, String>>
@@ -451,6 +421,7 @@ class ProfileActivity : AppCompatActivity() {
         if (userId != null) {
             val userData = hashMapOf(
                 "name" to nameInput.text.toString().trim(),
+                "surname" to surnameInput.text.toString().trim(),
                 "email" to emailInput.text.toString().trim(),
                 "phoneNumber" to phoneNumberInput.text.toString().trim(),
                 "address" to addressInput.text.toString().trim(),
@@ -461,11 +432,9 @@ class ProfileActivity : AppCompatActivity() {
                 "skills" to getSkillsList(),
                 "experience" to experienceAdapter.getExperienceList(),
                 "education" to educationAdapter.getEducationList(),
-                "certificates" to certificateAdapter.getCertificatesList(),
                 "references" to getReferencesList(),
                 "province" to provinceInput.text.toString().trim(),
                 "yearsOfExperience" to yearsOfExperienceInput.text.toString().trim(),
-                "certificate" to certificateInput.text.toString().trim(),
                 "expectedSalary" to expectedSalaryInput.text.toString().trim(),
                 "field" to fieldInput.text.toString().trim(),
                 "subField" to subFieldInput.text.toString().trim()
@@ -639,9 +608,16 @@ class ProfileActivity : AppCompatActivity() {
         val subFields = FieldCategories.fields[field] ?: listOf()
 
         if (subFields.isNotEmpty()) {
+            // Create a new adapter each time to ensure fresh data
             val subFieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, subFields)
             subFieldInput.setAdapter(subFieldAdapter)
             subFieldInput.isEnabled = true
+            subFieldInput.setText("", false) // Clear previous selection
+
+            // Force dropdown to show all options when clicked
+            subFieldInput.setOnClickListener {
+                subFieldInput.showDropDown()
+            }
         } else {
             // If no subcategories exist for this field
             subFieldInput.setText("")

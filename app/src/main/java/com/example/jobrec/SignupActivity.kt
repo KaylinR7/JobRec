@@ -821,24 +821,8 @@ class SignupActivity : AppCompatActivity() {
         val salaryAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, salaryOptions)
         expectedSalaryInput.setAdapter(salaryAdapter)
 
-        // Field options
-        val fieldOptions = arrayOf(
-            "Information Technology",
-            "Healthcare",
-            "Law",
-            "Education",
-            "Engineering",
-            "Business",
-            "Finance",
-            "Marketing",
-            "Sales",
-            "Customer Service",
-            "Manufacturing",
-            "Construction",
-            "Transportation",
-            "Hospitality",
-            "Other"
-        )
+        // Field options - get directly from FieldCategories to ensure consistency
+        val fieldOptions = FieldCategories.fields.keys.toTypedArray()
         val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, fieldOptions)
         fieldInput.setAdapter(fieldAdapter)
 

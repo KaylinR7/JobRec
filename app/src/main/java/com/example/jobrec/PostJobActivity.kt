@@ -77,24 +77,8 @@ class PostJobActivity : AppCompatActivity() {
     }
 
     private fun setupJobTypeDropdown() {
-        // Job Field options - same as in signup
-        val fieldOptions = arrayOf(
-            "Information Technology",
-            "Healthcare",
-            "Law",
-            "Education",
-            "Engineering",
-            "Business",
-            "Finance",
-            "Marketing",
-            "Sales",
-            "Customer Service",
-            "Manufacturing",
-            "Construction",
-            "Transportation",
-            "Hospitality",
-            "Other"
-        )
+        // Job Field options - get directly from FieldCategories to ensure consistency
+        val fieldOptions = FieldCategories.fields.keys.toTypedArray()
         val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, fieldOptions)
         jobFieldInput.setAdapter(fieldAdapter)
 

@@ -14,7 +14,7 @@ object FieldCategories {
             "System Administration",
             "Database Administration"
         ),
-        "Medical" to listOf(
+        "Healthcare" to listOf(
             "General Practice",
             "Nursing",
             "Pharmacy",
@@ -73,6 +73,114 @@ object FieldCategories {
             "Educational Technology",
             "Adult Education",
             "STEM Education"
+        ),
+        "Business" to listOf(
+            "Business Administration",
+            "Entrepreneurship",
+            "Operations Management",
+            "Project Management",
+            "Human Resources",
+            "Supply Chain Management",
+            "Business Analysis",
+            "Strategic Planning",
+            "Consulting",
+            "International Business"
+        ),
+        "Marketing" to listOf(
+            "Digital Marketing",
+            "Content Marketing",
+            "Social Media Marketing",
+            "SEO/SEM",
+            "Brand Management",
+            "Market Research",
+            "Public Relations",
+            "Advertising",
+            "Email Marketing",
+            "Product Marketing"
+        ),
+        "Sales" to listOf(
+            "Account Management",
+            "Business Development",
+            "Inside Sales",
+            "Field Sales",
+            "Sales Management",
+            "Retail Sales",
+            "Technical Sales",
+            "Pharmaceutical Sales",
+            "Real Estate Sales",
+            "Telemarketing"
+        ),
+        "Customer Service" to listOf(
+            "Call Center Support",
+            "Technical Support",
+            "Customer Success",
+            "Client Relations",
+            "Help Desk",
+            "Customer Experience",
+            "Account Services",
+            "Customer Retention",
+            "Complaint Resolution",
+            "Front Desk"
+        ),
+        "Manufacturing" to listOf(
+            "Production Management",
+            "Quality Control",
+            "Assembly Line",
+            "Machining",
+            "Fabrication",
+            "Process Improvement",
+            "Inventory Management",
+            "Maintenance",
+            "Safety Management",
+            "Lean Manufacturing"
+        ),
+        "Construction" to listOf(
+            "Project Management",
+            "Architecture",
+            "Carpentry",
+            "Electrical",
+            "Plumbing",
+            "HVAC",
+            "Masonry",
+            "Roofing",
+            "Site Supervision",
+            "Estimating"
+        ),
+        "Transportation" to listOf(
+            "Logistics",
+            "Fleet Management",
+            "Truck Driving",
+            "Shipping",
+            "Air Transport",
+            "Maritime Transport",
+            "Public Transit",
+            "Freight Forwarding",
+            "Dispatch",
+            "Warehouse Management"
+        ),
+        "Hospitality" to listOf(
+            "Hotel Management",
+            "Food Service",
+            "Event Planning",
+            "Tourism",
+            "Catering",
+            "Front Desk",
+            "Housekeeping",
+            "Restaurant Management",
+            "Concierge Services",
+            "Cruise Line Operations"
+        ),
+        "Other" to listOf(
+            "Agriculture",
+            "Arts & Entertainment",
+            "Government",
+            "Non-Profit",
+            "Real Estate",
+            "Research",
+            "Sports & Recreation",
+            "Telecommunications",
+            "Utilities",
+            "Miscellaneous"
         )
     )
 
@@ -89,7 +197,7 @@ object FieldCategories {
             "Certified Information Systems Security Professional (CISSP)",
             "Certified Ethical Hacker (CEH)"
         ),
-        "Medical" to listOf(
+        "Healthcare" to listOf(
             "Basic Life Support (BLS)",
             "Advanced Cardiac Life Support (ACLS)",
             "First Aid Certification",
@@ -112,6 +220,42 @@ object FieldCategories {
             "Contract Management Certification",
             "Legal Ethics Certification",
             "International Law Certification"
+        ),
+        "Engineering" to listOf(
+            "Professional Engineer (PE)",
+            "Engineer in Training (EIT)",
+            "Certified Engineering Technician",
+            "Project Management Professional (PMP)",
+            "Six Sigma Certification",
+            "LEED Certification",
+            "AutoCAD Certification",
+            "Certified Manufacturing Engineer",
+            "Certified Quality Engineer",
+            "Certified Safety Professional"
+        ),
+        "Finance" to listOf(
+            "Certified Public Accountant (CPA)",
+            "Chartered Financial Analyst (CFA)",
+            "Certified Financial Planner (CFP)",
+            "Certified Management Accountant (CMA)",
+            "Financial Risk Manager (FRM)",
+            "Chartered Alternative Investment Analyst (CAIA)",
+            "Certified Internal Auditor (CIA)",
+            "Certified Fraud Examiner (CFE)",
+            "Enrolled Agent (EA)",
+            "Series 7 License"
+        ),
+        "Education" to listOf(
+            "Teaching License/Certification",
+            "Special Education Certification",
+            "TESOL/TEFL Certification",
+            "School Administrator License",
+            "School Counselor Certification",
+            "Reading Specialist Certification",
+            "Gifted Education Certification",
+            "Educational Technology Certification",
+            "Early Childhood Education Certification",
+            "National Board Certification"
         )
     )
 
