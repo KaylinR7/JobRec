@@ -263,7 +263,7 @@ class SignupActivity : AppCompatActivity() {
     }
 
     private fun registerUser() {
-        val name = nameInput.text.toString().trim()
+        val name = nameInput.text.toString().trim() + surnameInput.text.toString().trim()
         val email = emailInput.text.toString().trim()
         val password = passwordInput.text.toString()
         val cellNumber = cellNumberInput.text.toString().trim()
