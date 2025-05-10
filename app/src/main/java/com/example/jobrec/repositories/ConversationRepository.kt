@@ -113,154 +113,86 @@ class ConversationRepository {
         // Add logging
         android.util.Log.d("ConversationRepo", "Getting conversations for user: $userId")
 
-        // First, check if there are any conversations with numeric companyId and fix them
-        val allConversationsCheck = db.collection("conversations")
-            .get()
-            .await()
+        // Get the current user's email
+        val currentUser = auth.currentUser
+        val userEmail = currentUser?.email
 
-        for (doc in allConversationsCheck.documents) {
-            val companyId = doc.getString("companyId") ?: continue
-
-            // If companyId is numeric, update it to current user ID
-            if (companyId.matches(Regex("\\d+"))) {
-                android.util.Log.d("ConversationRepo", "Auto-fixing: Found numeric companyId $companyId in conversation ${doc.id}")
-
-                // Check if this user is a company
-                val isCompany = db.collection("companies")
-                    .whereEqualTo("userId", userId)
-                    .get()
-                    .await()
-                    .size() > 0
-
-                if (isCompany) {
-                    android.util.Log.d("ConversationRepo", "Auto-fixing: User is a company, updating conversation ${doc.id}")
-
-                    // Update the conversation with current user ID
-                    db.collection("conversations")
-                        .document(doc.id)
-                        .update("companyId", userId)
-                        .await()
-
-                    android.util.Log.d("ConversationRepo", "Auto-fixing: Successfully updated conversation ${doc.id}")
-                }
-            }
+        if (userEmail == null) {
+            android.util.Log.d("ConversationRepo", "No email available for current user, returning empty list")
+            return emptyList()
         }
 
-        // Get conversations where user is the candidate (without sorting)
-        val candidateConversationsSnapshot = db.collection("conversations")
-            .whereEqualTo("candidateId", userId)
+        // Check if this is a company user by email
+        val companyByEmailSnapshot = db.collection("companies")
+            .whereEqualTo("email", userEmail)
             .get()
             .await()
 
-        android.util.Log.d("ConversationRepo", "Found ${candidateConversationsSnapshot.size()} candidate conversations")
+        val isCompanyUser = !companyByEmailSnapshot.isEmpty
+        android.util.Log.d("ConversationRepo", "Is company user (by email): $isCompanyUser")
 
-        val candidateConversations = candidateConversationsSnapshot.toObjects(Conversation::class.java)
+        if (isCompanyUser) {
+            // This is a company user, get company conversations
+            val companyDoc = companyByEmailSnapshot.documents[0]
+            val companyId = companyDoc.id
+            val companyName = companyDoc.getString("companyName") ?: "unknown"
 
-        // Get conversations where user is the company (without sorting)
-        android.util.Log.d("ConversationRepo", "Querying for company conversations with companyId = $userId")
+            android.util.Log.d("ConversationRepo", "Company user found: id=$companyId, name=$companyName")
 
-        val companyConversationsSnapshot = db.collection("conversations")
-            .whereEqualTo("companyId", userId)
-            .get()
-            .await()
+            // Update the company document with userId if it doesn't exist
+            if (companyDoc.getString("userId") == null) {
+                db.collection("companies")
+                    .document(companyId)
+                    .update("userId", userId)
+                    .await()
+                android.util.Log.d("ConversationRepo", "Updated company document with userId: $userId")
+            }
 
-        android.util.Log.d("ConversationRepo", "Found ${companyConversationsSnapshot.size()} company conversations")
-
-        // Check if we need to look for company conversations with a different ID
-        var additionalCompanyConversations = emptyList<Conversation>()
-        if (companyConversationsSnapshot.isEmpty) {
-            // Try to find the company's custom ID
-            val companyDoc = db.collection("companies")
-                .whereEqualTo("userId", userId)
+            // Get conversations where companyId matches the company document ID
+            val companyConversationsSnapshot = db.collection("conversations")
+                .whereEqualTo("companyId", companyId)
                 .get()
                 .await()
 
-            if (!companyDoc.isEmpty) {
-                val companyId = companyDoc.documents[0].getString("companyId")
-                if (companyId != null) {
-                    android.util.Log.d("ConversationRepo", "Found company with custom ID: $companyId, trying to find conversations")
+            android.util.Log.d("ConversationRepo", "Found ${companyConversationsSnapshot.size()} company conversations by companyId")
+            val companyConversations = companyConversationsSnapshot.toObjects(Conversation::class.java)
 
-                    val additionalSnapshot = db.collection("conversations")
-                        .whereEqualTo("companyId", companyId)
-                        .get()
-                        .await()
+            // Also get conversations where companyId matches the user ID (for backward compatibility)
+            val userIdConversationsSnapshot = db.collection("conversations")
+                .whereEqualTo("companyId", userId)
+                .get()
+                .await()
 
-                    android.util.Log.d("ConversationRepo", "Found ${additionalSnapshot.size()} additional company conversations with custom ID")
-                    additionalCompanyConversations = additionalSnapshot.toObjects(Conversation::class.java)
-                }
+            android.util.Log.d("ConversationRepo", "Found ${userIdConversationsSnapshot.size()} company conversations by userId")
+            val userIdConversations = userIdConversationsSnapshot.toObjects(Conversation::class.java)
+
+            // Combine and sort
+            val allCompanyConversations = (companyConversations + userIdConversations).distinctBy { it.id }
+            android.util.Log.d("ConversationRepo", "Total company conversations: ${allCompanyConversations.size}")
+
+            // Log each conversation for debugging
+            allCompanyConversations.forEach {
+                android.util.Log.d("ConversationRepo", "Company conversation: ${it.id}, with candidate: ${it.candidateName}")
             }
 
-            // Also check if this user is a candidate in any conversations
-            val candidateConversationsCheck = db.collection("conversations")
+            return allCompanyConversations.sortedByDescending { it.updatedAt.seconds }
+        } else {
+            // This is a student user, get candidate conversations
+            val candidateConversationsSnapshot = db.collection("conversations")
                 .whereEqualTo("candidateId", userId)
                 .get()
                 .await()
 
-            if (!candidateConversationsCheck.isEmpty) {
-                android.util.Log.d("ConversationRepo", "User is a candidate in ${candidateConversationsCheck.size()} conversations")
+            android.util.Log.d("ConversationRepo", "Found ${candidateConversationsSnapshot.size()} candidate conversations")
+            val candidateConversations = candidateConversationsSnapshot.toObjects(Conversation::class.java)
 
-                // For each conversation, check if we need to update the company ID
-                for (doc in candidateConversationsCheck.documents) {
-                    val companyId = doc.getString("companyId") ?: continue
-
-                    // If companyId is numeric, it might be a legacy ID
-                    if (companyId.matches(Regex("\\d+"))) {
-                        android.util.Log.d("ConversationRepo", "Found numeric company ID: $companyId in conversation ${doc.id}")
-
-                        // Try to find any company and use its userId
-                        val anyCompanyDoc = db.collection("companies")
-                            .limit(1)
-                            .get()
-                            .await()
-
-                        if (!anyCompanyDoc.isEmpty) {
-                            val firstCompany = anyCompanyDoc.documents[0]
-                            val companyUserId = firstCompany.getString("userId")
-                            if (companyUserId != null) {
-                                android.util.Log.d("ConversationRepo", "Updating conversation ${doc.id} with company userId: $companyUserId")
-
-                                // Update the conversation
-                                db.collection("conversations")
-                                    .document(doc.id)
-                                    .update("companyId", companyUserId)
-                                    .await()
-
-                                android.util.Log.d("ConversationRepo", "Successfully updated conversation ${doc.id}")
-                            }
-                        }
-                    }
-                }
+            // Log each conversation for debugging
+            candidateConversations.forEach {
+                android.util.Log.d("ConversationRepo", "Candidate conversation: ${it.id}, with company: ${it.companyName}")
             }
+
+            return candidateConversations.sortedByDescending { it.updatedAt.seconds }
         }
-
-        // Log all conversations in the database for debugging
-        val allConversationsSnapshot = db.collection("conversations")
-            .get()
-            .await()
-
-        android.util.Log.d("ConversationRepo", "Total conversations in database: ${allConversationsSnapshot.size()}")
-        allConversationsSnapshot.forEach { doc ->
-            val companyId = doc.getString("companyId") ?: "null"
-            val candidateId = doc.getString("candidateId") ?: "null"
-            android.util.Log.d("ConversationRepo", "Conversation ${doc.id}: companyId=$companyId, candidateId=$candidateId")
-        }
-
-        val companyConversations = companyConversationsSnapshot.toObjects(Conversation::class.java) + additionalCompanyConversations
-
-        // Log each conversation for debugging
-        candidateConversations.forEach {
-            android.util.Log.d("ConversationRepo", "Candidate conversation: ${it.id}, with company: ${it.companyName}")
-        }
-
-        companyConversations.forEach {
-            android.util.Log.d("ConversationRepo", "Company conversation: ${it.id}, with candidate: ${it.candidateName}")
-        }
-
-        // Combine and sort in memory
-        val allConversations = (candidateConversations + companyConversations)
-        android.util.Log.d("ConversationRepo", "Total conversations: ${allConversations.size}")
-
-        return allConversations.sortedByDescending { it.updatedAt.seconds }
     }
 
     suspend fun sendMessage(conversationId: String, content: String, receiverId: String): String {

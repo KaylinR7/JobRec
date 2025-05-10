@@ -55,15 +55,24 @@ class CompanyProfileActivity : AppCompatActivity() {
             Log.d("CompanyProfile", "Current user email: ${currentUser?.email}")
 
             if (currentUser != null) {
-                // Query companies collection to find the company with matching email
+                // Query companies collection to find the company with matching email (case-insensitive)
+                val userEmail = currentUser.email?.lowercase() ?: ""
+                Log.d("CompanyProfile", "Looking for company with email (lowercase): $userEmail")
+
+                // Get all companies and filter by email case-insensitively
                 db.collection("companies")
-                    .whereEqualTo("email", currentUser.email)
                     .get()
                     .addOnSuccessListener { documents ->
-                        Log.d("CompanyProfile", "Found ${documents.size()} documents")
-                        if (!documents.isEmpty) {
+                        Log.d("CompanyProfile", "Found ${documents.size()} total company documents")
+
+                        // Find company with matching email (case-insensitive)
+                        val companyDoc = documents.find { doc ->
+                            doc.getString("email")?.lowercase() == userEmail
+                        }
+
+                        if (companyDoc != null) {
                             // Get the registration number from the document
-                            val registrationNumber = documents.documents[0].getString("registrationNumber")
+                            val registrationNumber = companyDoc.getString("registrationNumber")
                             if (registrationNumber != null) {
                                 companyId = registrationNumber
                                 Log.d("CompanyProfile", "Found company ID (registration number): $companyId")

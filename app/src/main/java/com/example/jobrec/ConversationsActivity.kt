@@ -89,66 +89,73 @@ class ConversationsActivity : AppCompatActivity() {
     private fun checkUserType() {
         android.util.Log.d("ConversationsActivity", "Checking user type for userId: $currentUserId")
 
-        // First check if user exists in companies collection with userId field
-        db.collection("companies")
-            .whereEqualTo("userId", currentUserId)
-            .get()
-            .addOnSuccessListener { documents ->
-                if (!documents.isEmpty) {
-                    // User found as company with userId field
-                    isCompanyUser = true
-                    val companyDoc = documents.documents[0]
-                    val companyId = companyDoc.getString("companyId") ?: "unknown"
-                    val companyName = companyDoc.getString("companyName") ?: "unknown"
-                    android.util.Log.d("ConversationsActivity", "Company details - companyId: $companyId, name: $companyName")
-                    loadConversations()
-                } else {
-                    // If not found, check if user exists with companyId field
-                    db.collection("companies")
-                        .whereEqualTo("companyId", currentUserId)
-                        .get()
-                        .addOnSuccessListener { companyDocs ->
-                            isCompanyUser = !companyDocs.isEmpty
-                            android.util.Log.d("ConversationsActivity", "User is company (by companyId): $isCompanyUser")
+        // First check if the user's email is in the companies collection
+        val currentUserEmail = auth.currentUser?.email
+        if (currentUserEmail != null) {
+            db.collection("companies")
+                .whereEqualTo("email", currentUserEmail)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (!documents.isEmpty) {
+                        // User found as company by email
+                        isCompanyUser = true
+                        val companyDoc = documents.documents[0]
+                        val companyId = companyDoc.id
+                        val companyName = companyDoc.getString("companyName") ?: "unknown"
 
-                            if (isCompanyUser && !companyDocs.isEmpty) {
-                                val companyDoc = companyDocs.documents[0]
-                                val companyId = companyDoc.getString("companyId") ?: "unknown"
-                                val companyName = companyDoc.getString("companyName") ?: "unknown"
-                                android.util.Log.d("ConversationsActivity", "Company details - companyId: $companyId, name: $companyName")
-                            }
-
-                            // Also check if the user ID matches any companyId in conversations
-                            db.collection("conversations")
-                                .whereEqualTo("companyId", currentUserId)
-                                .get()
-                                .addOnSuccessListener { conversationDocs ->
-                                    if (!conversationDocs.isEmpty) {
-                                        isCompanyUser = true
-                                        android.util.Log.d("ConversationsActivity", "User is company (found in conversations): true")
-                                    }
-
-                                    // Finally, load conversations
-                                    loadConversations()
+                        // Update the company document with the userId field if it doesn't exist
+                        if (companyDoc.getString("userId") == null) {
+                            db.collection("companies")
+                                .document(companyId)
+                                .update("userId", currentUserId)
+                                .addOnSuccessListener {
+                                    android.util.Log.d("ConversationsActivity", "Updated company document with userId: $currentUserId")
                                 }
                                 .addOnFailureListener { e ->
-                                    android.util.Log.e("ConversationsActivity", "Error checking conversations", e)
-                                    loadConversations()
+                                    android.util.Log.e("ConversationsActivity", "Failed to update company with userId", e)
                                 }
                         }
-                        .addOnFailureListener { e ->
-                            android.util.Log.e("ConversationsActivity", "Error checking company by companyId", e)
-                            isCompanyUser = false
-                            loadConversations()
-                        }
+
+                        android.util.Log.d("ConversationsActivity", "User is company (by email): true, companyId: $companyId, name: $companyName")
+                        loadConversations()
+                    } else {
+                        // If not found by email, check if user exists in companies collection with userId field
+                        db.collection("companies")
+                            .whereEqualTo("userId", currentUserId)
+                            .get()
+                            .addOnSuccessListener { userIdDocs ->
+                                if (!userIdDocs.isEmpty) {
+                                    // User found as company with userId field
+                                    isCompanyUser = true
+                                    val companyDoc = userIdDocs.documents[0]
+                                    val companyId = companyDoc.id
+                                    val companyName = companyDoc.getString("companyName") ?: "unknown"
+                                    android.util.Log.d("ConversationsActivity", "User is company (by userId): true, companyId: $companyId, name: $companyName")
+                                } else {
+                                    // Not a company user
+                                    isCompanyUser = false
+                                    android.util.Log.d("ConversationsActivity", "User is not a company")
+                                }
+                                loadConversations()
+                            }
+                            .addOnFailureListener { e ->
+                                android.util.Log.e("ConversationsActivity", "Error checking company by userId", e)
+                                isCompanyUser = false
+                                loadConversations()
+                            }
+                    }
                 }
-            }
-            .addOnFailureListener { e ->
-                android.util.Log.e("ConversationsActivity", "Error checking user type", e)
-                // Default to student if there's an error
-                isCompanyUser = false
-                loadConversations()
-            }
+                .addOnFailureListener { e ->
+                    android.util.Log.e("ConversationsActivity", "Error checking company by email", e)
+                    isCompanyUser = false
+                    loadConversations()
+                }
+        } else {
+            // No email available, default to student
+            android.util.Log.d("ConversationsActivity", "No email available for current user, defaulting to student")
+            isCompanyUser = false
+            loadConversations()
+        }
     }
 
     private fun initializeViews() {
@@ -197,12 +204,12 @@ class ConversationsActivity : AppCompatActivity() {
     }
 
     private fun enableCompanyMode() {
-        // Always enable company mode for presentation
-        val sharedPreferences = getSharedPreferences("JobRecPrefs", MODE_PRIVATE)
-        sharedPreferences.edit().putBoolean("force_company_mode", true).apply()
+        // This method is now disabled to prevent data issues
+        android.util.Log.d("ConversationsActivity", "Company mode auto-enabling is disabled to prevent data issues")
 
-        isCompanyUser = true
-        android.util.Log.d("ConversationsActivity", "Company mode automatically enabled")
+        // Don't force company mode anymore
+        val sharedPreferences = getSharedPreferences("JobRecPrefs", MODE_PRIVATE)
+        sharedPreferences.edit().putBoolean("force_company_mode", false).apply()
     }
 
     private fun toggleCompanyMode() {
@@ -223,48 +230,11 @@ class ConversationsActivity : AppCompatActivity() {
     }
 
     private suspend fun fixConversations() {
-        // No need to update button UI since it's hidden
+        // This method is now a no-op to prevent modifying conversations that don't belong to the user
+        android.util.Log.d("ConversationsActivity", "Conversation fixing is disabled to prevent data issues")
 
-        try {
-            // First try the regular fixer
-            val fixer = ConversationFixer()
-            fixer.fixAllConversations()
-
-            // If that didn't work, try a direct approach
-            // Get all conversations
-            val conversations = db.collection("conversations")
-                .get()
-                .await()
-
-            android.util.Log.d("ConversationsActivity", "Direct fix: Found ${conversations.size()} conversations")
-
-            // For each conversation with a numeric companyId, update it to the current user ID
-            for (conversationDoc in conversations.documents) {
-                val companyId = conversationDoc.getString("companyId") ?: continue
-
-                // If companyId is numeric, update it to current user ID
-                if (companyId.matches(Regex("\\d+"))) {
-                    android.util.Log.d("ConversationsActivity", "Direct fix: Updating conversation ${conversationDoc.id} with current user ID")
-
-                    // Update the conversation with current user ID
-                    db.collection("conversations")
-                        .document(conversationDoc.id)
-                        .update("companyId", currentUserId)
-                        .await()
-
-                    android.util.Log.d("ConversationsActivity", "Direct fix: Successfully updated conversation ${conversationDoc.id}")
-                }
-            }
-
-            // Don't show toast for presentation
-            // Toast.makeText(this@ConversationsActivity, "Conversations fixed successfully", Toast.LENGTH_SHORT).show()
-            loadConversations()
-        } catch (e: Exception) {
-            android.util.Log.e("ConversationsActivity", "Error fixing conversations", e)
-            // Don't show error toast for presentation
-            // Toast.makeText(this@ConversationsActivity, "Error fixing conversations: ${e.message}", Toast.LENGTH_SHORT).show()
-            loadConversations() // Still try to load conversations even if fixing failed
-        }
+        // Just load conversations without modifying anything
+        loadConversations()
     }
 
     private fun setupToolbar() {
@@ -316,33 +286,9 @@ class ConversationsActivity : AppCompatActivity() {
         val userType = if (isCompanyUser) "COMPANY" else "STUDENT"
         android.util.Log.d("ConversationsActivity", "Loading conversations for $userType user: $currentUserId")
 
-        // Load conversations using the repository instead of direct Firestore queries
+        // Load conversations using the repository
         lifecycleScope.launch {
             try {
-                // If in company mode, try to directly update any conversations with numeric companyId
-                if (isCompanyUser) {
-                    val allConversationsCheck = db.collection("conversations")
-                        .get()
-                        .await()
-
-                    for (doc in allConversationsCheck.documents) {
-                        val companyId = doc.getString("companyId") ?: continue
-
-                        // If companyId is numeric, update it to current user ID
-                        if (companyId.matches(Regex("\\d+"))) {
-                            android.util.Log.d("ConversationsActivity", "Direct update: Found numeric companyId $companyId in conversation ${doc.id}")
-
-                            // Update the conversation with current user ID
-                            db.collection("conversations")
-                                .document(doc.id)
-                                .update("companyId", currentUserId)
-                                .await()
-
-                            android.util.Log.d("ConversationsActivity", "Direct update: Successfully updated conversation ${doc.id}")
-                        }
-                    }
-                }
-
                 val conversations = conversationRepository.getUserConversations(currentUserId)
 
                 // Log conversation data for debugging
@@ -358,42 +304,10 @@ class ConversationsActivity : AppCompatActivity() {
                 if (conversations.isNotEmpty()) {
                     conversationAdapter.submitList(conversations)
                     emptyView.visibility = View.GONE
-                    // Buttons always hidden for presentation
                 } else {
-                    // If in company mode and no conversations found, try one more direct approach
-                    if (isCompanyUser) {
-                        // Get all conversations
-                        val allConversations = db.collection("conversations")
-                            .get()
-                            .await()
-
-                        if (!allConversations.isEmpty) {
-                            // Take the first conversation and force it to use this user ID
-                            val firstConversation = allConversations.documents[0]
-                            android.util.Log.d("ConversationsActivity", "Last resort: Updating conversation ${firstConversation.id} with current user ID")
-
-                            // Update the conversation with current user ID
-                            db.collection("conversations")
-                                .document(firstConversation.id)
-                                .update("companyId", currentUserId)
-                                .await()
-
-                            android.util.Log.d("ConversationsActivity", "Last resort: Successfully updated conversation ${firstConversation.id}")
-
-                            // Try to load conversations again
-                            val updatedConversations = conversationRepository.getUserConversations(currentUserId)
-                            if (updatedConversations.isNotEmpty()) {
-                                conversationAdapter.submitList(updatedConversations)
-                                emptyView.visibility = View.GONE
-                                return@launch
-                            }
-                        }
-                    }
-
-                    // If we still have no conversations, show empty state
+                    // If we have no conversations, show empty state
                     conversationAdapter.submitList(emptyList())
                     emptyView.visibility = View.VISIBLE
-                    // Buttons always hidden for presentation
 
                     // Log more details about why we might not have conversations
                     android.util.Log.d("ConversationsActivity", "No conversations found. User type: $userType, userId: $currentUserId")

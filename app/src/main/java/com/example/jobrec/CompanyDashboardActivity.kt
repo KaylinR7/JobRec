@@ -43,20 +43,38 @@ class CompanyDashboardActivity : AppCompatActivity() {
             companyId = intent.getStringExtra("companyId") ?: run {
                 val currentUser = auth.currentUser
                 if (currentUser != null) {
-                    // Query companies collection to find the company with matching email
+                    // Query companies collection to find the company with matching email (case-insensitive)
+                    val userEmail = currentUser.email?.lowercase() ?: ""
+                    Log.d("CompanyDashboard", "Looking for company with email (lowercase): $userEmail")
+
+                    // Get all companies and filter by email case-insensitively
                     db.collection("companies")
-                        .whereEqualTo("email", currentUser.email)
                         .get()
                         .addOnSuccessListener { documents ->
-                            if (!documents.isEmpty) {
-                                companyId = documents.documents[0].id
-                                // Initialize views and load data after getting company ID
-                                initializeViews()
-                                setupBottomNavigation()
-                                setupQuickActions()
-                                setupSwipeRefresh()
-                                loadDashboardData()
+                            // Find company with matching email (case-insensitive)
+                            val companyDoc = documents.find { doc ->
+                                doc.getString("email")?.lowercase() == userEmail
+                            }
+
+                            if (companyDoc != null) {
+                                // Use registration number as company ID for consistency
+                                val registrationNumber = companyDoc.getString("registrationNumber")
+                                if (registrationNumber != null) {
+                                    companyId = registrationNumber
+                                    Log.d("CompanyDashboard", "Found company with registration number: $companyId")
+                                    // Initialize views and load data after getting company ID
+                                    initializeViews()
+                                    setupBottomNavigation()
+                                    setupQuickActions()
+                                    setupSwipeRefresh()
+                                    loadDashboardData()
+                                } else {
+                                    Log.e("CompanyDashboard", "Registration number not found in company document")
+                                    Toast.makeText(this, "Error: Company data incomplete", Toast.LENGTH_SHORT).show()
+                                    finish()
+                                }
                             } else {
+                                Log.e("CompanyDashboard", "No company found for email: ${currentUser.email}")
                                 Toast.makeText(this, "Error: Company not found", Toast.LENGTH_SHORT).show()
                                 finish()
                             }

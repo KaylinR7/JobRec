@@ -19,6 +19,7 @@ import android.widget.LinearLayout
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import com.example.jobrec.models.FieldCategories
+import java.util.UUID
 
 class SignupActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
@@ -280,19 +281,14 @@ class SignupActivity : AppCompatActivity() {
             return
         }
 
-        // Log registration attempt
-        Log.d(TAG, "Attempting to register user: $email")
-        Log.d(TAG, "Province selected: $province")
-
-        // First check if the email already exists in either users or companies collection
-        checkEmailExists(email) { emailExists ->
+        // Check if the email exists in Firebase Authentication or Firestore
+        FirebaseHelper.getInstance().isEmailExists(email) { emailExists ->
             if (emailExists) {
-                Log.e(TAG, "Email already exists: $email")
                 runOnUiThread {
                     Toast.makeText(this, "This email is already registered. Please use a different email or login.", Toast.LENGTH_LONG).show()
                     emailInput.error = "Email already in use"
                 }
-                return@checkEmailExists
+                return@isEmailExists
             }
 
             // Create user object
@@ -315,25 +311,47 @@ class SignupActivity : AppCompatActivity() {
                 subField = subFieldInput.text.toString().trim()
             )
 
-            // Log user object before sending to Firebase
-            Log.d(TAG, "User object created: $user")
-
-            // Add user to Firebase
+            // Register the user
             FirebaseHelper.getInstance().addUser(user, password) { success, error ->
                 if (success) {
-                    Log.d(TAG, "User registration successful")
                     runOnUiThread {
                         Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show()
                         startActivity(Intent(this, HomeActivity::class.java))
                         finish()
                     }
                 } else {
-                    Log.e(TAG, "User registration failed: $error")
                     runOnUiThread {
                         // Check if the error is about email already in use
                         if (error?.contains("email address is already in use", ignoreCase = true) == true) {
-                            Toast.makeText(this, "This email is already registered. Please use a different email or login.", Toast.LENGTH_LONG).show()
-                            emailInput.error = "Email already in use"
+                            // Show a dialog asking if the user wants to continue with this email
+                            val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+                            builder.setTitle("Account Recovery")
+                            builder.setMessage("It looks like you've previously started registration with this email but didn't complete it. Would you like to continue with this email?")
+
+                            builder.setPositiveButton("Yes") { _, _ ->
+                                // Use our recovery method to handle this case
+                                FirebaseHelper.getInstance().recoverOrCreateUser(user, password) { recoverySuccess, recoveryError ->
+                                    if (recoverySuccess) {
+                                        runOnUiThread {
+                                            Toast.makeText(this, "Registration completed successfully", Toast.LENGTH_SHORT).show()
+                                            startActivity(Intent(this, HomeActivity::class.java))
+                                            finish()
+                                        }
+                                    } else {
+                                        runOnUiThread {
+                                            Toast.makeText(this, "Registration failed: $recoveryError", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                }
+                            }
+
+                            builder.setNegativeButton("No") { _, _ ->
+                                // User doesn't want to use this email
+                                emailInput.error = "Please use a different email"
+                                emailInput.requestFocus()
+                            }
+
+                            builder.show()
                         } else {
                             Toast.makeText(this, "Registration failed: $error", Toast.LENGTH_SHORT).show()
                         }
@@ -343,8 +361,8 @@ class SignupActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkEmailExists(email: String, callback: (Boolean) -> Unit) {
-        Log.d(TAG, "Checking if email exists: $email")
+    private fun checkEmailInFirestore(email: String, callback: (Boolean) -> Unit) {
+        Log.d(TAG, "Checking if email exists in Firestore: $email")
         val db = FirebaseFirestore.getInstance()
 
         // Check in users collection (lowercase)
@@ -378,7 +396,7 @@ class SignupActivity : AppCompatActivity() {
                                 if (exists) {
                                     Log.d(TAG, "Email found in companies collection")
                                 } else {
-                                    Log.d(TAG, "Email not found in any collection")
+                                    Log.d(TAG, "Email not found in any Firestore collection")
                                 }
                                 callback(exists)
                             }
@@ -405,6 +423,361 @@ class SignupActivity : AppCompatActivity() {
             .addOnFailureListener { e ->
                 Log.e(TAG, "Error checking users collection", e)
                 callback(false) // Assume email doesn't exist if there's an error
+            }
+    }
+
+    private fun checkEmailExists(email: String, callback: (Boolean) -> Unit) {
+        Log.d(TAG, "Checking if email exists: $email")
+        val db = FirebaseFirestore.getInstance()
+
+        // First, log all users in the database for debugging
+        logAllUsersAndCompanies()
+
+        // Check if the email exists in Firebase Authentication
+        checkEmailExistsInAuth(email) { existsInAuth ->
+            if (existsInAuth) {
+                Log.d(TAG, "Email found in Firebase Authentication: $email")
+                callback(true)
+                return@checkEmailExistsInAuth
+            }
+
+            Log.d(TAG, "Email not found in Firebase Authentication, checking Firestore")
+
+            // Check in users collection (lowercase)
+            db.collection("users")
+                .whereEqualTo("email", email)
+                .get()
+                .addOnSuccessListener { usersResult ->
+                    if (!usersResult.isEmpty) {
+                        Log.d(TAG, "Email found in users collection")
+                        callback(true)
+                        return@addOnSuccessListener
+                    }
+
+                    // If not found in users, check in Users collection (uppercase)
+                    db.collection("Users")
+                        .whereEqualTo("email", email)
+                        .get()
+                        .addOnSuccessListener { usersCapitalResult ->
+                            if (!usersCapitalResult.isEmpty) {
+                                Log.d(TAG, "Email found in Users collection")
+                                callback(true)
+                                return@addOnSuccessListener
+                            }
+
+                            // If not found in Users, check in companies collection
+                            db.collection("companies")
+                                .whereEqualTo("email", email)
+                                .get()
+                                .addOnSuccessListener { companiesResult ->
+                                    val exists = !companiesResult.isEmpty
+                                    if (exists) {
+                                        Log.d(TAG, "Email found in companies collection")
+                                    } else {
+                                        Log.d(TAG, "Email not found in any collection")
+                                    }
+                                    callback(exists)
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e(TAG, "Error checking companies collection", e)
+                                    callback(false) // Assume email doesn't exist if there's an error
+                                }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Error checking Users collection", e)
+                            // Continue to check companies collection
+                            db.collection("companies")
+                                .whereEqualTo("email", email)
+                                .get()
+                                .addOnSuccessListener { companiesResult ->
+                                    callback(!companiesResult.isEmpty)
+                                }
+                                .addOnFailureListener { e2 ->
+                                    Log.e(TAG, "Error checking companies collection", e2)
+                                    callback(false) // Assume email doesn't exist if there's an error
+                                }
+                        }
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Error checking users collection", e)
+                    callback(false) // Assume email doesn't exist if there's an error
+                }
+        }
+    }
+
+    private fun checkEmailExistsInAuth(email: String, callback: (Boolean) -> Unit) {
+        Log.d(TAG, "Checking if email exists in Firebase Authentication: $email")
+
+        // Use the fetchSignInMethodsForEmail method to check if the email is registered
+        auth.fetchSignInMethodsForEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val signInMethods = task.result?.signInMethods
+                    val exists = !signInMethods.isNullOrEmpty()
+
+                    if (exists) {
+                        Log.d(TAG, "Email exists in Firebase Authentication: $email")
+                        Log.d(TAG, "Sign-in methods: ${signInMethods?.joinToString()}")
+                        callback(true)
+                    } else {
+                        Log.d(TAG, "Email does not exist in Firebase Authentication: $email")
+
+                        // Additional check for similar emails in Firebase Auth
+                        // This is a workaround for potential Firebase Auth inconsistencies
+                        checkSimilarEmailsInAuth(email) { hasSimilar ->
+                            if (hasSimilar) {
+                                Log.d(TAG, "Found similar email in Firebase Auth")
+                                callback(true)
+                            } else {
+                                callback(false)
+                            }
+                        }
+                    }
+                } else {
+                    // Check if the error message indicates the email is already in use
+                    val errorMessage = task.exception?.message ?: ""
+                    if (errorMessage.contains("email address is already in use", ignoreCase = true)) {
+                        Log.w(TAG, "Error suggests email exists despite fetchSignInMethods failure: $errorMessage")
+                        callback(true)
+                    } else {
+                        Log.e(TAG, "Error checking email in Firebase Authentication", task.exception)
+                        // If there's an error, we'll be cautious and check Firestore anyway
+                        callback(false)
+                    }
+                }
+            }
+    }
+
+    private fun checkSimilarEmailsInAuth(email: String, callback: (Boolean) -> Unit) {
+        Log.d(TAG, "Checking for similar emails in Firebase Auth: $email")
+
+        // Get all users from Firestore to check for similar emails
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users")
+            .get()
+            .addOnSuccessListener { userDocuments ->
+                var foundSimilar = false
+                val normalizedEmail = email.lowercase().replace(".", "").replace(" ", "")
+
+                userDocuments.documents.forEach { doc ->
+                    val userEmail = doc.getString("email") ?: ""
+                    val normalizedUserEmail = userEmail.lowercase().replace(".", "").replace(" ", "")
+
+                    // Check if emails are similar (ignoring dots and case)
+                    if (normalizedUserEmail.isNotEmpty() &&
+                        (normalizedEmail == normalizedUserEmail ||
+                         normalizedEmail.contains(normalizedUserEmail) ||
+                         normalizedUserEmail.contains(normalizedEmail))) {
+                        Log.d(TAG, "Found similar email: $userEmail for input: $email")
+                        foundSimilar = true
+                    }
+                }
+
+                // If not found in users, also check companies collection
+                if (!foundSimilar) {
+                    db.collection("companies")
+                        .get()
+                        .addOnSuccessListener { companyDocuments ->
+                            companyDocuments.documents.forEach { doc ->
+                                val companyEmail = doc.getString("email") ?: ""
+                                val normalizedCompanyEmail = companyEmail.lowercase().replace(".", "").replace(" ", "")
+
+                                if (normalizedCompanyEmail.isNotEmpty() &&
+                                    (normalizedEmail == normalizedCompanyEmail ||
+                                     normalizedEmail.contains(normalizedCompanyEmail) ||
+                                     normalizedCompanyEmail.contains(normalizedEmail))) {
+                                    Log.d(TAG, "Found similar email in companies: $companyEmail for input: $email")
+                                    foundSimilar = true
+                                }
+                            }
+                            callback(foundSimilar)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Error checking companies for similar emails", e)
+                            callback(false)
+                        }
+                } else {
+                    callback(foundSimilar)
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Error checking for similar emails", e)
+                callback(false)
+            }
+    }
+
+    /**
+     * Check if an email is already in use by attempting to create a temporary user
+     * This is more reliable than fetchSignInMethodsForEmail in some cases
+     */
+    private fun checkEmailWithDirectAttempt(email: String, callback: (Boolean) -> Unit) {
+        Log.d(TAG, "Performing direct attempt check for email: $email")
+
+        // Create a temporary random password
+        val tempPassword = UUID.randomUUID().toString().substring(0, 8)
+
+        // Try to create a user with this email
+        val tempAuth = FirebaseAuth.getInstance()
+        tempAuth.createUserWithEmailAndPassword(email, tempPassword)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Email is available, delete the temporary user
+                    Log.d(TAG, "Email is available (direct check). Deleting temporary user.")
+                    val user = tempAuth.currentUser
+                    user?.delete()
+                        ?.addOnCompleteListener { deleteTask ->
+                            if (deleteTask.isSuccessful) {
+                                Log.d(TAG, "Temporary user deleted successfully")
+                            } else {
+                                Log.e(TAG, "Failed to delete temporary user", deleteTask.exception)
+                            }
+                            // Sign out from the temporary auth
+                            tempAuth.signOut()
+                            callback(false) // Email is not in use
+                        }
+                } else {
+                    // Check if the error is because the email is already in use
+                    val errorMessage = task.exception?.message ?: ""
+                    val emailInUse = errorMessage.contains("email address is already in use", ignoreCase = true)
+
+                    if (emailInUse) {
+                        Log.d(TAG, "Direct check confirms email is already in use: $email")
+
+                        // Check if this email exists in Firestore
+                        checkEmailInFirestore(email) { existsInFirestore ->
+                            if (!existsInFirestore) {
+                                Log.d(TAG, "Email exists in Firebase Auth but not in Firestore. This is a recoverable situation.")
+                                // We'll still return true to prevent normal registration flow,
+                                // but we'll handle this special case in the registration process
+                            }
+                            callback(true) // Email is in use in Firebase Auth
+                        }
+                    } else {
+                        Log.e(TAG, "Error in direct email check: $errorMessage")
+                        callback(false) // Some other error occurred
+                    }
+                }
+            }
+    }
+
+    /**
+     * Check for similar emails in the database and log them for debugging
+     */
+    private fun checkForSimilarEmails(email: String) {
+        Log.d(TAG, "Checking for similar emails to: $email")
+        val normalizedEmail = email.lowercase().replace(".", "").replace(" ", "")
+
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users")
+            .get()
+            .addOnSuccessListener { userDocuments ->
+                Log.d(TAG, "======= SIMILAR EMAIL CHECK =======")
+                Log.d(TAG, "Normalized input email: $normalizedEmail")
+
+                userDocuments.documents.forEach { doc ->
+                    val userEmail = doc.getString("email") ?: ""
+                    val normalizedUserEmail = userEmail.lowercase().replace(".", "").replace(" ", "")
+
+                    // Calculate similarity percentage
+                    val similarity = calculateSimilarity(normalizedEmail, normalizedUserEmail)
+
+                    if (similarity > 70) { // 70% similarity threshold
+                        Log.d(TAG, "Similar email found: $userEmail (${similarity.toInt()}% similar)")
+                    }
+                }
+
+                // Also check companies
+                db.collection("companies")
+                    .get()
+                    .addOnSuccessListener { companyDocuments ->
+                        companyDocuments.documents.forEach { doc ->
+                            val companyEmail = doc.getString("email") ?: ""
+                            val normalizedCompanyEmail = companyEmail.lowercase().replace(".", "").replace(" ", "")
+
+                            // Calculate similarity percentage
+                            val similarity = calculateSimilarity(normalizedEmail, normalizedCompanyEmail)
+
+                            if (similarity > 70) { // 70% similarity threshold
+                                Log.d(TAG, "Similar company email found: $companyEmail (${similarity.toInt()}% similar)")
+                            }
+                        }
+                        Log.d(TAG, "======= END OF SIMILAR EMAIL CHECK =======")
+                    }
+            }
+    }
+
+    /**
+     * Calculate similarity percentage between two strings
+     */
+    private fun calculateSimilarity(s1: String, s2: String): Double {
+        if (s1.isEmpty() || s2.isEmpty()) return 0.0
+
+        // Simple implementation using Levenshtein distance
+        val distance = levenshteinDistance(s1, s2)
+        val maxLength = maxOf(s1.length, s2.length)
+
+        return (1.0 - distance.toDouble() / maxLength) * 100
+    }
+
+    /**
+     * Calculate Levenshtein distance between two strings
+     */
+    private fun levenshteinDistance(s1: String, s2: String): Int {
+        val m = s1.length
+        val n = s2.length
+
+        // Create a matrix of size (m+1) x (n+1)
+        val dp = Array(m + 1) { IntArray(n + 1) }
+
+        // Initialize first row and column
+        for (i in 0..m) dp[i][0] = i
+        for (j in 0..n) dp[0][j] = j
+
+        // Fill the matrix
+        for (i in 1..m) {
+            for (j in 1..n) {
+                val cost = if (s1[i - 1] == s2[j - 1]) 0 else 1
+                dp[i][j] = minOf(
+                    dp[i - 1][j] + 1,      // deletion
+                    dp[i][j - 1] + 1,      // insertion
+                    dp[i - 1][j - 1] + cost // substitution
+                )
+            }
+        }
+
+        return dp[m][n]
+    }
+
+    private fun logAllUsersAndCompanies() {
+        Log.d(TAG, "======= LOGGING ALL DATABASE USERS AND COMPANIES =======")
+        val db = FirebaseFirestore.getInstance()
+
+        // Log all users
+        db.collection("users")
+            .get()
+            .addOnSuccessListener { userDocuments ->
+                Log.d(TAG, "Total users in database: ${userDocuments.size()}")
+                userDocuments.documents.forEach { doc ->
+                    val email = doc.getString("email") ?: "no-email"
+                    val name = doc.getString("name") ?: "no-name"
+                    val id = doc.id
+                    Log.d(TAG, "User: ID=$id, Email=$email, Name=$name")
+                }
+
+                // Log all companies after users are logged
+                db.collection("companies")
+                    .get()
+                    .addOnSuccessListener { companyDocuments ->
+                        Log.d(TAG, "Total companies in database: ${companyDocuments.size()}")
+                        companyDocuments.documents.forEach { doc ->
+                            val email = doc.getString("email") ?: "no-email"
+                            val name = doc.getString("companyName") ?: "no-name"
+                            val id = doc.id
+                            val userId = doc.getString("userId") ?: "no-userId"
+                            Log.d(TAG, "Company: ID=$id, Email=$email, Name=$name, UserId=$userId")
+                        }
+                        Log.d(TAG, "======= END OF DATABASE LOGGING =======")
+                    }
             }
     }
 

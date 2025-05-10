@@ -19,7 +19,8 @@ data class Company(
     val email: String = "",
     val profileImageUrl: String = "",
     val status: String = "active",
-    val createdDate: Timestamp = Timestamp.now()
+    val createdDate: Timestamp = Timestamp.now(),
+    val userId: String = ""  // Firebase Auth user ID
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",
@@ -36,7 +37,8 @@ data class Company(
         parcel.readString() ?: "",
         parcel.readString() ?: "",
         parcel.readString() ?: "",
-        Timestamp(parcel.readLong(), parcel.readInt())
+        Timestamp(parcel.readLong(), parcel.readInt()),
+        parcel.readString() ?: ""
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -56,6 +58,7 @@ data class Company(
         parcel.writeString(status)
         parcel.writeLong(createdDate.seconds)
         parcel.writeInt(createdDate.nanoseconds)
+        parcel.writeString(userId)
     }
 
     override fun describeContents(): Int {

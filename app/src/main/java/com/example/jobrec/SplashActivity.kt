@@ -165,25 +165,41 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun checkCompanyAccount(email: String, userId: String) {
-        // Check if this is a company account by querying the companies collection
+        // Check if this is a company account by querying the companies collection (case-insensitive)
+        val userEmail = email.lowercase()
+        Log.d(TAG, "Looking for company with email (lowercase): $userEmail")
+
+        // Get all companies and filter by email case-insensitively
         db.collection("companies")
-            .whereEqualTo("email", email)
             .get()
             .addOnSuccessListener { documents ->
-                if (!documents.isEmpty) {
+                // Find company with matching email (case-insensitive)
+                val companyDoc = documents.find { doc ->
+                    doc.getString("email")?.lowercase() == userEmail
+                }
+
+                if (companyDoc != null) {
                     // It's a company
                     Log.d(TAG, "User is a company, redirecting to CompanyDashboardActivity")
-                    val companyId = documents.documents[0].id
+                    val registrationNumber = companyDoc.getString("registrationNumber")
 
-                    // Save user type and ID to SharedPreferences
-                    val editor = sharedPreferences.edit()
-                    editor.putString("user_type", "company")
-                    editor.putString("user_id", companyId)
-                    editor.apply()
+                    if (registrationNumber != null) {
+                        // Use registration number as company ID for consistency
+                        Log.d(TAG, "Found company with registration number: $registrationNumber")
 
-                    val intent = Intent(this, CompanyDashboardActivity::class.java)
-                    intent.putExtra("companyId", companyId)
-                    startActivity(intent)
+                        // Save user type and ID to SharedPreferences
+                        val editor = sharedPreferences.edit()
+                        editor.putString("user_type", "company")
+                        editor.putString("user_id", registrationNumber)
+                        editor.apply()
+
+                        val intent = Intent(this, CompanyDashboardActivity::class.java)
+                        intent.putExtra("companyId", registrationNumber)
+                        startActivity(intent)
+                    } else {
+                        Log.e(TAG, "Registration number not found in company document")
+                        fallbackEmailCheck(email)
+                    }
                 } else {
                     // Fallback to email check if not found in companies collection
                     Log.d(TAG, "User not found in companies collection, falling back to email check")
