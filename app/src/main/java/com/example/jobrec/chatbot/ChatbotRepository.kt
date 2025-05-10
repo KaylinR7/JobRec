@@ -20,7 +20,7 @@ class ChatbotRepository(private val context: Context) {
 
     // Hugging Face API token - loaded from secure storage
     private val huggingFaceToken: String
-        get() = getHuggingFaceToken()
+        get() = retrieveHuggingFaceToken()
 
     // Common help topics and responses
     private val helpTopics = mapOf(
@@ -473,7 +473,7 @@ class ChatbotRepository(private val context: Context) {
      * Securely retrieve the Hugging Face API token
      * @return The API token
      */
-    private fun getHuggingFaceToken(): String {
+    private fun retrieveHuggingFaceToken(): String {
         // Using BuildConfig field defined in build.gradle.kts
         return BuildConfig.HUGGING_FACE_TOKEN
     }
