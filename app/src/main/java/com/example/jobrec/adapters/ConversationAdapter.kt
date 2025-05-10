@@ -65,8 +65,15 @@ class ConversationAdapter(
                 profileImageView.setImageResource(R.drawable.ic_company_placeholder)
             }
 
-            // Set job title
-            jobTitleText.text = conversation.jobTitle
+            // Set company name or job title based on view
+            if (isCompanyView) {
+                // Company viewing candidate - show job title
+                jobTitleText.text = conversation.jobTitle
+            } else {
+                // Candidate viewing company - show company name (already shown in participant name)
+                // So we'll show the job title here for context
+                jobTitleText.text = "Job: ${conversation.jobTitle}"
+            }
 
             // Set last message with preview
             val lastMsg = conversation.lastMessage

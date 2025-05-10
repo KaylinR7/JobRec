@@ -184,7 +184,28 @@
             <meta-data
                 android:name="com.google.firebase.components:com.google.firebase.storage.StorageRegistrar"
                 android:value="com.google.firebase.components.ComponentRegistrar" />
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar" />
         </service>
+
+        <!-- Firebase Messaging Service -->
+        <service
+            android:name=".notifications.FirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Notification Receiver -->
+        <receiver
+            android:name=".notifications.NotificationReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.example.jobrec.NOTIFICATION_CLICKED" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".AdminLoginActivity"
@@ -246,6 +267,13 @@
             android:name=".chatbot.ChatbotActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+        <!-- Notifications Activity -->
+        <activity
+            android:name=".NotificationsActivity"
+            android:exported="false"
+            android:label="Notifications"
+            android:parentActivityName=".HomeActivity" />
 
     </application>
 

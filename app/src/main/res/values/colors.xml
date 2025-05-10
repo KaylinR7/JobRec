@@ -6,10 +6,11 @@
 
     <!-- Theme colors -->
     <color name="primary">#000000</color>
-    <color name="primary_dark">#212121</color>
-    <color name="primary_light">#757575</color>
-    <color name="accent">#757575</color>
-    <color name="accent_dark">#616161</color>
+    <color name="primary_dark">#000000</color>
+    <color name="primary_light">#444444</color>
+    <color name="accent">#000000</color>
+    <color name="accent_dark">#000000</color>
+    <color name="accent_light">#444444</color>
 
     <!-- Background colors -->
     <color name="background">#FFFFFF</color>
@@ -26,10 +27,10 @@
 
     <!-- Application Status Colors -->
     <color name="status_pending">#FFA500</color>
-    <color name="status_reviewed">#2196F3</color>
+    <color name="status_reviewed">#035491</color>
     <color name="status_accepted">#4CAF50</color>
     <color name="status_rejected">#F44336</color>
 
     <!-- Chip Colors -->
-    <color name="custom_chip_background">#EFEFEF</color>
+    <color name="custom_chip_background">#E6EEF5</color>
 </resources>

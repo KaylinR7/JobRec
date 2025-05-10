@@ -171,6 +171,8 @@
                             android:hint="Address" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+
+
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
@@ -296,6 +298,39 @@
                             android:gravity="top"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/getSuggestionsButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Get Summary Suggestions"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/black"
+                        android:layout_gravity="end"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Certificates"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"/>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/certificatesRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/addCertificateButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Add Certificate"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/black"/>
+
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
@@ -390,6 +425,8 @@
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
+
+
 
             <!-- Education Section -->
             <com.google.android.material.card.MaterialCardView

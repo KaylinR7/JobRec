@@ -2,18 +2,19 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#2196F3">
+        android:background="@color/black">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#2196F3"
+            android:background="@color/black"
             app:title="Notifications"
             app:titleTextColor="@android:color/white"
             app:navigationIcon="@drawable/ic_back"
@@ -21,13 +22,20 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/notificationsRecyclerView"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp"
-        android:clipToPadding="false"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/notificationsRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp"
+            android:clipToPadding="false" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <TextView
         android:id="@+id/emptyView"
@@ -38,4 +46,4 @@
         android:textSize="16sp"
         android:visibility="gone" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout> 
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

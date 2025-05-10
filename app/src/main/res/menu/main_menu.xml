@@ -9,10 +9,10 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_job_alerts"
-        android:title="Job Alerts"
+        android:id="@+id/action_notifications"
+        android:title="Notifications"
         android:icon="@drawable/ic_notifications"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_saved_jobs"
@@ -32,11 +32,6 @@
         android:icon="@drawable/ic_person"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_chatbot"
-        android:title="Get Help"
-        android:icon="@drawable/ic_chatbot"
-        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_logout"

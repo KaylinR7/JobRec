@@ -6,11 +6,6 @@
         android:title="Home" />
 
     <item
-        android:id="@+id/navigation_search"
-        android:icon="@drawable/ic_search"
-        android:title="Search" />
-
-    <item
         android:id="@+id/navigation_applications"
         android:icon="@drawable/ic_application"
         android:title="Applications" />
@@ -19,4 +14,9 @@
         android:id="@+id/navigation_profile"
         android:icon="@drawable/ic_person"
         android:title="Profile" />
-</menu> 
+
+    <item
+        android:id="@+id/navigation_ai_assistant"
+        android:icon="@drawable/ic_chatbot"
+        android:title="Assistant" />
+</menu>

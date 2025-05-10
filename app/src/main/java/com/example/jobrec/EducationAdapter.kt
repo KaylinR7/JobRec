@@ -9,45 +9,50 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 
 class EducationAdapter : RecyclerView.Adapter<EducationAdapter.ViewHolder>() {
-    
+
     private val educationList = mutableListOf<Education>()
     private val viewHolders = mutableMapOf<Int, ViewHolder>()
-    
+
     init {
         // Add an empty education item by default
         addNewEducation()
     }
-    
+
     fun addNewEducation() {
         educationList.add(Education())
         notifyItemInserted(educationList.size - 1)
     }
-    
+
     fun clearEducationList() {
         educationList.clear()
         viewHolders.clear()
         notifyDataSetChanged()
     }
-    
+
     fun addEducation(education: Education) {
         educationList.add(education)
         notifyItemInserted(educationList.size - 1)
     }
-    
+
     fun getEducationList(): List<Map<String, String>> {
         // Update the data from the views before returning
+        val updatedList = mutableListOf<Education>()
+
+        // Copy the current list to avoid concurrent modification
         for (i in educationList.indices) {
+            val education = educationList[i].copy()
             val holder = viewHolders[i]
             if (holder != null) {
-                val education = educationList[i]
                 education.institution = holder.institutionInput.text.toString()
                 education.degree = holder.degreeInput.text.toString()
                 education.startDate = holder.startDateInput.text.toString()
                 education.endDate = holder.endDateInput.text.toString()
                 education.description = holder.descriptionInput.text.toString()
             }
+            updatedList.add(education)
         }
-        return educationList.map { education ->
+
+        return updatedList.map { education ->
             mapOf(
                 "institution" to education.institution,
                 "degree" to education.degree,
@@ -57,13 +62,13 @@ class EducationAdapter : RecyclerView.Adapter<EducationAdapter.ViewHolder>() {
             )
         }
     }
-    
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_education, parent, false)
         return ViewHolder(view)
     }
-    
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         viewHolders[position] = holder
         val education = educationList[position]
@@ -72,7 +77,7 @@ class EducationAdapter : RecyclerView.Adapter<EducationAdapter.ViewHolder>() {
         holder.startDateInput.setText(education.startDate)
         holder.endDateInput.setText(education.endDate)
         holder.descriptionInput.setText(education.description)
-        
+
         // Set up remove button click listener
         holder.removeButton.setOnClickListener {
             if (educationList.size > 1) {  // Keep at least one education entry
@@ -88,14 +93,18 @@ class EducationAdapter : RecyclerView.Adapter<EducationAdapter.ViewHolder>() {
             }
         }
     }
-    
+
     override fun onViewRecycled(holder: ViewHolder) {
         super.onViewRecycled(holder)
-        viewHolders.remove(holder.adapterPosition)
+        // Find the key to remove by value instead of using adapterPosition
+        val keyToRemove = viewHolders.entries.find { it.value == holder }?.key
+        if (keyToRemove != null) {
+            viewHolders.remove(keyToRemove)
+        }
     }
-    
+
     override fun getItemCount(): Int = educationList.size
-    
+
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val institutionInput: TextInputEditText = view.findViewById(R.id.etEducationInstitution)
         val degreeInput: TextInputEditText = view.findViewById(R.id.etEducationDegree)
@@ -104,7 +113,7 @@ class EducationAdapter : RecyclerView.Adapter<EducationAdapter.ViewHolder>() {
         val descriptionInput: TextInputEditText = view.findViewById(R.id.etEducationDescription)
         val removeButton: Button = view.findViewById(R.id.btnRemoveEducation)
     }
-    
+
     data class Education(
         var institution: String = "",
         var degree: String = "",
@@ -112,4 +121,4 @@ class EducationAdapter : RecyclerView.Adapter<EducationAdapter.ViewHolder>() {
         var endDate: String = "",
         var description: String = ""
     )
-} 
+}

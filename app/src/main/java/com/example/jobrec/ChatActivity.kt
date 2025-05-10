@@ -3,6 +3,7 @@ package com.example.jobrec
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
@@ -245,7 +246,7 @@ class ChatActivity : AppCompatActivity() {
 
         if (isCompanyView) {
             // Company viewing candidate
-            jobTitleText.text = conversation.candidateName
+            jobTitleText.text = "Job: ${conversation.jobTitle}"
             participantNameText.text = conversation.candidateName
             receiverId = conversation.candidateId
             // Use a person icon for candidates
@@ -254,7 +255,7 @@ class ChatActivity : AppCompatActivity() {
             scheduleMeetingFab.visibility = View.VISIBLE
         } else {
             // Candidate viewing company
-            jobTitleText.text = conversation.companyName
+            jobTitleText.text = "Job: ${conversation.jobTitle}"
             participantNameText.text = conversation.companyName
             receiverId = conversation.companyId
             // Use a building icon for companies
@@ -448,12 +449,60 @@ class ChatActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.chat_menu, menu)
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
-            onBackPressed()
-            return true
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            R.id.action_delete_chat -> {
+                showDeleteChatConfirmationDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
+    }
+
+    private fun showDeleteChatConfirmationDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Delete Conversation")
+            .setMessage("Are you sure you want to delete this conversation? This action cannot be undone.")
+            .setPositiveButton("Delete") { _, _ ->
+                deleteConversation()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun deleteConversation() {
+        if (conversationId == null) return
+
+        lifecycleScope.launch {
+            try {
+                // Delete all messages in the conversation
+                val messagesSnapshot = db.collection("messages")
+                    .whereEqualTo("conversationId", conversationId)
+                    .get()
+                    .await()
+
+                for (document in messagesSnapshot.documents) {
+                    db.collection("messages").document(document.id).delete().await()
+                }
+
+                // Delete the conversation document
+                db.collection("conversations").document(conversationId!!).delete().await()
+
+                Toast.makeText(this@ChatActivity, "Conversation deleted", Toast.LENGTH_SHORT).show()
+                finish()
+            } catch (e: Exception) {
+                Toast.makeText(this@ChatActivity, "Error deleting conversation: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onDestroy() {

@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxWidth="280dp"
-        app:cardBackgroundColor="#FFFFFF"
+        app:cardBackgroundColor="@color/primary_light"
         app:cardCornerRadius="12dp"
         app:cardElevation="1dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -31,7 +31,7 @@
                 android:id="@+id/messageText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#000000"
+                android:textColor="@color/white"
                 android:textSize="16sp"
                 tools:text="Hi there! I'm interested in scheduling an interview with you." />
 
@@ -41,7 +41,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:background="#F5F5F5"
+                android:background="@color/white"
                 android:orientation="vertical"
                 android:padding="8dp"
                 android:visibility="gone"
@@ -51,7 +51,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Meeting Invitation"
-                    android:textColor="#000000"
+                    android:textColor="@color/primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 

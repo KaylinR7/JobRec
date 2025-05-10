@@ -4,15 +4,30 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="24dp">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Schedule a Meeting"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="24dp">
+
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_calendar"
+            android:tint="@color/primary"
+            android:layout_marginEnd="16dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Schedule Interview"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary" />
+    </LinearLayout>
 
     <!-- Meeting Date -->
     <com.google.android.material.textfield.TextInputLayout
@@ -21,8 +36,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Date"
-        app:boxStrokeColor="#000000"
-        app:hintTextColor="#757575">
+        app:boxStrokeColor="@color/primary"
+        app:hintTextColor="@color/primary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/dateInput"
@@ -41,8 +56,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:hint="Time"
-        app:boxStrokeColor="#000000"
-        app:hintTextColor="#757575">
+        app:boxStrokeColor="@color/primary"
+        app:hintTextColor="@color/primary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/timeInput"
@@ -61,8 +76,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:hint="Duration"
-        app:boxStrokeColor="#000000"
-        app:hintTextColor="#757575">
+        app:boxStrokeColor="@color/primary"
+        app:hintTextColor="@color/primary">
 
         <AutoCompleteTextView
             android:id="@+id/durationInput"
@@ -80,8 +95,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:hint="Meeting Type"
-        app:boxStrokeColor="#000000"
-        app:hintTextColor="#757575">
+        app:boxStrokeColor="@color/primary"
+        app:hintTextColor="@color/primary">
 
         <AutoCompleteTextView
             android:id="@+id/meetingTypeInput"
@@ -100,8 +115,8 @@
         android:layout_marginTop="8dp"
         android:hint="Location"
         android:visibility="gone"
-        app:boxStrokeColor="#000000"
-        app:hintTextColor="#757575">
+        app:boxStrokeColor="@color/primary"
+        app:hintTextColor="@color/primary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/locationInput"
@@ -120,8 +135,8 @@
         android:layout_marginTop="8dp"
         android:hint="Meeting Link"
         android:visibility="gone"
-        app:boxStrokeColor="#000000"
-        app:hintTextColor="#757575">
+        app:boxStrokeColor="@color/primary"
+        app:hintTextColor="@color/primary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/meetingLinkInput"
@@ -146,13 +161,13 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:text="Cancel"
-            android:textColor="#000000" />
+            android:textColor="@color/primary" />
 
         <Button
             android:id="@+id/scheduleButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="#000000"
+            android:backgroundTint="@color/primary"
             android:text="Schedule"
             android:textColor="#FFFFFF" />
 

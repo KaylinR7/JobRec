@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxWidth="320dp"
-        app:cardBackgroundColor="#000000"
+        app:cardBackgroundColor="@color/accent"
         app:cardCornerRadius="12dp"
         app:cardElevation="1dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -47,7 +47,7 @@
                     android:id="@+id/meetingDetailsLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#333333"
+                    android:background="@color/white"
                     android:orientation="vertical"
                     android:padding="8dp">
 
@@ -55,7 +55,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Meeting Invitation"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -65,7 +65,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:drawablePadding="4dp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/primary"
                     android:textSize="14sp"
                     tools:text="Date: May 15, 2023" />
 
@@ -75,7 +75,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:drawablePadding="4dp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/primary"
                     android:textSize="14sp"
                     tools:text="Time: 10:30 AM" />
 
@@ -85,7 +85,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:drawablePadding="4dp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/primary"
                     android:textSize="14sp"
                     tools:text="Type: Online" />
 
@@ -95,7 +95,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:drawablePadding="4dp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/primary"
                     android:textSize="14sp"
                     android:visibility="gone"
                     tools:text="Location: 123 Main St"

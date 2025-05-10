@@ -2,6 +2,8 @@ package com.example.jobrec
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
@@ -41,6 +43,18 @@ class ConversationsActivity : AppCompatActivity() {
     private var currentUserId: String = ""
     private var isLoading = false
     private var isCompanyUser = false
+
+    // Auto-refresh handler
+    private val refreshHandler = Handler(Looper.getMainLooper())
+    private val refreshInterval = 5000L // 5 seconds
+    private val refreshRunnable = object : Runnable {
+        override fun run() {
+            if (!isLoading) {
+                loadConversations()
+            }
+            refreshHandler.postDelayed(this, refreshInterval)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -430,8 +444,21 @@ class ConversationsActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Start auto-refresh when activity is resumed
+        refreshHandler.postDelayed(refreshRunnable, refreshInterval)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Stop auto-refresh when activity is paused
+        refreshHandler.removeCallbacks(refreshRunnable)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         conversationsListener?.remove()
+        refreshHandler.removeCallbacks(refreshRunnable)
     }
 }

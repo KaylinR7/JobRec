@@ -91,6 +91,7 @@ class ApplicationsActivity : AppCompatActivity() {
                 val newApplications = documents.map { doc ->
                     Application(
                         id = doc.id,
+                        jobId = doc.getString("jobId") ?: "",
                         jobTitle = doc.getString("jobTitle") ?: "",
                         applicantName = doc.getString("applicantName") ?: "",
                         applicantEmail = doc.getString("applicantEmail") ?: "",
@@ -98,10 +99,10 @@ class ApplicationsActivity : AppCompatActivity() {
                         timestamp = doc.getTimestamp("timestamp")?.toDate() ?: java.util.Date()
                     )
                 }.sortedByDescending { it.timestamp }
-                
+
                 applications.addAll(newApplications)
                 applicationsAdapter.notifyDataSetChanged()
-                
+
                 // Update empty state
                 emptyView.visibility = if (applications.isEmpty()) View.VISIBLE else View.GONE
                 applicationsRecyclerView.visibility = if (applications.isEmpty()) View.GONE else View.VISIBLE
@@ -121,10 +122,11 @@ class ApplicationsActivity : AppCompatActivity() {
 
     data class Application(
         val id: String,
+        val jobId: String = "",
         val jobTitle: String,
         val applicantName: String,
         val applicantEmail: String,
         val status: String,
         val timestamp: java.util.Date
     )
-} 
+}

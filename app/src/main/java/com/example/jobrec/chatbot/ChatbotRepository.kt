@@ -24,6 +24,7 @@ class ChatbotRepository(private val context: Context) {
     private val helpTopics = mapOf(
         // App information
         "what is jobrec" to "JobRec is a job recruitment app that connects job seekers with employers. It allows students to search for jobs, submit applications, and communicate with potential employers. Companies can post job openings, review applications, and connect with qualified candidates.",
+        "what is careerworx" to "Careerworx is a job recruitment app that connects job seekers with employers. It allows students to search for jobs, submit applications, and communicate with potential employers. Companies can post job openings, review applications, and connect with qualified candidates.",
         "about jobrec" to "JobRec is a comprehensive job recruitment platform designed to streamline the job search and hiring process. It offers features for both job seekers and employers, including job listings, application management, messaging, and profile customization.",
         "how does jobrec work" to "JobRec works by connecting job seekers with employers. As a student, you can create a profile, search for jobs, and submit applications. Employers can post job openings, review applications, and communicate with candidates. The app facilitates the entire recruitment process from job posting to hiring.",
         "app features" to "JobRec offers many features including job search with filters, application tracking, saved jobs, messaging with employers, profile management, CV/resume uploads, and notifications for job matches. Companies can post jobs, search for candidates, review applications, and communicate with applicants.",
@@ -71,9 +72,24 @@ class ChatbotRepository(private val context: Context) {
         "slow app" to "If the app is running slowly, try clearing your cache, ensuring you have a stable internet connection, and closing other apps running in the background.",
 
         // Getting help
-        "contact support" to "For support, email support@jobrec.com or use the Contact section in the app. Our team is available Monday-Friday, 9am-5pm to assist with any issues or questions.",
-        "feedback" to "We value your feedback! You can submit suggestions or comments through the Feedback option in the app settings or by emailing feedback@jobrec.com.",
-        "help center" to "The Help Center contains articles and guides on using JobRec. Access it from the menu to find answers to common questions and learn about app features."
+        "contact support" to "For support, email support@careerworx.com or use the Contact section in the app. Our team is available Monday-Friday, 9am-5pm to assist with any issues or questions.",
+        "feedback" to "We value your feedback! You can submit suggestions or comments through the Feedback option in the app settings or by emailing feedback@careerworx.com.",
+        "help center" to "The Help Center contains articles and guides on using Careerworx. Access it from the menu to find answers to common questions and learn about app features.",
+
+        // Profile setup assistance
+        "profile setup" to "To set up your profile effectively, make sure to include a professional photo, detailed education history, work experience with accomplishments, relevant skills, and certifications. A complete profile increases your chances of being noticed by employers.",
+        "profile tips" to "Here are some profile tips: 1) Use a professional photo, 2) List all relevant skills and certifications, 3) Provide detailed work experience with measurable achievements, 4) Include education details with GPA if it's strong, 5) Keep your profile updated regularly.",
+        "improve profile" to "To improve your profile, add specific achievements in your work experience, list relevant skills that match job descriptions, include certifications, ensure your education section is complete, and add a professional photo.",
+
+        // Resume/CV proofreading tips
+        "proofread resume" to "When proofreading your resume, check for: 1) Spelling and grammar errors, 2) Consistent formatting and font usage, 3) Proper verb tense (past tense for previous jobs), 4) Quantifiable achievements rather than just duties, 5) Tailored content that matches the jobs you're applying for.",
+        "resume mistakes" to "Common resume mistakes to avoid: 1) Typos and grammatical errors, 2) Using generic descriptions instead of specific achievements, 3) Including irrelevant experience, 4) Having an unprofessional email address, 5) Using an outdated or unprofessional format.",
+        "cv format" to "A good CV format includes: 1) Contact information at the top, 2) A brief professional summary, 3) Work experience in reverse chronological order with achievements, 4) Education details, 5) Skills section, 6) Certifications, and 7) References (or 'Available upon request').",
+
+        // Job application tips
+        "application tips" to "When applying for jobs: 1) Tailor your resume to each position, 2) Write a customized cover letter addressing the company's needs, 3) Research the company before applying, 4) Follow all application instructions carefully, 5) Proofread everything before submitting.",
+        "cover letter" to "A good cover letter should: 1) Address the hiring manager by name if possible, 2) Mention the specific job you're applying for, 3) Highlight relevant skills and experience, 4) Explain why you're interested in the company, 5) Include a call to action, and 6) Be concise (no more than one page).",
+        "interview preparation" to "To prepare for an interview: 1) Research the company thoroughly, 2) Practice answers to common questions, 3) Prepare examples of your achievements, 4) Have questions ready to ask the interviewer, 5) Dress professionally, 6) Plan your route to arrive early, 7) Bring copies of your resume."
     )
 
     /**
@@ -343,6 +359,15 @@ class ChatbotRepository(private val context: Context) {
             if (lowerQuery.contains("upload") || lowerQuery.contains("add")) {
                 return helpTopics["upload resume"]
             }
+            if (lowerQuery.contains("proofread") || lowerQuery.contains("check") || lowerQuery.contains("review")) {
+                return helpTopics["proofread resume"]
+            }
+            if (lowerQuery.contains("mistake") || lowerQuery.contains("error") || lowerQuery.contains("wrong")) {
+                return helpTopics["resume mistakes"]
+            }
+            if (lowerQuery.contains("format") || lowerQuery.contains("structure") || lowerQuery.contains("layout")) {
+                return helpTopics["cv format"]
+            }
             // General CV question
             return helpTopics["cv"] ?: helpTopics["resume"]
         }
@@ -354,6 +379,15 @@ class ChatbotRepository(private val context: Context) {
             }
             if (lowerQuery.contains("company")) {
                 return helpTopics["company profile"]
+            }
+            if (lowerQuery.contains("setup") || lowerQuery.contains("create") || lowerQuery.contains("new")) {
+                return helpTopics["profile setup"]
+            }
+            if (lowerQuery.contains("tip") || lowerQuery.contains("advice") || lowerQuery.contains("suggestion")) {
+                return helpTopics["profile tips"]
+            }
+            if (lowerQuery.contains("improve") || lowerQuery.contains("enhance") || lowerQuery.contains("better")) {
+                return helpTopics["improve profile"]
             }
             return helpTopics["profile"]
         }
@@ -373,6 +407,15 @@ class ChatbotRepository(private val context: Context) {
             }
             if (lowerQuery.contains("track") || lowerQuery.contains("status") || lowerQuery.contains("view")) {
                 return helpTopics["applications"]
+            }
+            if (lowerQuery.contains("tip") || lowerQuery.contains("advice") || lowerQuery.contains("help")) {
+                return helpTopics["application tips"]
+            }
+            if (lowerQuery.contains("cover letter") || lowerQuery.contains("introduction")) {
+                return helpTopics["cover letter"]
+            }
+            if (lowerQuery.contains("interview") || lowerQuery.contains("meeting") || lowerQuery.contains("prepare")) {
+                return helpTopics["interview preparation"]
             }
         }
 

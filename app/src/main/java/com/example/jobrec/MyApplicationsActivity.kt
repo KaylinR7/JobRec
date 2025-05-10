@@ -16,24 +16,24 @@ class MyApplicationsActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private lateinit var applicationsRecyclerView: RecyclerView
     private lateinit var emptyView: TextView
-    private lateinit var applicationsAdapter: ApplicationAdapter
+    private lateinit var applicationsAdapter: MyApplicationsAdapter
     private lateinit var bottomNavigation: BottomNavigationView
     private val applications = mutableListOf<ApplicationsActivity.Application>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_applications)
-        
+
         // Setup toolbar
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        
+
         db = FirebaseFirestore.getInstance()
-        
+
         applicationsRecyclerView = findViewById(R.id.applicationsRecyclerView)
         emptyView = findViewById(R.id.emptyView)
         bottomNavigation = findViewById(R.id.bottomNavigation)
-        
+
         setupRecyclerView()
         setupBottomNavigation()
         loadApplications() // Load all applications by default
@@ -48,10 +48,10 @@ class MyApplicationsActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        applicationsAdapter = ApplicationAdapter(applications) { application ->
+        applicationsAdapter = MyApplicationsAdapter(applications) { application ->
             showApplicationDetails(application)
         }
-        
+
         applicationsRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@MyApplicationsActivity)
             adapter = applicationsAdapter
@@ -83,7 +83,7 @@ class MyApplicationsActivity : AppCompatActivity() {
 
     private fun loadApplications(status: String? = null) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        
+
         var query = db.collection("applications")
             .whereEqualTo("userId", userId)
 
@@ -97,6 +97,7 @@ class MyApplicationsActivity : AppCompatActivity() {
                 val newApplications = documents.map { document ->
                     ApplicationsActivity.Application(
                         id = document.id,
+                        jobId = document.getString("jobId") ?: "",
                         jobTitle = document.getString("jobTitle") ?: "",
                         applicantName = document.getString("applicantName") ?: "",
                         applicantEmail = document.getString("applicantEmail") ?: "",
@@ -104,10 +105,10 @@ class MyApplicationsActivity : AppCompatActivity() {
                         timestamp = document.getTimestamp("timestamp")?.toDate() ?: java.util.Date()
                     )
                 }.sortedByDescending { it.timestamp }
-                
+
                 applications.addAll(newApplications)
                 applicationsAdapter.notifyDataSetChanged()
-                
+
                 // Update empty state
                 emptyView.visibility = if (applications.isEmpty()) View.VISIBLE else View.GONE
                 applicationsRecyclerView.visibility = if (applications.isEmpty()) View.GONE else View.VISIBLE
@@ -116,4 +117,4 @@ class MyApplicationsActivity : AppCompatActivity() {
                 android.widget.Toast.makeText(this, "Error loading applications: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
             }
     }
-} 
+}

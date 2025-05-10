@@ -93,19 +93,96 @@
 
             </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/viewDetailsButton"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="View Details"
-                android:textSize="12sp"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"
-                app:cornerRadius="8dp"
-                style="@style/Widget.MaterialComponents.Button.TextButton"/>
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Location"
+                    android:textSize="12sp"
+                    android:textColor="#757575"/>
+
+                <TextView
+                    android:id="@+id/jobLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="2dp"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Salary"
+                    android:textSize="12sp"
+                    android:textColor="#757575"/>
+
+                <TextView
+                    android:id="@+id/jobSalary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="2dp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Type"
+                    android:textSize="12sp"
+                    android:textColor="#757575"/>
+
+                <TextView
+                    android:id="@+id/jobType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="2dp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/viewDetailsButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Details"
+            android:textSize="14sp"
+            android:layout_marginTop="12dp"
+            app:cornerRadius="8dp"
+            android:textColor="@color/white"
+            app:backgroundTint="@color/primary"/>
+
     </LinearLayout>
 
-</com.google.android.material.card.MaterialCardView> 
+</com.google.android.material.card.MaterialCardView>

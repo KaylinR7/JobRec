@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -37,6 +38,7 @@ import android.view.Menu
 import android.view.MenuItem
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.example.jobrec.models.FieldCategories
+import com.example.jobrec.adapters.CertificateAdapter
 
 class ProfileActivity : AppCompatActivity() {
     private lateinit var toolbar: MaterialToolbar
@@ -68,8 +70,12 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var addEducationButton: MaterialButton
     private lateinit var experienceAdapter: ExperienceAdapter
     private lateinit var educationAdapter: EducationAdapter
+    private lateinit var certificateAdapter: CertificateAdapter
     private lateinit var referencesContainer: LinearLayout
     private lateinit var addReferenceButton: MaterialButton
+    private lateinit var certificatesRecyclerView: RecyclerView
+    private lateinit var addCertificateButton: MaterialButton
+    private lateinit var getSuggestionsButton: MaterialButton
     private val TAG = "ProfileActivity"
 
     private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -144,10 +150,13 @@ class ProfileActivity : AppCompatActivity() {
         skillsChipGroup = findViewById(R.id.skillsChipGroup)
         experienceRecyclerView = findViewById(R.id.experienceRecyclerView)
         educationRecyclerView = findViewById(R.id.educationRecyclerView)
+        certificatesRecyclerView = findViewById(R.id.certificatesRecyclerView)
         addExperienceButton = findViewById(R.id.addExperienceButton)
         addEducationButton = findViewById(R.id.addEducationButton)
+        addCertificateButton = findViewById(R.id.addCertificateButton)
         referencesContainer = findViewById(R.id.referencesContainer)
         addReferenceButton = findViewById(R.id.addReferenceButton)
+        getSuggestionsButton = findViewById(R.id.getSuggestionsButton)
 
         // Initialize dropdown fields
         provinceInput = findViewById(R.id.provinceInput)
@@ -160,10 +169,13 @@ class ProfileActivity : AppCompatActivity() {
         // Set up RecyclerViews
         experienceRecyclerView.layoutManager = LinearLayoutManager(this)
         educationRecyclerView.layoutManager = LinearLayoutManager(this)
+        certificatesRecyclerView.layoutManager = LinearLayoutManager(this)
         experienceAdapter = ExperienceAdapter()
         educationAdapter = EducationAdapter()
+        certificateAdapter = CertificateAdapter()
         experienceRecyclerView.adapter = experienceAdapter
         educationRecyclerView.adapter = educationAdapter
+        certificatesRecyclerView.adapter = certificateAdapter
     }
 
     private fun setupClickListeners() {
@@ -183,8 +195,16 @@ class ProfileActivity : AppCompatActivity() {
             educationAdapter.addNewEducation()
         }
 
+        addCertificateButton.setOnClickListener {
+            certificateAdapter.addNewCertificate()
+        }
+
         addReferenceButton.setOnClickListener {
             addReferenceField()
+        }
+
+        getSuggestionsButton.setOnClickListener {
+            showSummarySuggestions()
         }
 
         skillsInput.setOnEditorActionListener { _, actionId, event ->
@@ -376,6 +396,19 @@ class ProfileActivity : AppCompatActivity() {
                             )
                         }
 
+                        // Load certificates
+                        val certificatesList = document.get("certificates") as? List<Map<String, Any>>
+                        certificatesList?.forEach { certificate ->
+                            certificateAdapter.addCertificate(
+                                CertificateAdapter.Certificate(
+                                    certificate["name"] as? String ?: "",
+                                    certificate["issuer"] as? String ?: "",
+                                    certificate["year"] as? String ?: "",
+                                    certificate["description"] as? String ?: ""
+                                )
+                            )
+                        }
+
                         // Load references
                         val referencesList = document.get("references") as? List<Map<String, String>>
                         referencesList?.forEach { reference ->
@@ -428,6 +461,7 @@ class ProfileActivity : AppCompatActivity() {
                 "skills" to getSkillsList(),
                 "experience" to experienceAdapter.getExperienceList(),
                 "education" to educationAdapter.getEducationList(),
+                "certificates" to certificateAdapter.getCertificatesList(),
                 "references" to getReferencesList(),
                 "province" to provinceInput.text.toString().trim(),
                 "yearsOfExperience" to yearsOfExperienceInput.text.toString().trim(),
@@ -471,17 +505,55 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun checkPermissionAndPickImage() {
-        when {
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                openImagePicker()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // For Android 13+ (API 33+), we need to request READ_MEDIA_IMAGES permission
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_MEDIA_IMAGES
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    openImagePicker()
+                }
+                shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES) -> {
+                    // Show an explanation to the user
+                    showPermissionExplanationDialog(Manifest.permission.READ_MEDIA_IMAGES)
+                }
+                else -> {
+                    requestPermissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
+                }
             }
-            else -> {
-                requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+        } else {
+            // For Android 12 and below, use READ_EXTERNAL_STORAGE
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    openImagePicker()
+                }
+                shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE) -> {
+                    // Show an explanation to the user
+                    showPermissionExplanationDialog(Manifest.permission.READ_EXTERNAL_STORAGE)
+                }
+                else -> {
+                    requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                }
             }
         }
+    }
+
+    private fun showPermissionExplanationDialog(permission: String) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Permission Required")
+            .setMessage("We need access to your photos to set a profile picture. Please grant this permission to continue.")
+            .setPositiveButton("Grant Permission") { _, _ ->
+                requestPermissionLauncher.launch(permission)
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+                Toast.makeText(this, "Permission is required to change profile picture", Toast.LENGTH_SHORT).show()
+            }
+            .show()
     }
 
     private fun openImagePicker() {
@@ -575,5 +647,64 @@ class ProfileActivity : AppCompatActivity() {
             subFieldInput.setText("")
             subFieldInput.isEnabled = false
         }
+    }
+
+    private fun showSummarySuggestions() {
+        val field = fieldInput.text.toString()
+        val subField = subFieldInput.text.toString()
+        val experience = yearsOfExperienceInput.text.toString()
+        val skills = getSkillsList()
+
+        val suggestions = generateSummarySuggestions(field, subField, experience, skills)
+
+        if (suggestions.isEmpty()) {
+            Toast.makeText(this, "Please fill in more profile details to get suggestions", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val builder = MaterialAlertDialogBuilder(this)
+        builder.setTitle("Professional Summary Suggestions")
+        builder.setItems(suggestions.toTypedArray()) { _, which ->
+            summaryInput.setText(suggestions[which])
+        }
+        builder.setNegativeButton("Cancel", null)
+        builder.show()
+    }
+
+    private fun generateSummarySuggestions(field: String, subField: String, experience: String, skills: List<String>): List<String> {
+        val suggestions = mutableListOf<String>()
+
+        if (field.isEmpty()) {
+            return suggestions
+        }
+
+        // Extract years from experience string
+        val years = when {
+            experience.contains("0-1") -> "entry-level"
+            experience.contains("1-3") -> "junior"
+            experience.contains("3-5") -> "mid-level"
+            experience.contains("5-10") -> "senior"
+            experience.contains("10+") -> "expert"
+            else -> ""
+        }
+
+        // Create skill string
+        val skillsText = if (skills.isNotEmpty()) {
+            "with expertise in ${skills.take(3).joinToString(", ")}" +
+            if (skills.size > 3) " and other areas" else ""
+        } else ""
+
+        // Generate suggestions based on field and experience
+        if (field.isNotEmpty() && years.isNotEmpty()) {
+            val fieldSpecific = if (subField.isNotEmpty()) "$field specializing in $subField" else field
+
+            suggestions.add("$years $fieldSpecific professional $skillsText. Passionate about delivering high-quality work and continuously improving my skills to stay at the forefront of the industry.")
+
+            suggestions.add("Results-driven $years professional in the $fieldSpecific field $skillsText. Committed to excellence and innovation in every project I undertake.")
+
+            suggestions.add("Dedicated $fieldSpecific professional with ${experience.lowercase()} experience $skillsText. Seeking opportunities to apply my skills and knowledge to make a meaningful impact.")
+        }
+
+        return suggestions
     }
 }

@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +19,7 @@ import com.google.firebase.firestore.Query
 import androidx.core.content.ContextCompat
 import com.example.jobrec.chatbot.ChatbotHelper
 import com.example.jobrec.databinding.ActivityHomeBinding
+import com.example.jobrec.utils.NotificationHelper
 
 class HomeActivity : AppCompatActivity() {
     companion object {
@@ -30,6 +32,7 @@ class HomeActivity : AppCompatActivity() {
     private var userId: String? = null
     private lateinit var recentJobsAdapter: RecentJobsAdapter
     private lateinit var recommendedJobsAdapter: RecentJobsAdapter
+    private lateinit var notificationHelper: NotificationHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +43,10 @@ class HomeActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         userId = auth.currentUser?.uid
+
+        // Initialize notification helper
+        notificationHelper = NotificationHelper(this)
+        notificationHelper.createNotificationChannel()
 
         // Initialize views
         initializeViews()
@@ -74,9 +81,6 @@ class HomeActivity : AppCompatActivity() {
             adapter = recommendedJobsAdapter
             addItemDecoration(SpacingItemDecoration(16))
         }
-
-        // Add chatbot button
-        ChatbotHelper.addChatbotButton(this)
 
         // Apply entrance animations
         applyEntranceAnimations()
@@ -148,35 +152,34 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun animateClick(view: View, action: () -> Unit) {
-        view.animate()
-            .scaleX(0.95f)
-            .scaleY(0.95f)
-            .setDuration(100)
-            .withEndAction {
-                view.animate()
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .setDuration(100)
-                    .withEndAction {
-                        action()
-                    }
+        // Load and start the bounce animation
+        val bounceAnimation = AnimationUtils.loadAnimation(this, R.anim.bounce)
+        view.startAnimation(bounceAnimation)
+
+        // Execute the action after animation completes
+        bounceAnimation.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {}
+            override fun onAnimationRepeat(animation: Animation?) {}
+            override fun onAnimationEnd(animation: Animation?) {
+                action()
             }
+        })
     }
 
     private fun setupBottomNavigation() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.navigation_home -> true
-                R.id.navigation_search -> {
-                    startActivity(Intent(this, SearchActivity::class.java))
-                    false
-                }
                 R.id.navigation_applications -> {
                     startActivity(Intent(this, MyApplicationsActivity::class.java))
                     false
                 }
                 R.id.navigation_profile -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
+                    false
+                }
+                R.id.navigation_ai_assistant -> {
+                    startActivity(Intent(this, com.example.jobrec.chatbot.ChatbotActivity::class.java))
                     false
                 }
                 else -> false
@@ -353,6 +356,18 @@ class HomeActivity : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Start listening for new job notifications
+        notificationHelper.startJobNotificationsListener()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Stop listening for new job notifications
+        notificationHelper.stopJobNotificationsListener()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
@@ -364,8 +379,8 @@ class HomeActivity : AppCompatActivity() {
                 startActivity(Intent(this, MyApplicationsActivity::class.java))
                 true
             }
-            R.id.action_job_alerts -> {
-                startActivity(Intent(this, JobAlertsActivity::class.java))
+            R.id.action_notifications -> {
+                startActivity(Intent(this, NotificationsActivity::class.java))
                 true
             }
             R.id.action_saved_jobs -> {
@@ -378,10 +393,6 @@ class HomeActivity : AppCompatActivity() {
             }
             R.id.action_profile -> {
                 startActivity(Intent(this, ProfileActivity::class.java))
-                true
-            }
-            R.id.action_chatbot -> {
-                startActivity(Intent(this, com.example.jobrec.chatbot.ChatbotActivity::class.java))
                 true
             }
             R.id.action_logout -> {
