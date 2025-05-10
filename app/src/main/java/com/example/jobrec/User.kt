@@ -7,6 +7,7 @@ data class User(
     val surname: String = "",
     val email: String = "",
     val phoneNumber: String = "",
+    val province: String = "",
     val address: String = "",
     val summary: String = "",
     val skills: List<String> = emptyList(),

@@ -14,6 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 class CompanySignupActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
+    private val TAG = "CompanySignupActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,48 +64,171 @@ class CompanySignupActivity : AppCompatActivity() {
             return
         }
 
-        // Create company object
-        val company = Company(
-            id = registrationNumber,
-            companyName = companyName,
-            registrationNumber = registrationNumber,
-            industry = industry,
-            companySize = companySize,
-            location = location,
-            website = website,
-            description = description,
-            contactPersonName = contactPersonName,
-            contactPersonEmail = contactPersonEmail,
-            contactPersonPhone = contactPersonPhone,
-            email = email
-        )
+        // Log registration attempt
+        Log.d(TAG, "Attempting to register company: $email, registration number: $registrationNumber")
 
-        // Register with Firebase
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    // Save company data to Firestore
-                    db.collection("companies")
-                        .document(registrationNumber)
-                        .set(company)
-                        .addOnSuccessListener {
-                            Log.d("CompanySignupActivity", "Company registered successfully")
-                            Toast.makeText(this, "Registration successful! Please login to continue.", Toast.LENGTH_LONG).show()
-                            
-                            // Navigate to login page
-                            val intent = Intent(this, LoginActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                            finish()
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("CompanySignupActivity", "Error saving company data", e)
-                            Toast.makeText(this, "Registration failed: ${e.message}", Toast.LENGTH_LONG).show()
-                        }
-                } else {
-                    Log.e("CompanySignupActivity", "Registration failed", task.exception)
-                    Toast.makeText(this, "Registration failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+        // First check if the email already exists
+        checkEmailExists(email) { emailExists ->
+            if (emailExists) {
+                Log.e(TAG, "Email already exists: $email")
+                runOnUiThread {
+                    Toast.makeText(this, "This email is already registered. Please use a different email or login.", Toast.LENGTH_LONG).show()
+                    findViewById<TextInputEditText>(R.id.emailInput).error = "Email already in use"
                 }
+                return@checkEmailExists
+            }
+
+            // Check if registration number already exists
+            checkRegistrationNumberExists(registrationNumber) { regNumberExists ->
+                if (regNumberExists) {
+                    Log.e(TAG, "Registration number already exists: $registrationNumber")
+                    runOnUiThread {
+                        Toast.makeText(this, "This registration number is already registered. Please check and try again.", Toast.LENGTH_LONG).show()
+                        findViewById<TextInputEditText>(R.id.registrationNumberInput).error = "Registration number already in use"
+                    }
+                    return@checkRegistrationNumberExists
+                }
+
+                // Create company object
+                val company = Company(
+                    id = registrationNumber,
+                    companyName = companyName,
+                    registrationNumber = registrationNumber,
+                    industry = industry,
+                    companySize = companySize,
+                    location = location,
+                    website = website,
+                    description = description,
+                    contactPersonName = contactPersonName,
+                    contactPersonEmail = contactPersonEmail,
+                    contactPersonPhone = contactPersonPhone,
+                    email = email
+                )
+
+                // Log company object
+                Log.d(TAG, "Company object created: $company")
+
+                // Register with Firebase
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this) { task ->
+                        if (task.isSuccessful) {
+                            Log.d(TAG, "Firebase Auth account created successfully")
+
+                            // Save company data to Firestore
+                            db.collection("companies")
+                                .document(registrationNumber)
+                                .set(company)
+                                .addOnSuccessListener {
+                                    Log.d(TAG, "Company registered successfully")
+                                    Toast.makeText(this, "Registration successful! Please login to continue.", Toast.LENGTH_LONG).show()
+
+                                    // Navigate to login page
+                                    val intent = Intent(this, LoginActivity::class.java)
+                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    startActivity(intent)
+                                    finish()
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e(TAG, "Error saving company data", e)
+                                    Toast.makeText(this, "Registration failed: ${e.message}", Toast.LENGTH_LONG).show()
+                                }
+                        } else {
+                            Log.e(TAG, "Registration failed", task.exception)
+                            // Check if the error is about email already in use
+                            if (task.exception?.message?.contains("email address is already in use", ignoreCase = true) == true) {
+                                Toast.makeText(this, "This email is already registered. Please use a different email or login.", Toast.LENGTH_LONG).show()
+                                findViewById<TextInputEditText>(R.id.emailInput).error = "Email already in use"
+                            } else {
+                                Toast.makeText(this, "Registration failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    }
+            }
+        }
+    }
+
+    private fun checkEmailExists(email: String, callback: (Boolean) -> Unit) {
+        Log.d(TAG, "Checking if email exists: $email")
+
+        // Check in users collection (lowercase)
+        db.collection("users")
+            .whereEqualTo("email", email)
+            .get()
+            .addOnSuccessListener { usersResult ->
+                if (!usersResult.isEmpty) {
+                    Log.d(TAG, "Email found in users collection")
+                    callback(true)
+                    return@addOnSuccessListener
+                }
+
+                // If not found in users, check in Users collection (uppercase)
+                db.collection("Users")
+                    .whereEqualTo("email", email)
+                    .get()
+                    .addOnSuccessListener { usersCapitalResult ->
+                        if (!usersCapitalResult.isEmpty) {
+                            Log.d(TAG, "Email found in Users collection")
+                            callback(true)
+                            return@addOnSuccessListener
+                        }
+
+                        // If not found in Users, check in companies collection
+                        db.collection("companies")
+                            .whereEqualTo("email", email)
+                            .get()
+                            .addOnSuccessListener { companiesResult ->
+                                val exists = !companiesResult.isEmpty
+                                if (exists) {
+                                    Log.d(TAG, "Email found in companies collection")
+                                } else {
+                                    Log.d(TAG, "Email not found in any collection")
+                                }
+                                callback(exists)
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e(TAG, "Error checking companies collection", e)
+                                callback(false) // Assume email doesn't exist if there's an error
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "Error checking Users collection", e)
+                        // Continue to check companies collection
+                        db.collection("companies")
+                            .whereEqualTo("email", email)
+                            .get()
+                            .addOnSuccessListener { companiesResult ->
+                                callback(!companiesResult.isEmpty)
+                            }
+                            .addOnFailureListener { e2 ->
+                                Log.e(TAG, "Error checking companies collection", e2)
+                                callback(false) // Assume email doesn't exist if there's an error
+                            }
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Error checking users collection", e)
+                callback(false) // Assume email doesn't exist if there's an error
             }
     }
-} 
+
+    private fun checkRegistrationNumberExists(registrationNumber: String, callback: (Boolean) -> Unit) {
+        Log.d(TAG, "Checking if registration number exists: $registrationNumber")
+
+        db.collection("companies")
+            .whereEqualTo("registrationNumber", registrationNumber)
+            .get()
+            .addOnSuccessListener { result ->
+                val exists = !result.isEmpty
+                if (exists) {
+                    Log.d(TAG, "Registration number found in companies collection")
+                } else {
+                    Log.d(TAG, "Registration number not found in companies collection")
+                }
+                callback(exists)
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Error checking registration number", e)
+                callback(false) // Assume registration number doesn't exist if there's an error
+            }
+    }
+}

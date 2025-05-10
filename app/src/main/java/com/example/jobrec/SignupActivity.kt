@@ -76,6 +76,7 @@ class SignupActivity : AppCompatActivity() {
         cellNumberInput = findViewById(R.id.etCellNumber)
         emailInput = findViewById(R.id.etEmail)
         passwordInput = findViewById(R.id.etPassword)
+        provinceInput = findViewById(R.id.provinceInput) // Added missing initialization
         addressInput = findViewById(R.id.etAddress)
         summaryInput = findViewById(R.id.etSummary)
         skillsInput = findViewById(R.id.etSkills)
@@ -266,6 +267,7 @@ class SignupActivity : AppCompatActivity() {
         val email = emailInput.text.toString().trim()
         val password = passwordInput.text.toString()
         val cellNumber = cellNumberInput.text.toString().trim()
+        val province = provinceInput.text.toString().trim()
         val address = addressInput.text.toString().trim()
         val summary = summaryInput.text.toString().trim()
         val linkedin = linkedinInput.text.toString().trim()
@@ -278,38 +280,143 @@ class SignupActivity : AppCompatActivity() {
             return
         }
 
-        // Create user object
-        val user = User(
-            name = name,
-            email = email,
-            phoneNumber = cellNumber,
-            address = address,
-            summary = summary,
-            skills = skills,
-            linkedin = linkedin,
-            github = github,
-            portfolio = portfolio,
-            role = "user", // Set default role
-            yearsOfExperience = yearsOfExperienceInput.text.toString().trim(),
-            certificate = certificateInput.text.toString().trim(),
-            expectedSalary = expectedSalaryInput.text.toString().trim(),
-            field = fieldInput.text.toString().trim(),
-            subField = subFieldInput.text.toString().trim()
-        )
+        // Log registration attempt
+        Log.d(TAG, "Attempting to register user: $email")
+        Log.d(TAG, "Province selected: $province")
 
-        // Add user to Firebase
-        FirebaseHelper.getInstance().addUser(user, password) { success, error ->
-            if (success) {
-                Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, HomeActivity::class.java))
-                finish()
-            } else {
-                Toast.makeText(this, "Registration failed: $error", Toast.LENGTH_SHORT).show()
+        // First check if the email already exists in either users or companies collection
+        checkEmailExists(email) { emailExists ->
+            if (emailExists) {
+                Log.e(TAG, "Email already exists: $email")
+                runOnUiThread {
+                    Toast.makeText(this, "This email is already registered. Please use a different email or login.", Toast.LENGTH_LONG).show()
+                    emailInput.error = "Email already in use"
+                }
+                return@checkEmailExists
+            }
+
+            // Create user object
+            val user = User(
+                name = name,
+                email = email,
+                phoneNumber = cellNumber,
+                province = province,
+                address = address,
+                summary = summary,
+                skills = skills,
+                linkedin = linkedin,
+                github = github,
+                portfolio = portfolio,
+                role = "user", // Set default role
+                yearsOfExperience = yearsOfExperienceInput.text.toString().trim(),
+                certificate = certificateInput.text.toString().trim(),
+                expectedSalary = expectedSalaryInput.text.toString().trim(),
+                field = fieldInput.text.toString().trim(),
+                subField = subFieldInput.text.toString().trim()
+            )
+
+            // Log user object before sending to Firebase
+            Log.d(TAG, "User object created: $user")
+
+            // Add user to Firebase
+            FirebaseHelper.getInstance().addUser(user, password) { success, error ->
+                if (success) {
+                    Log.d(TAG, "User registration successful")
+                    runOnUiThread {
+                        Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this, HomeActivity::class.java))
+                        finish()
+                    }
+                } else {
+                    Log.e(TAG, "User registration failed: $error")
+                    runOnUiThread {
+                        // Check if the error is about email already in use
+                        if (error?.contains("email address is already in use", ignoreCase = true) == true) {
+                            Toast.makeText(this, "This email is already registered. Please use a different email or login.", Toast.LENGTH_LONG).show()
+                            emailInput.error = "Email already in use"
+                        } else {
+                            Toast.makeText(this, "Registration failed: $error", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             }
         }
     }
 
+    private fun checkEmailExists(email: String, callback: (Boolean) -> Unit) {
+        Log.d(TAG, "Checking if email exists: $email")
+        val db = FirebaseFirestore.getInstance()
+
+        // Check in users collection (lowercase)
+        db.collection("users")
+            .whereEqualTo("email", email)
+            .get()
+            .addOnSuccessListener { usersResult ->
+                if (!usersResult.isEmpty) {
+                    Log.d(TAG, "Email found in users collection")
+                    callback(true)
+                    return@addOnSuccessListener
+                }
+
+                // If not found in users, check in Users collection (uppercase)
+                db.collection("Users")
+                    .whereEqualTo("email", email)
+                    .get()
+                    .addOnSuccessListener { usersCapitalResult ->
+                        if (!usersCapitalResult.isEmpty) {
+                            Log.d(TAG, "Email found in Users collection")
+                            callback(true)
+                            return@addOnSuccessListener
+                        }
+
+                        // If not found in Users, check in companies collection
+                        db.collection("companies")
+                            .whereEqualTo("email", email)
+                            .get()
+                            .addOnSuccessListener { companiesResult ->
+                                val exists = !companiesResult.isEmpty
+                                if (exists) {
+                                    Log.d(TAG, "Email found in companies collection")
+                                } else {
+                                    Log.d(TAG, "Email not found in any collection")
+                                }
+                                callback(exists)
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e(TAG, "Error checking companies collection", e)
+                                callback(false) // Assume email doesn't exist if there's an error
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "Error checking Users collection", e)
+                        // Continue to check companies collection
+                        db.collection("companies")
+                            .whereEqualTo("email", email)
+                            .get()
+                            .addOnSuccessListener { companiesResult ->
+                                callback(!companiesResult.isEmpty)
+                            }
+                            .addOnFailureListener { e2 ->
+                                Log.e(TAG, "Error checking companies collection", e2)
+                                callback(false) // Assume email doesn't exist if there's an error
+                            }
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Error checking users collection", e)
+                callback(false) // Assume email doesn't exist if there's an error
+            }
+    }
+
     private fun setupDropdowns() {
+        // Province options
+        val provinces = arrayOf(
+            "Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal",
+            "Limpopo", "Mpumalanga", "Northern Cape", "North West", "Western Cape"
+        )
+        val provinceAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, provinces)
+        provinceInput.setAdapter(provinceAdapter)
+
         // Years of Experience options
         val yearsOptions = arrayOf("0-1 years", "1-3 years", "3-5 years", "5-10 years", "10+ years")
         val yearsAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, yearsOptions)

@@ -29,34 +29,46 @@ class FirebaseHelper private constructor() {
                 .build()
         }
         auth = FirebaseAuth.getInstance()
-        usersCollection = db.collection("Users")
+        usersCollection = db.collection("users") // Changed to lowercase to match LoginActivity
+        Log.d("FirebaseHelper", "Initialized with users collection")
     }
 
     // Add a new user to the database
     fun addUser(user: User, password: String, callback: (Boolean, String?) -> Unit) {
+        Log.d("FirebaseHelper", "Adding user: ${user.email}")
+        Log.d("FirebaseHelper", "User details: name=${user.name}, province=${user.province}, field=${user.field}")
+
         // First create the user in Firebase Auth
         auth.createUserWithEmailAndPassword(user.email, password)
             .addOnSuccessListener { authResult ->
+                Log.d("FirebaseHelper", "Firebase Auth account created successfully")
+
                 // Then add the user data to Firestore using the Firebase Auth UID
                 val userId = authResult.user?.uid
                 if (userId != null) {
+                    Log.d("FirebaseHelper", "Got user ID: $userId")
                     val userWithId = user.copy(id = userId)
+
+                    // Log the complete user object
+                    Log.d("FirebaseHelper", "Saving user to Firestore: $userWithId")
+
                     usersCollection.document(userId)
                         .set(userWithId)
                         .addOnSuccessListener {
-                            Log.d("FirebaseHelper", "User added successfully: ${user.email}")
+                            Log.d("FirebaseHelper", "User added successfully to Firestore: ${user.email}")
                             callback(true, null)
                         }
                         .addOnFailureListener { e ->
-                            Log.e("FirebaseHelper", "Error adding user", e)
+                            Log.e("FirebaseHelper", "Error adding user to Firestore", e)
                             callback(false, e.message)
                         }
                 } else {
+                    Log.e("FirebaseHelper", "Failed to get user ID after auth")
                     callback(false, "Failed to get user ID")
                 }
             }
             .addOnFailureListener { e ->
-                Log.e("FirebaseHelper", "Error creating user", e)
+                Log.e("FirebaseHelper", "Error creating user in Firebase Auth", e)
                 callback(false, e.message)
             }
     }
@@ -113,4 +125,4 @@ class FirebaseHelper private constructor() {
                 callback(false)
             }
     }
-} 
+}
