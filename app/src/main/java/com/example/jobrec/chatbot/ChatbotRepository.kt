@@ -2,6 +2,7 @@ package com.example.jobrec.chatbot
 
 import android.content.Context
 import android.util.Log
+import com.example.jobrec.BuildConfig
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -17,8 +18,9 @@ class ChatbotRepository(private val context: Context) {
     private val auth = FirebaseAuth.getInstance()
     private val TAG = "ChatbotRepository"
 
-    // Hugging Face API token
-    private val huggingFaceToken = "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"
+    // Hugging Face API token - loaded from secure storage
+    private val huggingFaceToken: String
+        get() = getHuggingFaceToken()
 
     // Common help topics and responses
     private val helpTopics = mapOf(
@@ -465,5 +467,14 @@ class ChatbotRepository(private val context: Context) {
         } catch (e: Exception) {
             Log.e(TAG, "Error saving chatbot interaction", e)
         }
+    }
+
+    /**
+     * Securely retrieve the Hugging Face API token
+     * @return The API token
+     */
+    private fun getHuggingFaceToken(): String {
+        // Using BuildConfig field defined in build.gradle.kts
+        return BuildConfig.HUGGING_FACE_TOKEN
     }
 }

@@ -1,7 +1,17 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
+}
+
+// Load properties from local.properties file
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
 }
 
 android {
@@ -16,6 +26,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Add BuildConfig field for API keys
+        // Get token from local.properties or use a placeholder
+        val huggingFaceToken = localProperties.getProperty("huggingface.token") ?: "YOUR_TOKEN_HERE"
+        buildConfigField("String", "HUGGING_FACE_TOKEN", "\"$huggingFaceToken\"")
     }
 
     buildTypes {
