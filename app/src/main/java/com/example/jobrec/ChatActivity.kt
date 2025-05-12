@@ -3,6 +3,7 @@ package com.example.jobrec
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -109,7 +110,13 @@ class ChatActivity : AppCompatActivity() {
     private fun setupToolbar() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = "Chat"
+        supportActionBar?.setDisplayShowTitleEnabled(true)
+
+        // Ensure the toolbar has the correct appearance
+        toolbar.setTitleTextColor(resources.getColor(R.color.white, theme))
+
+        // Set a temporary title until conversation data is loaded
+        supportActionBar?.title = "Messages"
     }
 
     private fun setupRecyclerView() {
@@ -182,25 +189,40 @@ class ChatActivity : AppCompatActivity() {
                             val candidateId = applicationDoc.getString("userId") ?: ""
                             val candidateName = applicationDoc.getString("applicantName") ?: ""
                             val companyIdFromApp = applicationDoc.getString("companyId") ?: ""
-                            val companyName = applicationDoc.getString("companyName") ?: ""
+                            var companyName = applicationDoc.getString("companyName") ?: ""
 
-                            // Log the company ID from the application
+                            // Log the company ID and name from the application
                             android.util.Log.d("ChatActivity", "Company ID from application: $companyIdFromApp")
+                            android.util.Log.d("ChatActivity", "Company name from application: $companyName")
 
-                            // Look up the company's Firebase Auth user ID
+                            // Look up the company's Firebase Auth user ID and name if needed
                             val companyDoc = db.collection("companies")
                                 .whereEqualTo("companyId", companyIdFromApp)
                                 .get()
                                 .await()
 
-                            // Get the company's user ID
-                            val companyUserId = if (!companyDoc.isEmpty) {
-                                val userId = companyDoc.documents[0].getString("userId")
+                            // Get the company's user ID and name
+                            val companyUserId: String
+                            if (!companyDoc.isEmpty) {
+                                val companyDocument = companyDoc.documents[0]
+                                val userId = companyDocument.getString("userId")
                                 android.util.Log.d("ChatActivity", "Found company user ID: $userId")
-                                userId ?: companyIdFromApp
+                                companyUserId = userId ?: companyIdFromApp
+
+                                // If company name is empty, get it from the company document
+                                if (companyName.isEmpty()) {
+                                    companyName = companyDocument.getString("companyName") ?: "Company"
+                                    android.util.Log.d("ChatActivity", "Using company name from company document: $companyName")
+                                }
                             } else {
                                 android.util.Log.d("ChatActivity", "Company not found, using original ID")
-                                companyIdFromApp
+                                companyUserId = companyIdFromApp
+
+                                // If company name is still empty, use a default
+                                if (companyName.isEmpty()) {
+                                    companyName = "Company"
+                                    android.util.Log.d("ChatActivity", "Using default company name: $companyName")
+                                }
                             }
 
                             // Create the conversation
@@ -244,25 +266,80 @@ class ChatActivity : AppCompatActivity() {
         // Determine if current user is the candidate or the company
         val isCompanyView = currentUserId == conversation.companyId
 
+        // Hide the secondary chat header that shows job title
+        findViewById<View>(R.id.chatHeader).visibility = View.GONE
+
         if (isCompanyView) {
             // Company viewing candidate
-            jobTitleText.text = "Job: ${conversation.jobTitle}"
-            participantNameText.text = conversation.candidateName
             receiverId = conversation.candidateId
-            // Use a person icon for candidates
-            participantImageView.setImageResource(R.drawable.ic_person)
             // Show schedule meeting button for companies only
             scheduleMeetingFab.visibility = View.VISIBLE
+            // Set toolbar title to candidate name, use default if empty
+            val candidateName = if (conversation.candidateName.isNullOrEmpty()) "Candidate" else conversation.candidateName
+            supportActionBar?.title = candidateName
+            // Log the title being set
+            Log.d("ChatActivity", "Setting title to candidate name: $candidateName")
         } else {
             // Candidate viewing company
-            jobTitleText.text = "Job: ${conversation.jobTitle}"
-            participantNameText.text = conversation.companyName
             receiverId = conversation.companyId
-            // Use a building icon for companies
-            participantImageView.setImageResource(R.drawable.ic_company_placeholder)
             // Hide schedule meeting button for students
             scheduleMeetingFab.visibility = View.GONE
+
+            // Get company name directly from the companies collection
+            getCompanyNameFromFirestore(conversation.companyId)
         }
+
+        // Force the toolbar to update its appearance
+        toolbar.setTitleTextColor(resources.getColor(R.color.white, theme))
+    }
+
+    private fun getCompanyNameFromFirestore(companyId: String) {
+        // First try to get the company document directly by ID
+        db.collection("companies")
+            .document(companyId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val companyName = document.getString("companyName")
+                    if (!companyName.isNullOrEmpty()) {
+                        supportActionBar?.title = companyName
+                        Log.d("ChatActivity", "Set company name from direct document query: $companyName")
+                        return@addOnSuccessListener
+                    }
+                }
+
+                // If that fails, try to find the company by companyId field
+                db.collection("companies")
+                    .whereEqualTo("companyId", companyId)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        if (!documents.isEmpty) {
+                            val companyName = documents.documents[0].getString("companyName")
+                            if (!companyName.isNullOrEmpty()) {
+                                supportActionBar?.title = companyName
+                                Log.d("ChatActivity", "Set company name from query: $companyName")
+                                return@addOnSuccessListener
+                            }
+                        }
+
+                        // If all else fails, use the name from the conversation or a default
+                        val fallbackName = if (conversation?.companyName.isNullOrEmpty()) "Company" else conversation?.companyName
+                        supportActionBar?.title = fallbackName
+                        Log.d("ChatActivity", "Using fallback company name: $fallbackName")
+                    }
+                    .addOnFailureListener { e ->
+                        // Use the name from the conversation or a default
+                        val fallbackName = if (conversation?.companyName.isNullOrEmpty()) "Company" else conversation?.companyName
+                        supportActionBar?.title = fallbackName
+                        Log.d("ChatActivity", "Error querying company, using fallback: $fallbackName", e)
+                    }
+            }
+            .addOnFailureListener { e ->
+                // Use the name from the conversation or a default
+                val fallbackName = if (conversation?.companyName.isNullOrEmpty()) "Company" else conversation?.companyName
+                supportActionBar?.title = fallbackName
+                Log.d("ChatActivity", "Error getting company document, using fallback: $fallbackName", e)
+            }
     }
 
     private fun startMessagesListener() {

@@ -14,9 +14,8 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#000000"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:titleTextColor="@android:color/white" />
+            style="@style/Widget.JobRec.Toolbar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -110,7 +109,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Fix Conversations"
-                android:backgroundTint="#000000"
+                android:backgroundTint="@color/primary"
                 android:textColor="#FFFFFF"
                 android:visibility="gone"
                 android:layout_marginBottom="8dp" />
@@ -126,7 +125,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:backgroundTint="#000000"
+        android:backgroundTint="@color/primary"
         android:contentDescription="New Conversation"
         android:src="@android:drawable/ic_dialog_email"
         android:visibility="gone"

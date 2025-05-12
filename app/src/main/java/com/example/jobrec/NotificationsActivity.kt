@@ -12,11 +12,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
+import com.example.jobrec.repositories.NotificationRepository
+import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 class NotificationsActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
@@ -25,16 +23,14 @@ class NotificationsActivity : AppCompatActivity() {
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
     private lateinit var notificationsAdapter: NotificationsAdapter
-    private lateinit var db: FirebaseFirestore
-    private lateinit var auth: FirebaseAuth
+    private lateinit var notificationRepository: NotificationRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notifications)
 
-        // Initialize Firebase
-        db = FirebaseFirestore.getInstance()
-        auth = FirebaseAuth.getInstance()
+        // Initialize repository
+        notificationRepository = NotificationRepository(this)
 
         // Initialize views
         initializeViews()
@@ -55,7 +51,10 @@ class NotificationsActivity : AppCompatActivity() {
         swipeRefreshLayout.setOnRefreshListener {
             loadNotifications()
         }
+
     }
+
+
 
     private fun setupToolbar() {
         setSupportActionBar(toolbar)
@@ -64,11 +63,15 @@ class NotificationsActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
+        println("NotificationsActivity: Setting up RecyclerView")
+
         notificationsAdapter = NotificationsAdapter(
             onNotificationClick = { notification ->
+                println("NotificationsActivity: Notification clicked: ${notification.id}")
                 handleNotificationClick(notification)
             },
             onApplyClick = { notification ->
+                println("NotificationsActivity: Apply clicked for notification: ${notification.id}")
                 if (notification.jobId != null) {
                     val intent = Intent(this, JobDetailsActivity::class.java).apply {
                         putExtra("jobId", notification.jobId)
@@ -78,45 +81,129 @@ class NotificationsActivity : AppCompatActivity() {
             }
         )
 
+        val layoutManager = LinearLayoutManager(this@NotificationsActivity)
         notificationsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@NotificationsActivity)
+            this.layoutManager = layoutManager
             adapter = notificationsAdapter
+
+            println("NotificationsActivity: RecyclerView adapter set")
+
+            // Add scroll listener for pagination
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    val visibleItemCount = layoutManager.childCount
+                    val totalItemCount = layoutManager.itemCount
+                    val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+                    // Load more when user scrolls to the end
+                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                        && firstVisibleItemPosition >= 0
+                        && !isLoadingMore
+                        && !allNotificationsLoaded) {
+                        loadMoreNotifications()
+                    }
+                }
+            })
         }
     }
 
+    private val PAGE_SIZE = 20
+    private var lastVisibleNotification: DocumentSnapshot? = null
+    private var isLoadingMore = false
+    private var allNotificationsLoaded = false
+    private val notifications = mutableListOf<NotificationRepository.Notification>()
+
     private fun loadNotifications() {
-        val currentUser = auth.currentUser ?: return
+        // Reset pagination state
+        lastVisibleNotification = null
+        allNotificationsLoaded = false
+        notifications.clear()
 
         // Show loading indicator
         swipeRefreshLayout.isRefreshing = true
 
+        // First fix any invalid timestamps and clean up duplicates
         lifecycleScope.launch {
             try {
-                val notificationsSnapshot = db.collection("notifications")
-                    .whereEqualTo("userId", currentUser.uid)
-                    .orderBy("timestamp", Query.Direction.DESCENDING)
-                    .get()
-                    .await()
+                // Fix invalid timestamps
+                notificationRepository.fixNotificationTimestamps()
 
-                val notifications = notificationsSnapshot.documents.mapNotNull { doc ->
-                    try {
-                        Notification(
-                            id = doc.id,
-                            title = doc.getString("title") ?: "",
-                            message = doc.getString("message") ?: "",
-                            type = doc.getString("type") ?: "",
-                            jobId = doc.getString("jobId"),
-                            timestamp = doc.getTimestamp("timestamp") ?: com.google.firebase.Timestamp.now(),
-                            read = doc.getBoolean("read") ?: false
-                        )
-                    } catch (e: Exception) {
-                        null
+                // Clean up duplicate notifications
+                notificationRepository.cleanupDuplicateNotifications()
+
+                // Load first page
+                loadMoreNotifications(true)
+            } catch (e: Exception) {
+                // Continue with loading notifications even if cleanup fails
+                loadMoreNotifications(true)
+            }
+        }
+    }
+
+    private fun loadMoreNotifications(isFirstLoad: Boolean = false) {
+        if (isLoadingMore) {
+            return
+        }
+
+        if (allNotificationsLoaded && !isFirstLoad) {
+            return
+        }
+
+        isLoadingMore = true
+
+        lifecycleScope.launch {
+            try {
+                // Get notifications using the repository
+                val result = notificationRepository.getNotifications(
+                    pageSize = PAGE_SIZE,
+                    lastDocument = if (isFirstLoad) null else lastVisibleNotification
+                )
+
+                val newNotifications = result.first
+                lastVisibleNotification = result.second
+
+                // Update pagination state
+                if (newNotifications.size < PAGE_SIZE) {
+                    allNotificationsLoaded = true
+                }
+
+                // Update the list
+                if (isFirstLoad) {
+                    notifications.clear()
+                }
+
+                // Add only notifications that aren't already in the list (by content)
+                val newUniqueNotifications = newNotifications.filter { newNotification ->
+                    !notifications.any {
+                        it.title == newNotification.title &&
+                        it.message == newNotification.message &&
+                        it.jobId == newNotification.jobId
                     }
                 }
 
+                notifications.addAll(newUniqueNotifications)
+
+                // Deduplicate the entire list again to be sure
+                val uniqueNotifications = notifications
+                    .groupBy { Triple(it.title, it.message, it.jobId) }
+                    .map { (_, group) -> group.maxByOrNull { it.timestamp.seconds } ?: group.first() }
+
+                notifications.clear()
+                notifications.addAll(uniqueNotifications)
+
+
+
                 // Update UI
                 if (notifications.isNotEmpty()) {
-                    notificationsAdapter.submitList(notifications)
+                    // Create a new list to ensure DiffUtil detects changes
+                    // Sort by timestamp and deduplicate by content
+                    val finalNotifications = notifications
+                        .sortedByDescending { it.timestamp.seconds }
+                        .distinctBy { Triple(it.title, it.message, it.jobId) } // Ensure no duplicates by content
+
+                    notificationsAdapter.submitList(ArrayList(finalNotifications))
                     emptyView.visibility = View.GONE
                     notificationsRecyclerView.visibility = View.VISIBLE
                 } else {
@@ -128,19 +215,24 @@ class NotificationsActivity : AppCompatActivity() {
             } finally {
                 // Hide loading indicator
                 swipeRefreshLayout.isRefreshing = false
+                isLoadingMore = false
             }
         }
     }
 
-    private fun handleNotificationClick(notification: Notification) {
+    private fun handleNotificationClick(notification: NotificationRepository.Notification) {
         // Mark notification as read
-        db.collection("notifications")
-            .document(notification.id)
-            .update("read", true)
+        lifecycleScope.launch {
+            try {
+                notificationRepository.markAsRead(notification.id)
+            } catch (e: Exception) {
+                // Ignore errors
+            }
+        }
 
         // Handle click based on notification type
         when (notification.type) {
-            "new_job" -> {
+            NotificationRepository.TYPE_NEW_JOB -> {
                 if (notification.jobId != null) {
                     val intent = Intent(this, JobDetailsActivity::class.java).apply {
                         putExtra("jobId", notification.jobId)
@@ -148,10 +240,10 @@ class NotificationsActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
             }
-            "application_status" -> {
+            NotificationRepository.TYPE_APPLICATION_STATUS -> {
                 startActivity(Intent(this, MyApplicationsActivity::class.java))
             }
-            "new_message" -> {
+            NotificationRepository.TYPE_NEW_MESSAGE -> {
                 startActivity(Intent(this, ConversationsActivity::class.java))
             }
         }
@@ -165,13 +257,5 @@ class NotificationsActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    data class Notification(
-        val id: String,
-        val title: String,
-        val message: String,
-        val type: String,
-        val jobId: String? = null,
-        val timestamp: com.google.firebase.Timestamp,
-        val read: Boolean = false
-    )
+
 }

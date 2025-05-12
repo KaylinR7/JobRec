@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import com.google.android.material.chip.Chip
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -18,10 +20,17 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
     private lateinit var jobTitleText: TextView
     private lateinit var companyNameText: TextView
     private lateinit var jobLocationText: TextView
-    private lateinit var statusText: TextView
+    private lateinit var statusChip: Chip
+    private lateinit var statusDescriptionText: TextView
     private lateinit var appliedDateText: TextView
     private lateinit var lastUpdatedText: TextView
     private lateinit var chatButton: Button
+    private lateinit var viewJobDetailsButton: Button
+    private lateinit var jobTypeContainer: LinearLayout
+    private lateinit var jobTypeText: TextView
+    private lateinit var salaryContainer: LinearLayout
+    private lateinit var salaryText: TextView
+
     private var applicationId: String? = null
     private var jobId: String? = null
     private var companyId: String? = null
@@ -37,7 +46,7 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
-            title = "My Application"
+            title = "Application Details"
         }
 
         // Get the application ID from intent
@@ -47,15 +56,21 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
         jobTitleText = findViewById(R.id.jobTitleText)
         companyNameText = findViewById(R.id.companyNameText)
         jobLocationText = findViewById(R.id.jobLocationText)
-        statusText = findViewById(R.id.statusText)
+        statusChip = findViewById(R.id.statusChip)
+        statusDescriptionText = findViewById(R.id.statusDescriptionText)
         appliedDateText = findViewById(R.id.appliedDateText)
         lastUpdatedText = findViewById(R.id.lastUpdatedText)
         chatButton = findViewById(R.id.chatButton)
+        viewJobDetailsButton = findViewById(R.id.viewJobDetailsButton)
+        jobTypeContainer = findViewById(R.id.jobTypeContainer)
+        jobTypeText = findViewById(R.id.jobTypeText)
+        salaryContainer = findViewById(R.id.salaryContainer)
+        salaryText = findViewById(R.id.salaryText)
 
         // Initialize Firestore
         db = FirebaseFirestore.getInstance()
         loadApplicationDetails()
-        setupChatButton()
+        setupButtons()
     }
 
     private fun loadApplicationDetails() {
@@ -70,30 +85,16 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
                         companyName = document.getString("companyName")
                         companyNameText.text = companyName
 
-                        // Get job location from the job document
+                        // Get job details from the job document
                         jobId = document.getString("jobId")
                         companyId = document.getString("companyId")
 
                         if (!jobId.isNullOrEmpty()) {
-                            db.collection("jobs").document(jobId!!)
-                                .get()
-                                .addOnSuccessListener { jobDoc ->
-                                    if (jobDoc != null && jobDoc.exists()) {
-                                        jobLocationText.text = jobDoc.getString("location") ?: "Location not specified"
-                                    }
-                                }
+                            loadJobDetails(jobId!!)
                         }
 
                         val status = document.getString("status") ?: "pending"
-                        statusText.text = status.capitalize()
-                        statusText.setTextColor(getStatusColor(status))
-
-                        // Show chat button only if application is accepted
-                        if (status == "accepted") {
-                            chatButton.visibility = View.VISIBLE
-                        } else {
-                            chatButton.visibility = View.GONE
-                        }
+                        updateStatusUI(status)
 
                         // Format dates
                         val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
@@ -108,21 +109,94 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
                     }
                 }
                 .addOnFailureListener { e ->
-                    android.widget.Toast.makeText(this, "Error loading application: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Error loading application: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
+        }
+    }
+
+    private fun loadJobDetails(jobId: String) {
+        db.collection("jobs").document(jobId)
+            .get()
+            .addOnSuccessListener { jobDoc ->
+                if (jobDoc != null && jobDoc.exists()) {
+                    // Basic job details
+                    jobLocationText.text = jobDoc.getString("location") ?: "Location not specified"
+
+                    // Job type (if available)
+                    val jobType = jobDoc.getString("jobType")
+                    if (!jobType.isNullOrEmpty()) {
+                        jobTypeText.text = jobType
+                        jobTypeContainer.visibility = View.VISIBLE
+                    } else {
+                        jobTypeContainer.visibility = View.GONE
+                    }
+
+                    // Salary information (if available)
+                    val salaryMin = jobDoc.getLong("salaryMin")
+                    val salaryMax = jobDoc.getLong("salaryMax")
+                    val salaryCurrency = jobDoc.getString("salaryCurrency") ?: "$"
+                    val salaryPeriod = jobDoc.getString("salaryPeriod") ?: "year"
+
+                    if (salaryMin != null && salaryMax != null) {
+                        val formattedSalary = "$salaryCurrency${salaryMin.toInt().formatWithCommas()} - $salaryCurrency${salaryMax.toInt().formatWithCommas()} per $salaryPeriod"
+                        salaryText.text = formattedSalary
+                        salaryContainer.visibility = View.VISIBLE
+                    } else {
+                        salaryContainer.visibility = View.GONE
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error loading job details: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun Int.formatWithCommas(): String {
+        return String.format("%,d", this)
+    }
+
+    private fun updateStatusUI(status: String) {
+        // Update chip text and background color
+        statusChip.text = status.capitalize()
+        statusChip.chipBackgroundColor = getColorStateList(getStatusColor(status))
+
+        // Show chat button only if application is accepted
+        if (status == "accepted") {
+            chatButton.visibility = View.VISIBLE
+        } else {
+            chatButton.visibility = View.GONE
+        }
+
+        // Set status description based on status
+        statusDescriptionText.text = getStatusDescription(status)
+    }
+
+    private fun getStatusDescription(status: String): String {
+        return when (status.lowercase()) {
+            "pending" -> "Your application is being reviewed by the employer."
+            "accepted" -> "Congratulations! Your application has been accepted."
+            "rejected" -> "Unfortunately, your application was not selected for this position."
+            "shortlisted" -> "You've been shortlisted for this position. The employer may contact you soon."
+            "interviewing" -> "You're in the interview process for this position."
+            "offered" -> "You've received a job offer for this position."
+            else -> "Your application status is: ${status.capitalize()}"
         }
     }
 
     private fun getStatusColor(status: String): Int {
         return when (status.lowercase()) {
-            "pending" -> resources.getColor(R.color.status_pending, theme)
-            "accepted" -> resources.getColor(R.color.status_accepted, theme)
-            "rejected" -> resources.getColor(R.color.status_rejected, theme)
-            else -> resources.getColor(R.color.status_pending, theme)
+            "pending" -> R.color.status_pending
+            "accepted" -> R.color.status_accepted
+            "rejected" -> R.color.status_rejected
+            "shortlisted" -> R.color.status_shortlisted
+            "interviewing" -> R.color.status_interviewing
+            "offered" -> R.color.status_offered
+            else -> R.color.status_pending
         }
     }
 
-    private fun setupChatButton() {
+    private fun setupButtons() {
+        // Chat button setup
         chatButton.setOnClickListener {
             if (applicationId != null) {
                 // Open chat activity with this application
@@ -132,6 +206,19 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
                 startActivity(intent)
             } else {
                 Toast.makeText(this, "Cannot start chat: Missing application information", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // View job details button setup
+        viewJobDetailsButton.setOnClickListener {
+            if (jobId != null) {
+                // Open job details activity
+                val intent = Intent(this, JobDetailsActivity::class.java).apply {
+                    putExtra("jobId", jobId)
+                }
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "Cannot view job details: Missing job information", Toast.LENGTH_SHORT).show()
             }
         }
     }

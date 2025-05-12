@@ -14,9 +14,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#000000"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:titleTextColor="@android:color/white" />
+            style="@style/Widget.JobRec.Toolbar"
+            app:titleTextColor="@color/white"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -30,7 +30,7 @@
             android:id="@+id/chatHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#F5F5F5"
+            android:background="@color/primary"
             android:padding="12dp"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -59,7 +59,7 @@
                     android:id="@+id/participantNameText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="#000000"
+                    android:textColor="@color/white"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     tools:text="Samsung Electronics" />
@@ -69,7 +69,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:textColor="#757575"
+                    android:textColor="@color/white"
                     android:textSize="14sp"
                     tools:text="Senior Software Engineer" />
 
@@ -83,7 +83,7 @@
             android:layout_height="0dp"
             android:background="#FFFFFF"
             app:layout_constraintBottom_toTopOf="@id/messageInputLayout"
-            app:layout_constraintTop_toBottomOf="@id/chatHeader" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Messages RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
@@ -93,7 +93,7 @@
             android:clipToPadding="false"
             android:padding="8dp"
             app:layout_constraintBottom_toTopOf="@id/messageInputLayout"
-            app:layout_constraintTop_toBottomOf="@id/chatHeader" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Empty State View -->
         <TextView
@@ -107,7 +107,7 @@
             app:layout_constraintBottom_toTopOf="@id/messageInputLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/chatHeader" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Message Input Layout - WhatsApp style -->
         <LinearLayout
@@ -149,12 +149,12 @@
                 android:layout_height="48dp"
                 android:layout_gravity="bottom"
                 android:layout_marginStart="8dp"
-                android:backgroundTint="#000000"
+                android:backgroundTint="@color/primary"
                 android:contentDescription="Send message"
                 app:borderWidth="0dp"
                 app:fabCustomSize="48dp"
                 app:srcCompat="@android:drawable/ic_menu_send"
-                app:tint="#FFFFFF" />
+                app:tint="@color/white" />
 
         </LinearLayout>
 
@@ -167,13 +167,13 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:backgroundTint="#000000"
+        android:backgroundTint="@color/primary"
         android:contentDescription="Schedule Meeting"
         android:src="@android:drawable/ic_menu_my_calendar"
         app:borderWidth="0dp"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
         app:layout_constraintBottom_toTopOf="@id/messageInputLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:tint="#FFFFFF" />
+        app:tint="@color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

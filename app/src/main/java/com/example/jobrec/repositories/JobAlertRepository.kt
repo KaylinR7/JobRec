@@ -17,12 +17,12 @@ class JobAlertRepository {
             id = alertId,
             userId = auth.currentUser?.uid ?: throw Exception("User not authenticated")
         )
-        
+
         db.collection("jobAlerts")
             .document(alertId)
             .set(newAlert)
             .await()
-            
+
         return alertId
     }
 
@@ -68,25 +68,54 @@ class JobAlertRepository {
     }
 
     suspend fun checkForNewJobs(jobAlert: JobAlert): List<String> {
-        // Query jobs that match the alert criteria
-        val jobsQuery = db.collection("jobs")
+        // Get all active jobs with a simple query
+        val allJobs = db.collection("jobs")
             .whereEqualTo("isActive", true)
-            .whereGreaterThan("createdAt", jobAlert.lastNotified ?: jobAlert.createdAt)
-            
-        // Add filters based on alert criteria
-        if (jobAlert.keywords.isNotEmpty()) {
-            jobsQuery.whereArrayContainsAny("keywords", jobAlert.keywords)
-        }
-        if (jobAlert.locations.isNotEmpty()) {
-            jobsQuery.whereIn("location", jobAlert.locations)
-        }
-        if (jobAlert.jobTypes.isNotEmpty()) {
-            jobsQuery.whereIn("type", jobAlert.jobTypes)
-        }
-        
-        return jobsQuery.get()
+            .get()
             .await()
             .documents
-            .map { it.id }
+
+        // Filter jobs in memory
+        return allJobs.filter { jobDoc ->
+            var matches = true
+
+            // Check if job is newer than last notification
+            val jobCreatedAt = jobDoc.getTimestamp("createdAt")
+            val lastNotified = jobAlert.lastNotified ?: jobAlert.createdAt
+
+            if (jobCreatedAt == null || !jobCreatedAt.toDate().after(lastNotified.toDate())) {
+                return@filter false
+            }
+
+            // Check keywords
+            if (jobAlert.keywords.isNotEmpty()) {
+                val jobTitle = jobDoc.getString("title") ?: ""
+                val jobDescription = jobDoc.getString("description") ?: ""
+                val jobKeywords = jobDoc.get("keywords") as? List<String> ?: emptyList()
+
+                // Check if any keyword matches in title, description or keywords
+                matches = matches && jobAlert.keywords.any { keyword ->
+                    jobTitle.contains(keyword, ignoreCase = true) ||
+                    jobDescription.contains(keyword, ignoreCase = true) ||
+                    jobKeywords.any { it.contains(keyword, ignoreCase = true) }
+                }
+            }
+
+            // Check location
+            if (matches && jobAlert.locations.isNotEmpty()) {
+                val jobLocation = jobDoc.getString("location") ?: ""
+                matches = matches && jobAlert.locations.any {
+                    jobLocation.contains(it, ignoreCase = true)
+                }
+            }
+
+            // Check job type
+            if (matches && jobAlert.jobTypes.isNotEmpty()) {
+                val jobType = jobDoc.getString("type") ?: ""
+                matches = matches && jobAlert.jobTypes.contains(jobType)
+            }
+
+            matches
+        }.map { it.id }
     }
-} 
+}

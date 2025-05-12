@@ -122,7 +122,7 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             android:src="@drawable/ic_search"
-            app:backgroundTint="@color/black"
+            app:backgroundTint="@color/accent"
             app:tint="@color/white"/>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

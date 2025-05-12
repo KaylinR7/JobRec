@@ -39,6 +39,29 @@ class ConversationRepository {
         val conversationId = UUID.randomUUID().toString()
         android.util.Log.d("ConversationRepo", "Creating new conversation with ID: $conversationId")
 
+        // Ensure we have a valid company name
+        var validCompanyName = companyName
+        if (validCompanyName.isBlank()) {
+            // Try to get company name from the company document
+            try {
+                val companyDoc = db.collection("companies")
+                    .document(companyId)
+                    .get()
+                    .await()
+
+                if (companyDoc.exists()) {
+                    validCompanyName = companyDoc.getString("companyName") ?: "Company"
+                    android.util.Log.d("ConversationRepo", "Retrieved company name from document: $validCompanyName")
+                } else {
+                    validCompanyName = "Company"
+                    android.util.Log.d("ConversationRepo", "Using default company name: $validCompanyName")
+                }
+            } catch (e: Exception) {
+                validCompanyName = "Company"
+                android.util.Log.d("ConversationRepo", "Error getting company name, using default: $validCompanyName")
+            }
+        }
+
         val conversation = Conversation(
             id = conversationId,
             applicationId = applicationId,
@@ -47,7 +70,7 @@ class ConversationRepository {
             candidateId = candidateId,
             candidateName = candidateName,
             companyId = companyId,
-            companyName = companyName
+            companyName = validCompanyName
         )
 
         try {

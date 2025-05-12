@@ -1,42 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/background">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        app:elevation="0dp">
+        android:layout_height="wrap_content">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
+            style="@style/Widget.JobRec.Toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/black"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:title="Job Details">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/saveJobButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_gravity="end"
                 android:layout_marginEnd="8dp"
-                app:icon="@drawable/ic_bookmark_border"
-                app:iconTint="@android:color/white"
+                android:backgroundTint="@android:color/transparent"
                 android:insetLeft="0dp"
                 android:insetTop="0dp"
                 android:insetRight="0dp"
                 android:insetBottom="0dp"
+                app:icon="@drawable/ic_bookmark_border"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                app:strokeWidth="0dp"
-                android:backgroundTint="@android:color/transparent" />
+                app:iconTint="@android:color/white"
+                app:strokeWidth="0dp" />
         </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -44,6 +42,8 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingBottom="80dp"
+        android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -52,325 +52,327 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Job Header Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#E0E0E0">
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="24dp">
+                    android:padding="16dp">
 
                     <TextView
                         android:id="@+id/jobTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Job Title"
-                        android:textSize="24sp"
+                        android:textAppearance="?attr/textAppearanceHeadline5"
+                        android:textColor="@color/text_primary"
                         android:textStyle="bold"
-                        android:textColor="@color/black"
-                        android:layout_marginBottom="8dp" />
+                        tools:text="Senior Software Engineer" />
 
-                    <TextView
-                        android:id="@+id/companyName"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Company Name"
-                        android:textSize="18sp"
-                        android:textColor="@color/black"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="16dp" />
-
-                    <!-- Job Field -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_business"
+                            app:tint="@color/black" />
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:id="@+id/companyName"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Field: "
-                            android:textSize="16sp"
+                            android:layout_marginStart="12dp"
+                            android:textAppearance="?attr/textAppearanceBody1"
+                            android:textColor="@color/text_primary"
                             android:textStyle="bold"
-                            android:textColor="@color/black" />
-
-                        <TextView
-                            android:id="@+id/jobField"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Information Technology"
-                            android:textSize="16sp"
-                            android:textColor="@color/black" />
+                            tools:text="Google" />
                     </LinearLayout>
 
-                    <!-- Location Information -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Location: "
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/black" />
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_location"
+                            app:tint="@color/black" />
 
                         <TextView
                             android:id="@+id/jobLocation"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Cape Town"
-                            android:textSize="16sp"
-                            android:textColor="@color/black" />
+                            android:layout_marginStart="12dp"
+                            android:textAppearance="?attr/textAppearanceBody1"
+                            android:textColor="@color/text_primary"
+                            tools:text="Mountain View, CA" />
                     </LinearLayout>
 
-                    <!-- Province Information -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Province: "
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/black" />
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_location"
+                            app:tint="@color/black" />
 
                         <TextView
                             android:id="@+id/jobProvince"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Western Cape"
-                            android:textSize="16sp"
-                            android:textColor="@color/black" />
+                            android:layout_marginStart="12dp"
+                            android:textAppearance="?attr/textAppearanceBody1"
+                            android:textColor="@color/text_primary"
+                            tools:text="Western Cape" />
                     </LinearLayout>
 
-                    <!-- Job Type -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_work"
+                            app:tint="@color/black" />
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:id="@+id/jobField"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Job Type: "
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/black" />
+                            android:layout_marginStart="12dp"
+                            android:textAppearance="?attr/textAppearanceBody1"
+                            android:textColor="@color/text_primary"
+                            tools:text="Information Technology" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_schedule"
+                            app:tint="@color/black" />
 
                         <TextView
                             android:id="@+id/jobType"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Full-time"
-                            android:textSize="16sp"
-                            android:textColor="@color/black" />
+                            android:layout_marginStart="12dp"
+                            android:textAppearance="?attr/textAppearanceBody1"
+                            android:textColor="@color/text_primary"
+                            tools:text="Full-time" />
                     </LinearLayout>
 
-                    <!-- Experience Level -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Experience: "
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/black" />
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_experience"
+                            app:tint="@color/black" />
 
                         <TextView
                             android:id="@+id/jobExperience"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="3-5 years"
-                            android:textSize="16sp"
-                            android:textColor="@color/black" />
+                            android:layout_marginStart="12dp"
+                            android:textAppearance="?attr/textAppearanceBody1"
+                            android:textColor="@color/text_primary"
+                            tools:text="3-5 years" />
                     </LinearLayout>
 
-                    <!-- Salary -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Salary: "
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/black" />
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_attach_money"
+                            app:tint="@color/black" />
 
                         <TextView
                             android:id="@+id/jobSalary"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="R30,000 - R40,000"
-                            android:textSize="16sp"
-                            android:textColor="@color/black" />
+                            android:layout_marginStart="12dp"
+                            android:textAppearance="?attr/textAppearanceBody1"
+                            android:textColor="@color/text_primary"
+                            tools:text="$100,000 - $150,000 per year" />
                     </LinearLayout>
 
-                    <!-- Posted Date -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="16dp">
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Posted: "
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/black" />
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_calendar"
+                            app:tint="@color/black" />
 
                         <TextView
                             android:id="@+id/jobPostedDate"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="May 9, 2025"
-                            android:textSize="16sp"
-                            android:textColor="@color/black" />
+                            android:layout_marginStart="12dp"
+                            android:textAppearance="?attr/textAppearanceBody1"
+                            android:textColor="@color/text_primary"
+                            tools:text="Posted on May 15, 2023" />
                     </LinearLayout>
-
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Job Description Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#E0E0E0">
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="24dp">
+                    android:padding="16dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Job Description"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/black"
-                        android:layout_marginBottom="8dp" />
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:textColor="@color/primary"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/jobDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Job description goes here..."
-                        android:textSize="16sp"
-                        android:textColor="@color/black"
+                        android:layout_marginTop="12dp"
                         android:lineSpacingExtra="4dp"
-                        android:layout_marginBottom="24dp" />
-
+                        android:textAppearance="?attr/textAppearanceBody1"
+                        android:textColor="@color/text_primary"
+                        tools:text="This is a detailed job description that explains the responsibilities, tasks, and expectations for the role." />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Job Requirements Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#E0E0E0">
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="24dp">
+                    android:padding="16dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Requirements"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/black"
-                        android:layout_marginBottom="8dp" />
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:textColor="@color/primary"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/jobRequirements"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Requirements go here..."
-                        android:textSize="16sp"
-                        android:textColor="@color/black"
+                        android:layout_marginTop="12dp"
                         android:lineSpacingExtra="4dp"
-                        android:layout_marginBottom="24dp" />
-
+                        android:textAppearance="?attr/textAppearanceBody1"
+                        android:textColor="@color/text_primary"
+                        tools:text="• Bachelor's degree in Computer Science or related field\n• 3+ years of experience in software development\n• Proficiency in Java, Kotlin, and Android development" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/applyButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Apply Now"
-                android:textColor="@color/white"
-                android:padding="12dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="32dp"
-                app:cornerRadius="8dp"/>
-
-            <LinearLayout
-                android:id="@+id/jobManagementLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/editJobButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Edit"
-                    android:layout_marginEnd="8dp"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/deleteJobButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Delete"
-                    android:layout_marginStart="8dp"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-            </LinearLayout>
-
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- Bottom Action Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/white"
+        android:elevation="8dp"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/applyButton"
+            style="@style/Widget.JobRec.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Apply Now" />
+
+        <LinearLayout
+            android:id="@+id/jobManagementLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/editJobButton"
+                style="@style/Widget.JobRec.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="Edit" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/deleteJobButton"
+                style="@style/Widget.JobRec.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="Delete" />
+        </LinearLayout>
+    </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -43,7 +43,7 @@
                         android:text="Welcome back!"
                         android:textSize="28sp"
                         android:textStyle="bold"
-                        android:textColor="#000000"/>
+                        android:textColor="@color/primary"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/returnToCompanyView"
@@ -52,7 +52,7 @@
                         android:text="Return to Company View"
                         android:layout_marginTop="8dp"
                         android:visibility="gone"
-                        app:backgroundTint="#000000"
+                        app:backgroundTint="@color/primary"
                         app:cornerRadius="8dp"/>
                 </LinearLayout>
 
@@ -78,7 +78,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_search"
-                            android:tint="#000000"
+                            android:tint="@color/black"
                             android:layout_marginEnd="12dp" />
 
                         <TextView
@@ -113,7 +113,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
                             android:padding="20dp"
-                            android:background="#000000">
+                            android:background="@color/primary">
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -150,7 +150,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
                             android:padding="20dp"
-                            android:background="#212121">
+                            android:background="@color/primary">
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -179,7 +179,7 @@
                     android:text="Quick Actions"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    android:textColor="#000000"
+                    android:textColor="@color/primary"
                     android:layout_marginBottom="16dp"/>
 
                 <LinearLayout
@@ -211,7 +211,7 @@
                                 android:layout_width="40dp"
                                 android:layout_height="40dp"
                                 android:src="@drawable/ic_application"
-                                android:tint="#000000"
+                                android:tint="@color/black"
                                 android:layout_marginBottom="12dp"/>
 
                             <TextView
@@ -219,7 +219,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="My Applications"
                                 android:textSize="16sp"
-                                android:textColor="#000000"
+                                android:textColor="@color/primary"
                                 android:gravity="center"/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
@@ -247,7 +247,7 @@
                                 android:layout_width="40dp"
                                 android:layout_height="40dp"
                                 android:src="@android:drawable/ic_dialog_email"
-                                android:tint="#000000"
+                                android:tint="@color/black"
                                 android:layout_marginBottom="12dp"/>
 
                             <TextView
@@ -255,7 +255,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="Messages"
                                 android:textSize="16sp"
-                                android:textColor="#000000"
+                                android:textColor="@color/primary"
                                 android:gravity="center"/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
@@ -269,7 +269,7 @@
                     android:text="Recently Posted Jobs"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    android:textColor="#000000"
+                    android:textColor="@color/primary"
                     android:layout_marginBottom="16dp"/>
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -289,7 +289,7 @@
                     android:text="Recommended for You"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    android:textColor="#000000"
+                    android:textColor="@color/primary"
                     android:layout_marginBottom="16dp"/>
 
                 <androidx.recyclerview.widget.RecyclerView

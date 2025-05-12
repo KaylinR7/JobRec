@@ -4,7 +4,7 @@
     android:layout_width="280dp"
     android:layout_height="match_parent"
     android:layout_gravity="end"
-    android:background="@color/white">
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -122,7 +122,10 @@
                 android:layout_height="wrap_content"
                 android:text="Full-time"
                 android:checkable="true"
-                app:chipBackgroundColor="@color/custom_chip_background"/>
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:chipStrokeColor="@color/primary"
+                app:chipStrokeWidth="1dp"
+                android:textColor="@color/chip_text_color"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipPartTime"
@@ -130,7 +133,10 @@
                 android:layout_height="wrap_content"
                 android:text="Part-time"
                 android:checkable="true"
-                app:chipBackgroundColor="@color/custom_chip_background"/>
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:chipStrokeColor="@color/primary"
+                app:chipStrokeWidth="1dp"
+                android:textColor="@color/chip_text_color"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipContract"
@@ -138,7 +144,10 @@
                 android:layout_height="wrap_content"
                 android:text="Contract"
                 android:checkable="true"
-                app:chipBackgroundColor="@color/custom_chip_background"/>
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:chipStrokeColor="@color/primary"
+                app:chipStrokeWidth="1dp"
+                android:textColor="@color/chip_text_color"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipRemote"
@@ -146,7 +155,10 @@
                 android:layout_height="wrap_content"
                 android:text="Remote"
                 android:checkable="true"
-                app:chipBackgroundColor="@color/custom_chip_background"/>
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:chipStrokeColor="@color/primary"
+                app:chipStrokeWidth="1dp"
+                android:textColor="@color/chip_text_color"/>
         </com.google.android.material.chip.ChipGroup>
 
         <LinearLayout
@@ -157,7 +169,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/clearFiltersButton"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.JobRec.Button.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -166,11 +178,12 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/applyFiltersButton"
+                style="@style/Widget.JobRec.Button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Apply"
-                app:cornerRadius="8dp"/>
+                app:backgroundTint="@color/primary"/>
         </LinearLayout>
 
     </LinearLayout>

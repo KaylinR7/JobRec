@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="24dp"
-    android:background="@android:color/white"
+    android:background="@color/background"
     android:gravity="center">
 
     <TextView
@@ -14,7 +14,7 @@
         android:text="Welcome! Login in to find your perfect job!"
         android:textSize="32sp"
         android:textStyle="bold"
-        android:textColor="@android:color/black"
+        android:textColor="@color/text_primary"
         android:layout_marginBottom="8dp"/>
 
     <TextView
@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:text="Sign in to continue"
         android:textSize="16sp"
-        android:textColor="@android:color/darker_gray"
+        android:textColor="@color/text_secondary"
         android:layout_marginBottom="32dp"/>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -30,8 +30,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        app:boxStrokeColor="@android:color/black"
-        app:hintTextColor="@android:color/black">
+        app:boxStrokeColor="@color/primary"
+        app:hintTextColor="@color/primary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/emailInput"
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:hint="Email"
             android:inputType="textEmailAddress"
-            android:textColor="@android:color/black"/>
+            android:textColor="@color/text_primary"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -47,10 +47,10 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        app:boxStrokeColor="@android:color/black"
-        app:hintTextColor="@android:color/black"
+        app:boxStrokeColor="@color/primary"
+        app:hintTextColor="@color/primary"
         app:passwordToggleEnabled="true"
-        app:passwordToggleTint="@android:color/black">
+        app:passwordToggleTint="@color/primary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/passwordInput"
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:hint="Password"
             android:inputType="textPassword"
-            android:textColor="@android:color/black"/>
+            android:textColor="@color/text_primary"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
@@ -67,8 +67,9 @@
         android:layout_height="56dp"
         android:text="Sign In"
         android:textSize="16sp"
-        android:textColor="@android:color/white"
-        app:backgroundTint="@android:color/black"
+        android:textColor="@color/white"
+        app:backgroundTint="@color/primary"
+        style="@style/Widget.JobRec.Button"
         android:layout_marginBottom="24dp"/>
 
     <LinearLayout
@@ -79,37 +80,37 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/signupLink"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            style="@style/Widget.JobRec.Button.Outlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Don't have an account? Sign up"
-            android:textColor="@android:color/black"
+            android:textColor="@color/primary"
             android:textSize="14sp"
-            app:strokeColor="@android:color/black"
+            app:strokeColor="@color/primary"
             app:strokeWidth="1dp"
             android:layout_marginBottom="8dp"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/companySignupLink"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            style="@style/Widget.JobRec.Button.Outlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Are you a company? Register here"
-            android:textColor="@android:color/black"
+            android:textColor="@color/primary"
             android:textSize="14sp"
-            app:strokeColor="@android:color/black"
+            app:strokeColor="@color/primary"
             app:strokeWidth="1dp"
             android:layout_marginBottom="8dp"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/adminLoginLink"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            style="@style/Widget.JobRec.Button.Outlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Admin Login"
-            android:textColor="@android:color/black"
+            android:textColor="@color/primary"
             android:textSize="14sp"
-            app:strokeColor="@android:color/black"
+            app:strokeColor="@color/primary"
             app:strokeWidth="1dp"
             android:layout_marginBottom="16dp"/>
 
@@ -120,7 +121,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Debug Database"
-            android:textColor="#888888"
+            android:textColor="@color/text_secondary"
             android:textSize="12sp"
             android:visibility="visible"
             android:layout_marginTop="16dp"/>
