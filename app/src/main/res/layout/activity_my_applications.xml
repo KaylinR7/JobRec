@@ -14,8 +14,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            style="@style/Widget.JobRec.Toolbar"
             app:title="My Applications" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -52,4 +51,4 @@
         app:menu="@menu/application_status_menu"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout> 
+</androidx.constraintlayout.widget.ConstraintLayout>
