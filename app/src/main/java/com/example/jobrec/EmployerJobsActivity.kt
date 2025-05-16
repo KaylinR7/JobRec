@@ -23,7 +23,7 @@ class EmployerJobsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_employer_jobs)
 
-        // Setup toolbar
+        // Setup toolbar with black back button
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -31,6 +31,9 @@ class EmployerJobsActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
             title = "Manage Jobs"
         }
+
+        // Set white navigation icon for red toolbar
+        toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
 
         // Initialize Firebase
         db = FirebaseFirestore.getInstance()
@@ -119,4 +122,4 @@ class EmployerJobsActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error deleting job: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-} 
+}

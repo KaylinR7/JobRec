@@ -9,10 +9,9 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@color/primary"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+        style="@style/Widget.CareerWorx.Toolbar.Company" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -36,4 +35,4 @@
             android:src="@android:drawable/ic_input_add" />
 
     </LinearLayout>
-</LinearLayout> 
+</LinearLayout>

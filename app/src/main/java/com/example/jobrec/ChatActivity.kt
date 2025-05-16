@@ -49,7 +49,6 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var emptyView: TextView
     private lateinit var messageInput: TextInputEditText
     private lateinit var sendButton: FloatingActionButton
-    private lateinit var scheduleMeetingFab: FloatingActionButton
 
     private lateinit var messageAdapter: MessageAdapter
     private lateinit var conversationRepository: ConversationRepository
@@ -104,7 +103,6 @@ class ChatActivity : AppCompatActivity() {
         emptyView = findViewById(R.id.emptyView)
         messageInput = findViewById(R.id.messageInput)
         sendButton = findViewById(R.id.sendButton)
-        scheduleMeetingFab = findViewById(R.id.scheduleMeetingFab)
     }
 
     private fun setupToolbar() {
@@ -157,10 +155,6 @@ class ChatActivity : AppCompatActivity() {
             if (messageContent.isNotEmpty() && conversationId != null && receiverId.isNotEmpty()) {
                 sendMessage(messageContent)
             }
-        }
-
-        scheduleMeetingFab.setOnClickListener {
-            showScheduleMeetingDialog()
         }
     }
 
@@ -263,30 +257,76 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun updateConversationUI(conversation: Conversation) {
-        // Determine if current user is the candidate or the company
-        val isCompanyView = currentUserId == conversation.companyId
+        // Check if user is a company by checking both the current user ID and the company email
+        checkIfCompanyUser { isCompanyUser ->
+            // Hide the secondary chat header that shows job title
+            findViewById<View>(R.id.chatHeader).visibility = View.GONE
 
-        // Hide the secondary chat header that shows job title
-        findViewById<View>(R.id.chatHeader).visibility = View.GONE
+            if (isCompanyUser) {
+                // Company viewing candidate
+                receiverId = conversation.candidateId
+                // Set toolbar title to candidate name, use default if empty
+                val candidateName = if (conversation.candidateName.isNullOrEmpty()) "Candidate" else conversation.candidateName
+                supportActionBar?.title = candidateName
+                // Log the title being set
+                Log.d("ChatActivity", "Setting title to candidate name: $candidateName")
+            } else {
+                // Candidate viewing company
+                receiverId = conversation.companyId
+                // Get company name directly from the companies collection
+                getCompanyNameFromFirestore(conversation.companyId)
+            }
+        }
+    }
 
-        if (isCompanyView) {
-            // Company viewing candidate
-            receiverId = conversation.candidateId
-            // Show schedule meeting button for companies only
-            scheduleMeetingFab.visibility = View.VISIBLE
-            // Set toolbar title to candidate name, use default if empty
-            val candidateName = if (conversation.candidateName.isNullOrEmpty()) "Candidate" else conversation.candidateName
-            supportActionBar?.title = candidateName
-            // Log the title being set
-            Log.d("ChatActivity", "Setting title to candidate name: $candidateName")
+    private fun checkIfCompanyUser(callback: (Boolean) -> Unit) {
+        // First check if the user's email is in the companies collection
+        val currentUserEmail = auth.currentUser?.email
+        if (currentUserEmail != null) {
+            db.collection("companies")
+                .whereEqualTo("email", currentUserEmail)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (!documents.isEmpty) {
+                        // User found as company by email
+                        Log.d("ChatActivity", "User is company (by email): true")
+                        callback(true)
+                        invalidateOptionsMenu() // Force menu to update
+                    } else {
+                        // If not found by email, check if user exists in companies collection with userId field
+                        db.collection("companies")
+                            .whereEqualTo("userId", currentUserId)
+                            .get()
+                            .addOnSuccessListener { userIdDocs ->
+                                if (!userIdDocs.isEmpty) {
+                                    // User found as company with userId field
+                                    Log.d("ChatActivity", "User is company (by userId): true")
+                                    callback(true)
+                                    invalidateOptionsMenu() // Force menu to update
+                                } else {
+                                    // Not a company user
+                                    Log.d("ChatActivity", "User is not a company")
+                                    callback(false)
+                                    invalidateOptionsMenu() // Force menu to update
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("ChatActivity", "Error checking company by userId", e)
+                                callback(false)
+                                invalidateOptionsMenu() // Force menu to update
+                            }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("ChatActivity", "Error checking company by email", e)
+                    callback(false)
+                    invalidateOptionsMenu() // Force menu to update
+                }
         } else {
-            // Candidate viewing company
-            receiverId = conversation.companyId
-            // Hide schedule meeting button for students
-            scheduleMeetingFab.visibility = View.GONE
-
-            // Get company name directly from the companies collection
-            getCompanyNameFromFirestore(conversation.companyId)
+            // No email available, default to student
+            Log.d("ChatActivity", "No email available for current user, defaulting to student")
+            callback(false)
+            invalidateOptionsMenu() // Force menu to update
         }
     }
 
@@ -543,15 +583,42 @@ class ChatActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    private var isCompanyUser = false
+    private var menuInstance: Menu? = null
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.chat_menu, menu)
+        menuInstance = menu
+
+        // Initially hide the schedule meeting option
+        menu.findItem(R.id.action_schedule_meeting)?.isVisible = false
+
+        // Use our more reliable method to check if user is a company
+        checkIfCompanyUser { isCompany ->
+            isCompanyUser = isCompany
+            // Update menu visibility on the UI thread
+            runOnUiThread {
+                menuInstance?.findItem(R.id.action_schedule_meeting)?.isVisible = isCompany
+            }
+        }
+
         return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        // Update menu item visibility based on user type
+        menu.findItem(R.id.action_schedule_meeting)?.isVisible = isCompanyUser
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
                 onBackPressed()
+                true
+            }
+            R.id.action_schedule_meeting -> {
+                showScheduleMeetingDialog()
                 true
             }
             R.id.action_delete_chat -> {

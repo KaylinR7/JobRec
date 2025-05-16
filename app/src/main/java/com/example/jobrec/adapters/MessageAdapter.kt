@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -49,7 +50,7 @@ class MessageAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = getItem(position)
-        
+
         if (holder.itemViewType == VIEW_TYPE_SENT) {
             (holder as SentMessageViewHolder).bind(message)
         } else {
@@ -60,6 +61,7 @@ class MessageAdapter(
     inner class SentMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val messageText: TextView = itemView.findViewById(R.id.messageText)
         private val messageTimeText: TextView = itemView.findViewById(R.id.messageTimeText)
+        private val meetingScrollView: ScrollView = itemView.findViewById(R.id.meetingScrollView)
         private val meetingDetailsLayout: LinearLayout = itemView.findViewById(R.id.meetingDetailsLayout)
         private val meetingDateText: TextView = itemView.findViewById(R.id.meetingDateText)
         private val meetingTimeText: TextView = itemView.findViewById(R.id.meetingTimeText)
@@ -73,27 +75,28 @@ class MessageAdapter(
             messageTimeText.text = timeFormat.format(message.createdAt.toDate())
 
             if (message.type == "interview" && message.interviewDetails != null) {
+                meetingScrollView.visibility = View.VISIBLE
                 meetingDetailsLayout.visibility = View.VISIBLE
-                
+
                 val details = message.interviewDetails
                 meetingDateText.text = "Date: ${dateFormat.format(details.date.toDate())}"
                 meetingTimeText.text = "Time: ${details.time}"
-                meetingTypeText.text = "Type: ${details.type.capitalize()}"
-                
+                meetingTypeText.text = "Type: ${details.type.capitalize(Locale.getDefault())}"
+
                 if (!details.location.isNullOrEmpty()) {
                     meetingLocationText.visibility = View.VISIBLE
                     meetingLocationText.text = "Location: ${details.location}"
                 } else {
                     meetingLocationText.visibility = View.GONE
                 }
-                
+
                 if (!details.meetingLink.isNullOrEmpty()) {
                     meetingLinkText.visibility = View.VISIBLE
                     meetingLinkText.text = "Link: ${details.meetingLink}"
                 } else {
                     meetingLinkText.visibility = View.GONE
                 }
-                
+
                 val statusText = when (details.status) {
                     "pending" -> "Pending response"
                     "accepted" -> "Meeting accepted"
@@ -103,6 +106,7 @@ class MessageAdapter(
                 }
                 meetingStatusText.text = statusText
             } else {
+                meetingScrollView.visibility = View.GONE
                 meetingDetailsLayout.visibility = View.GONE
             }
         }
@@ -111,6 +115,7 @@ class MessageAdapter(
     inner class ReceivedMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val messageText: TextView = itemView.findViewById(R.id.messageText)
         private val messageTimeText: TextView = itemView.findViewById(R.id.messageTimeText)
+        private val meetingScrollView: ScrollView = itemView.findViewById(R.id.meetingScrollView)
         private val meetingDetailsLayout: LinearLayout = itemView.findViewById(R.id.meetingDetailsLayout)
         private val meetingDateText: TextView = itemView.findViewById(R.id.meetingDateText)
         private val meetingTimeText: TextView = itemView.findViewById(R.id.meetingTimeText)
@@ -127,43 +132,44 @@ class MessageAdapter(
             messageTimeText.text = timeFormat.format(message.createdAt.toDate())
 
             if (message.type == "interview" && message.interviewDetails != null) {
+                meetingScrollView.visibility = View.VISIBLE
                 meetingDetailsLayout.visibility = View.VISIBLE
-                
+
                 val details = message.interviewDetails
                 meetingDateText.text = "Date: ${dateFormat.format(details.date.toDate())}"
                 meetingTimeText.text = "Time: ${details.time}"
-                meetingTypeText.text = "Type: ${details.type.capitalize()}"
-                
+                meetingTypeText.text = "Type: ${details.type.capitalize(Locale.getDefault())}"
+
                 if (!details.location.isNullOrEmpty()) {
                     meetingLocationText.visibility = View.VISIBLE
                     meetingLocationText.text = "Location: ${details.location}"
                 } else {
                     meetingLocationText.visibility = View.GONE
                 }
-                
+
                 if (!details.meetingLink.isNullOrEmpty()) {
                     meetingLinkText.visibility = View.VISIBLE
                     meetingLinkText.text = "Link: ${details.meetingLink}"
                 } else {
                     meetingLinkText.visibility = View.GONE
                 }
-                
+
                 // Show response buttons only if the meeting is pending
                 if (details.status == "pending") {
                     meetingResponseLayout.visibility = View.VISIBLE
                     meetingStatusText.visibility = View.GONE
-                    
+
                     acceptMeetingButton.setOnClickListener {
                         onMeetingAccept(message)
                     }
-                    
+
                     declineMeetingButton.setOnClickListener {
                         onMeetingDecline(message)
                     }
                 } else {
                     meetingResponseLayout.visibility = View.GONE
                     meetingStatusText.visibility = View.VISIBLE
-                    
+
                     val statusText = when (details.status) {
                         "accepted" -> "Meeting accepted"
                         "rejected" -> "Meeting declined"
@@ -173,6 +179,7 @@ class MessageAdapter(
                     meetingStatusText.text = statusText
                 }
             } else {
+                meetingScrollView.visibility = View.GONE
                 meetingDetailsLayout.visibility = View.GONE
             }
         }

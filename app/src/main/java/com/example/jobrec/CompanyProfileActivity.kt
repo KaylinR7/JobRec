@@ -104,11 +104,14 @@ class CompanyProfileActivity : AppCompatActivity() {
 
         Log.d("CompanyProfile", "Using company ID from intent: $companyId")
 
-        // Setup toolbar
+        // Setup toolbar with black back button
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Company Profile"
+
+        // Set white navigation icon for red toolbar
+        toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
 
         // Initialize views
         initializeViews()

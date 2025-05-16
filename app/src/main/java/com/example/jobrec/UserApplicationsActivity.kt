@@ -68,10 +68,10 @@ class UserApplicationsActivity : AppCompatActivity() {
         val statuses = arrayOf("PENDING", "REVIEWING", "SHORTLISTED", "INTERVIEWING", "OFFERED", "REJECTED")
         val status = statuses[statusIndex]
 
+        // Using simpler query without complex ordering
         db.collection("applications")
             .whereEqualTo("userId", userId)
             .whereEqualTo("status", status)
-            .orderBy("appliedDate", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
                 val applications = documents.mapNotNull { document ->
@@ -83,7 +83,11 @@ class UserApplicationsActivity : AppCompatActivity() {
                         null
                     }
                 }
-                applicationsAdapter.updateApplications(applications)
+                // Sort in memory - using appliedDate field from the Application class
+                val sortedApplications = applications.sortedByDescending {
+                    it.appliedDate.seconds
+                }
+                applicationsAdapter.updateApplications(sortedApplications)
             }
             .addOnFailureListener { e ->
                 Toast.makeText(this, "Error loading applications: ${e.message}", Toast.LENGTH_SHORT).show()

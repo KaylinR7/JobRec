@@ -6,14 +6,14 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/primary">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            style="@style/Widget.CareerWorx.Toolbar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+            style="@style/Widget.CareerWorx.Toolbar.Company"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 

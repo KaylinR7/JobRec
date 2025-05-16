@@ -6,14 +6,14 @@
     android:layout_height="wrap_content"
     android:paddingStart="8dp"
     android:paddingTop="4dp"
-    android:paddingEnd="60dp"
+    android:paddingEnd="40dp"
     android:paddingBottom="4dp">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/messageCard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxWidth="280dp"
+        android:minWidth="280dp"
         app:cardBackgroundColor="@color/black"
         app:cardCornerRadius="12dp"
         app:cardElevation="1dp"
@@ -37,66 +37,68 @@
 
             <!-- Meeting details (visible only for meeting messages) -->
             <ScrollView
-                android:layout_width="match_parent"
+                android:id="@+id/meetingScrollView"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:minHeight="200dp"
                 android:visibility="gone"
                 tools:visibility="visible">
 
                 <LinearLayout
                     android:id="@+id/meetingDetailsLayout"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@color/white"
                     android:orientation="vertical"
-                    android:padding="8dp">
+                    android:padding="16dp">
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Meeting Invitation"
                     android:textColor="@color/primary"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/meetingDateText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:drawablePadding="4dp"
+                    android:layout_marginTop="12dp"
+                    android:drawablePadding="6dp"
                     android:textColor="#000000"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     tools:text="Date: May 15, 2023" />
 
                 <TextView
                     android:id="@+id/meetingTimeText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:drawablePadding="4dp"
+                    android:layout_marginTop="8dp"
+                    android:drawablePadding="6dp"
                     android:textColor="#000000"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     tools:text="Time: 10:30 AM" />
 
                 <TextView
                     android:id="@+id/meetingTypeText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:drawablePadding="4dp"
+                    android:layout_marginTop="8dp"
+                    android:drawablePadding="6dp"
                     android:textColor="#000000"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     tools:text="Type: Online" />
 
                 <TextView
                     android:id="@+id/meetingLocationText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:drawablePadding="4dp"
+                    android:layout_marginTop="8dp"
+                    android:drawablePadding="6dp"
                     android:textColor="#000000"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:visibility="gone"
                     tools:text="Location: 123 Main St"
                     tools:visibility="visible" />
@@ -105,40 +107,43 @@
                     android:id="@+id/meetingLinkText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="8dp"
                     android:autoLink="web"
-                    android:drawablePadding="4dp"
+                    android:drawablePadding="6dp"
                     android:textColor="#1976D2"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:visibility="gone"
                     tools:text="Link: https://meet.google.com/abc-def-ghi"
                     tools:visibility="visible" />
 
                 <LinearLayout
                     android:id="@+id/meetingResponseLayout"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_gravity="center"
                     android:orientation="horizontal">
 
                     <Button
                         android:id="@+id/acceptMeetingButton"
                         style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
                         android:text="Accept"
                         android:textColor="#4CAF50"
-                        android:textSize="12sp" />
+                        android:textSize="14sp" />
 
                     <Button
                         android:id="@+id/declineMeetingButton"
                         style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:text="Decline"
                         android:textColor="#F44336"
-                        android:textSize="12sp" />
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
@@ -146,9 +151,10 @@
                     android:id="@+id/meetingStatusText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_gravity="center"
                     android:textColor="#757575"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:textStyle="italic"
                     android:visibility="gone"
                     tools:text="Meeting accepted"
@@ -163,7 +169,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginTop="4dp"
-                android:textColor="#757575"
+                android:textColor="@color/white"
                 android:textSize="11sp"
                 tools:text="10:30 AM" />
 

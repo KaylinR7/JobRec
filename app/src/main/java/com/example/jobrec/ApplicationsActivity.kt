@@ -36,11 +36,14 @@ class ApplicationsActivity : AppCompatActivity() {
             return
         }
 
-        // Setup toolbar
+        // Setup toolbar with black back button
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Applications"
+
+        // Set white navigation icon for red toolbar
+        toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
 
         // Initialize views
         applicationsRecyclerView = findViewById(R.id.applicationsRecyclerView)
@@ -118,6 +121,11 @@ class ApplicationsActivity : AppCompatActivity() {
             putExtra("applicationId", application.id)
         }
         startActivity(intent)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     data class Application(

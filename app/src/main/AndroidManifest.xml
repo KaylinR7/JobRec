@@ -87,6 +87,11 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <activity
+            android:name=".CompanyDashboardActivityNew"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Job Related Activities -->
         <activity
             android:name=".JobDetailsActivity"
@@ -240,10 +245,10 @@
         <activity
             android:name=".EmployerAnalyticsActivity"
             android:label="Analytics Dashboard"
-            android:parentActivityName=".CompanyDashboardActivity">
+            android:parentActivityName=".CompanyDashboardActivityNew">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CompanyDashboardActivity" />
+                android:value=".CompanyDashboardActivityNew" />
         </activity>
 
         <activity

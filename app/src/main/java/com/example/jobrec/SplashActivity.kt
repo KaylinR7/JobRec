@@ -72,7 +72,7 @@ class SplashActivity : AppCompatActivity() {
                 Log.d(TAG, "Using saved user type: $savedUserType")
                 when (savedUserType) {
                     "company" -> {
-                        val intent = Intent(this, CompanyDashboardActivity::class.java)
+                        val intent = Intent(this, CompanyDashboardActivityNew::class.java)
                         intent.putExtra("companyId", savedUserId)
                         startActivity(intent)
                         finish()
@@ -129,7 +129,7 @@ class SplashActivity : AppCompatActivity() {
                             editor.putString("user_id", userId)
                             editor.apply()
 
-                            val intent = Intent(this, CompanyDashboardActivity::class.java)
+                            val intent = Intent(this, CompanyDashboardActivityNew::class.java)
                             intent.putExtra("companyId", userId)
                             startActivity(intent)
                         }
@@ -193,7 +193,7 @@ class SplashActivity : AppCompatActivity() {
                         editor.putString("user_id", registrationNumber)
                         editor.apply()
 
-                        val intent = Intent(this, CompanyDashboardActivity::class.java)
+                        val intent = Intent(this, CompanyDashboardActivityNew::class.java)
                         intent.putExtra("companyId", registrationNumber)
                         startActivity(intent)
                     } else {
@@ -222,7 +222,7 @@ class SplashActivity : AppCompatActivity() {
             editor.putString("user_id", auth.currentUser?.uid ?: "")
             editor.apply()
 
-            startActivity(Intent(this, CompanyDashboardActivity::class.java))
+            startActivity(Intent(this, CompanyDashboardActivityNew::class.java))
         } else if (email == "admin@jobrec.com") {
             // Admin user
             editor.putString("user_type", "admin")

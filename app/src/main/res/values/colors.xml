@@ -33,6 +33,8 @@
     <color name="status_shortlisted">#9C27B0</color><!-- Purple 500 -->
     <color name="status_interviewing">#009688</color><!-- Teal 500 -->
     <color name="status_offered">#FF9800</color>    <!-- Orange 500 -->
+    <color name="status_applied">#FFC107</color>    <!-- Amber 500 -->
+    <color name="status_interviewed">#009688</color><!-- Teal 500 -->
 
     <!-- Chip Colors -->
     <color name="custom_chip_background">#FFEBEE</color> <!-- Red 50 -->

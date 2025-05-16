@@ -55,15 +55,32 @@ class ConversationAdapter(
 
             if (isCompanyView) {
                 // Company viewing candidate
-                participantNameText.text = conversation.candidateName
+                // Make sure we display the student name (not empty or default)
+                val displayName = when {
+                    conversation.candidateName.isBlank() -> "Student"
+                    else -> conversation.candidateName
+                }
+                participantNameText.text = displayName
                 // Use a person icon for candidates
                 profileImageView.setImageResource(R.drawable.ic_person)
             } else {
-                // Candidate viewing company
+                // Student viewing company
                 // Make sure we display the company name (not empty or default)
                 val displayName = when {
-                    conversation.companyName.isBlank() -> "Company"
-                    conversation.companyName == "unknown" -> "Company"
+                    conversation.companyName.isBlank() || conversation.companyName == "unknown" -> {
+                        // If company name is not available, show the job title as the company name
+                        if (conversation.jobTitle.isNotBlank()) {
+                            // Extract company name from job title if possible
+                            val parts = conversation.jobTitle.split(" at ", " - ", " @ ", limit = 2)
+                            if (parts.size > 1) {
+                                parts[1].trim() // Use the part after "at" or "-" as company name
+                            } else {
+                                conversation.jobTitle
+                            }
+                        } else {
+                            "Company"
+                        }
+                    }
                     else -> conversation.companyName
                 }
                 participantNameText.text = displayName
@@ -76,8 +93,13 @@ class ConversationAdapter(
                 // Company viewing candidate - show job title
                 jobTitleText.text = conversation.jobTitle
             } else {
-                // Candidate viewing company - show only the job title without prefix
-                jobTitleText.text = conversation.jobTitle
+                // Student viewing company - show the job title
+                // If we're using the job title as the company name, show "Job Position" instead
+                if (participantNameText.text.toString() == conversation.jobTitle) {
+                    jobTitleText.text = "Job Position"
+                } else {
+                    jobTitleText.text = conversation.jobTitle
+                }
             }
 
             // Set last message with preview

@@ -83,4 +83,13 @@
         <item name="android:tint">@color/white</item>
         <item name="tint">@color/white</item>
     </style>
+
+    <!-- Company Toolbar Style with Red Background and White Icons -->
+    <style name="Widget.CareerWorx.Toolbar.Company" parent="Widget.MaterialComponents.Toolbar">
+        <item name="android:background">@color/primary</item>
+        <item name="titleTextColor">@color/white</item>
+        <item name="colorControlNormal">@color/white</item>
+        <item name="navigationIconTint">@color/white</item>
+        <item name="actionOverflowButtonStyle">@style/OverflowButtonStyle</item>
+    </style>
 </resources>

@@ -12,7 +12,11 @@ data class Application(
     val lastUpdated: Timestamp = Timestamp.now(),
     val documents: List<ApplicationDocument> = emptyList(),
     val interviews: List<Interview> = emptyList(),
-    val feedback: ApplicationFeedback? = null
+    val feedback: ApplicationFeedback? = null,
+    var jobTitle: String? = null,
+    var candidateName: String? = null,
+    var companyName: String? = null,
+    val timestamp: Timestamp = Timestamp.now() // For backward compatibility
 ) {
     data class ApplicationDocument(
         val id: String = "",
@@ -49,4 +53,4 @@ data class Application(
         val areasForImprovement: List<String> = emptyList(),
         val submittedAt: Timestamp = Timestamp.now()
     )
-} 
+}
