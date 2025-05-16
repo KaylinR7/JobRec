@@ -241,6 +241,9 @@ class ConversationsActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Messages"
+
+        // Explicitly set white navigation icon
+        toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
     }
 
     private fun setupRecyclerView() {

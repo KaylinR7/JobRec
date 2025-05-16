@@ -52,15 +52,22 @@ class ExperienceAdapter : RecyclerView.Adapter<ExperienceAdapter.ViewHolder>() {
             updatedList.add(experience)
         }
 
-        return updatedList.map { experience ->
-            mapOf(
-                "title" to experience.title,
-                "company" to experience.company,
-                "startDate" to experience.startDate,
-                "endDate" to experience.endDate,
-                "description" to experience.description
-            )
-        }
+        // Filter out empty experiences before returning
+        return updatedList
+            .filter { exp ->
+                !(exp.title.isBlank() && exp.company.isBlank() &&
+                  exp.startDate.isBlank() && exp.endDate.isBlank() &&
+                  exp.description.isBlank())
+            }
+            .map { experience ->
+                mapOf(
+                    "title" to experience.title,
+                    "company" to experience.company,
+                    "startDate" to experience.startDate,
+                    "endDate" to experience.endDate,
+                    "description" to experience.description
+                )
+            }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

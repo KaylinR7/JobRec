@@ -13,10 +13,10 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            style="@style/Widget.JobRec.Toolbar"
+            style="@style/Widget.CareerWorx.Toolbar"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:title="JobRec Assistant" />
+            app:title="CareerWorx Assistant" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="16dp"
-            android:text="Ask me anything about JobRec! I'm here to help."
+            android:text="Ask me anything about CareerWorx! I'm here to help."
             android:textColor="@color/black"
             android:textSize="16sp"
             android:visibility="gone"

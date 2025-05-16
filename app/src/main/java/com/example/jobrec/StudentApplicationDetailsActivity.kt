@@ -2,6 +2,7 @@ package com.example.jobrec
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
@@ -49,6 +50,9 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
             title = "Application Details"
         }
 
+        // Explicitly set white navigation icon
+        toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
+
         // Get the application ID from intent
         applicationId = intent.getStringExtra("applicationId")
 
@@ -83,7 +87,14 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
                         jobTitleText.text = document.getString("jobTitle")
 
                         companyName = document.getString("companyName")
-                        companyNameText.text = companyName
+                        companyId = document.getString("companyId")
+
+                        // If company name is missing but we have company ID, load it from companies collection
+                        if (companyName.isNullOrEmpty() && !companyId.isNullOrEmpty()) {
+                            loadCompanyName(companyId!!)
+                        } else {
+                            companyNameText.text = companyName ?: "Unknown Company"
+                        }
 
                         // Get job details from the job document
                         jobId = document.getString("jobId")
@@ -153,6 +164,28 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
 
     private fun Int.formatWithCommas(): String {
         return String.format("%,d", this)
+    }
+
+    private fun loadCompanyName(companyId: String) {
+        db.collection("companies").document(companyId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    val name = document.getString("companyName") ?: document.getString("name")
+                    if (!name.isNullOrEmpty()) {
+                        companyName = name
+                        companyNameText.text = name
+                    } else {
+                        companyNameText.text = "Unknown Company"
+                    }
+                } else {
+                    companyNameText.text = "Unknown Company"
+                }
+            }
+            .addOnFailureListener { e ->
+                companyNameText.text = "Unknown Company"
+                Log.e("StudentApplicationDetailsActivity", "Error loading company: ${e.message}")
+            }
     }
 
     private fun updateStatusUI(status: String) {

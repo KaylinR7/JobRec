@@ -25,8 +25,12 @@ class MyApplicationsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_my_applications)
 
         // Setup toolbar
-        setSupportActionBar(findViewById(R.id.toolbar))
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        // Explicitly set white navigation icon
+        toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
 
         db = FirebaseFirestore.getInstance()
 

@@ -48,6 +48,9 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
             title = "Application Review"
         }
 
+        // Explicitly set white navigation icon
+        toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
+
         // Get the application ID from intent
         applicationId = intent.getStringExtra("applicationId")
 

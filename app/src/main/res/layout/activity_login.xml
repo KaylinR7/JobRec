@@ -11,7 +11,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome! Login in to find your perfect job!"
+        android:text="Welcome to CareerWorx!"
         android:textSize="32sp"
         android:textStyle="bold"
         android:textColor="@color/text_primary"
@@ -23,7 +23,38 @@
         android:text="Sign in to continue"
         android:textSize="16sp"
         android:textColor="@color/text_secondary"
-        android:layout_marginBottom="32dp"/>
+        android:layout_marginBottom="16dp"/>
+
+    <!-- User Type Selector -->
+    <RadioGroup
+        android:id="@+id/userTypeRadioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="16dp">
+
+        <RadioButton
+            android:id="@+id/studentRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Student"
+            android:checked="true"
+            android:layout_marginEnd="16dp"/>
+
+        <RadioButton
+            android:id="@+id/companyRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Company"
+            android:layout_marginEnd="16dp"/>
+
+        <RadioButton
+            android:id="@+id/adminRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Admin"/>
+    </RadioGroup>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
@@ -79,35 +110,11 @@
         android:gravity="center">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/signupLink"
+            android:id="@+id/signupButton"
             style="@style/Widget.JobRec.Button.Outlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Don't have an account? Sign up"
-            android:textColor="@color/primary"
-            android:textSize="14sp"
-            app:strokeColor="@color/primary"
-            app:strokeWidth="1dp"
-            android:layout_marginBottom="8dp"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/companySignupLink"
-            style="@style/Widget.JobRec.Button.Outlined"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Are you a company? Register here"
-            android:textColor="@color/primary"
-            android:textSize="14sp"
-            app:strokeColor="@color/primary"
-            app:strokeWidth="1dp"
-            android:layout_marginBottom="8dp"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/adminLoginLink"
-            style="@style/Widget.JobRec.Button.Outlined"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Admin Login"
             android:textColor="@color/primary"
             android:textSize="14sp"
             app:strokeColor="@color/primary"

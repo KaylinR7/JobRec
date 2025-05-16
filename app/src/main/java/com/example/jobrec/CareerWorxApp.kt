@@ -5,7 +5,7 @@ import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 
-class JobRecApp : Application() {
+class CareerWorxApp : Application() {
     private val TAG = "CareerWorxApp"
 
     override fun onCreate() {

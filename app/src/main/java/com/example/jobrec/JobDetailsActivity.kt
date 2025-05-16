@@ -70,6 +70,9 @@ class JobDetailsActivity : AppCompatActivity() {
             title = "Job Details"
         }
 
+        // Explicitly set white navigation icon
+        binding.toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
+
         // Initialize views
         initializeViews()
 
@@ -121,7 +124,7 @@ class JobDetailsActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkIfAlreadyApplied() {
+    private fun checkIfAlreadyApplied(showDialog: Boolean = true) {
         val userId = auth.currentUser?.uid ?: return
         val jobId = jobId ?: return
 
@@ -131,16 +134,22 @@ class JobDetailsActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { documents ->
                 if (documents.isEmpty) {
-                    showApplicationDialog()
+                    if (showDialog) {
+                        showApplicationDialog()
+                    }
                 } else {
-                    Toast.makeText(this, "You have already applied for this job", Toast.LENGTH_SHORT).show()
+                    if (showDialog) {
+                        Toast.makeText(this, "You have already applied for this job", Toast.LENGTH_SHORT).show()
+                    }
                     applyButton.isEnabled = false
                     applyButton.text = "Already Applied"
                 }
             }
             .addOnFailureListener { e ->
                 Log.e("JobDetailsActivity", "Error checking application status", e)
-                Toast.makeText(this, "Error checking application status: ${e.message}", Toast.LENGTH_SHORT).show()
+                if (showDialog) {
+                    Toast.makeText(this, "Error checking application status: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
                 applyButton.isEnabled = true
             }
     }
@@ -399,6 +408,11 @@ class JobDetailsActivity : AppCompatActivity() {
 
         // Check if this job is saved
         checkIfJobIsSaved()
+
+        // Check if user has already applied for this job
+        if (auth.currentUser != null) {
+            checkIfAlreadyApplied(false)
+        }
 
         // Check if current user is a company
         val currentUser = auth.currentUser

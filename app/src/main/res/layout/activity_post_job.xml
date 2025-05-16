@@ -18,7 +18,7 @@
             android:background="@color/white"
             app:title="Post a Job"
             app:titleTextColor="@color/black"
-            app:navigationIconTint="@color/black"/>
+            app:navigationIconTint="@color/white"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 

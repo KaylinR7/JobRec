@@ -14,14 +14,31 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/notificationTitle"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Notification Title"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/black" />
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/notificationTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@+id/deleteButton"
+                android:text="Notification Title"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
+
+            <ImageButton
+                android:id="@+id/deleteButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_delete"
+                android:tint="@color/primary"
+                android:contentDescription="Delete notification" />
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/notificationMessage"
@@ -48,7 +65,7 @@
             android:layout_marginTop="8dp"
             android:text="Apply Now"
             android:textSize="12sp"
-            android:backgroundTint="@color/black"
+            android:backgroundTint="@color/primary"
             android:visibility="gone" />
 
     </LinearLayout>

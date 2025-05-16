@@ -112,11 +112,11 @@ class ChatActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(true)
 
-        // Ensure the toolbar has the correct appearance
-        toolbar.setTitleTextColor(resources.getColor(R.color.white, theme))
-
         // Set a temporary title until conversation data is loaded
         supportActionBar?.title = "Messages"
+
+        // Explicitly set white navigation icon
+        toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
     }
 
     private fun setupRecyclerView() {
@@ -288,9 +288,6 @@ class ChatActivity : AppCompatActivity() {
             // Get company name directly from the companies collection
             getCompanyNameFromFirestore(conversation.companyId)
         }
-
-        // Force the toolbar to update its appearance
-        toolbar.setTitleTextColor(resources.getColor(R.color.white, theme))
     }
 
     private fun getCompanyNameFromFirestore(companyId: String) {
@@ -304,6 +301,16 @@ class ChatActivity : AppCompatActivity() {
                     if (!companyName.isNullOrEmpty()) {
                         supportActionBar?.title = companyName
                         Log.d("ChatActivity", "Set company name from direct document query: $companyName")
+
+                        // Also update the conversation object with the correct company name
+                        conversation?.let { conv ->
+                            if (conv.companyName != companyName) {
+                                // Update the conversation in memory
+                                conversation = conv.copy(companyName = companyName)
+                                Log.d("ChatActivity", "Updated conversation company name in memory: $companyName")
+                            }
+                        }
+
                         return@addOnSuccessListener
                     }
                 }
@@ -318,6 +325,16 @@ class ChatActivity : AppCompatActivity() {
                             if (!companyName.isNullOrEmpty()) {
                                 supportActionBar?.title = companyName
                                 Log.d("ChatActivity", "Set company name from query: $companyName")
+
+                                // Also update the conversation object with the correct company name
+                                conversation?.let { conv ->
+                                    if (conv.companyName != companyName) {
+                                        // Update the conversation in memory
+                                        conversation = conv.copy(companyName = companyName)
+                                        Log.d("ChatActivity", "Updated conversation company name in memory: $companyName")
+                                    }
+                                }
+
                                 return@addOnSuccessListener
                             }
                         }

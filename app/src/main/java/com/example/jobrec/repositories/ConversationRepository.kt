@@ -209,12 +209,59 @@ class ConversationRepository {
             android.util.Log.d("ConversationRepo", "Found ${candidateConversationsSnapshot.size()} candidate conversations")
             val candidateConversations = candidateConversationsSnapshot.toObjects(Conversation::class.java)
 
+            // For each conversation, ensure we have the correct company name
+            val updatedConversations = candidateConversations.map { conversation ->
+                // If company name is missing or default, try to get it from the companies collection
+                if (conversation.companyName.isBlank() || conversation.companyName == "Company" || conversation.companyName == "unknown") {
+                    try {
+                        // First try by document ID
+                        val companyDoc = db.collection("companies")
+                            .document(conversation.companyId)
+                            .get()
+                            .await()
+
+                        if (companyDoc.exists()) {
+                            val companyName = companyDoc.getString("companyName")
+                            if (!companyName.isNullOrEmpty()) {
+                                android.util.Log.d("ConversationRepo", "Updated company name for conversation ${conversation.id}: $companyName")
+                                conversation.copy(companyName = companyName)
+                            } else {
+                                conversation
+                            }
+                        } else {
+                            // Try by companyId field
+                            val companyDocs = db.collection("companies")
+                                .whereEqualTo("companyId", conversation.companyId)
+                                .get()
+                                .await()
+
+                            if (!companyDocs.isEmpty) {
+                                val companyName = companyDocs.documents[0].getString("companyName")
+                                if (!companyName.isNullOrEmpty()) {
+                                    android.util.Log.d("ConversationRepo", "Updated company name for conversation ${conversation.id}: $companyName")
+                                    conversation.copy(companyName = companyName)
+                                } else {
+                                    conversation
+                                }
+                            } else {
+                                conversation
+                            }
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("ConversationRepo", "Error getting company name: ${e.message}")
+                        conversation
+                    }
+                } else {
+                    conversation
+                }
+            }
+
             // Log each conversation for debugging
-            candidateConversations.forEach {
+            updatedConversations.forEach {
                 android.util.Log.d("ConversationRepo", "Candidate conversation: ${it.id}, with company: ${it.companyName}")
             }
 
-            return candidateConversations.sortedByDescending { it.updatedAt.seconds }
+            return updatedConversations.sortedByDescending { it.updatedAt.seconds }
         }
     }
 

@@ -34,6 +34,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import androidx.appcompat.widget.Toolbar
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import android.widget.Filter
 import android.view.Menu
 import android.view.MenuItem
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -247,27 +248,67 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun setupDropdowns() {
+        // Years of Experience options - match signup values exactly
+        val yearsOptions = arrayOf("0-1 years", "1-3 years", "3-5 years", "5-10 years", "10+ years")
+
+        // Create custom adapter for years of experience
+        val yearsAdapter = object : ArrayAdapter<String>(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            yearsOptions
+        ) {
+            override fun getFilter(): Filter {
+                return object : Filter() {
+                    override fun performFiltering(constraint: CharSequence?): FilterResults {
+                        val results = FilterResults()
+                        results.values = yearsOptions
+                        results.count = yearsOptions.size
+                        return results
+                    }
+
+                    override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                        notifyDataSetChanged()
+                    }
+                }
+            }
+        }
+
+        yearsOfExperienceInput.setAdapter(yearsAdapter)
+        yearsOfExperienceInput.setOnClickListener {
+            yearsOfExperienceInput.showDropDown()
+        }
+
         // Province options
         val provinces = arrayOf(
             "Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal",
             "Limpopo", "Mpumalanga", "Northern Cape", "North West", "Western Cape"
         )
-        val provinceAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, provinces)
-        provinceInput.setAdapter(provinceAdapter)
 
-        // Make dropdown show all options when clicked
-        provinceInput.setOnClickListener {
-            provinceInput.showDropDown()
+        // Create custom adapter for province
+        val provinceAdapter = object : ArrayAdapter<String>(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            provinces
+        ) {
+            override fun getFilter(): Filter {
+                return object : Filter() {
+                    override fun performFiltering(constraint: CharSequence?): FilterResults {
+                        val results = FilterResults()
+                        results.values = provinces
+                        results.count = provinces.size
+                        return results
+                    }
+
+                    override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                        notifyDataSetChanged()
+                    }
+                }
+            }
         }
 
-        // Years of Experience options
-        val yearsOptions = arrayOf("0-1 years", "1-3 years", "3-5 years", "5-10 years", "10+ years")
-        val yearsAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, yearsOptions)
-        yearsOfExperienceInput.setAdapter(yearsAdapter)
-
-        // Make dropdown show all options when clicked
-        yearsOfExperienceInput.setOnClickListener {
-            yearsOfExperienceInput.showDropDown()
+        provinceInput.setAdapter(provinceAdapter)
+        provinceInput.setOnClickListener {
+            provinceInput.showDropDown()
         }
 
         // Expected Salary options
@@ -279,32 +320,72 @@ class ProfileActivity : AppCompatActivity() {
             "R40,000 - R50,000",
             "R50,000+"
         )
-        val salaryAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, salaryOptions)
-        expectedSalaryInput.setAdapter(salaryAdapter)
 
-        // Make dropdown show all options when clicked
+        // Create custom adapter for salary
+        val salaryAdapter = object : ArrayAdapter<String>(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            salaryOptions
+        ) {
+            override fun getFilter(): Filter {
+                return object : Filter() {
+                    override fun performFiltering(constraint: CharSequence?): FilterResults {
+                        val results = FilterResults()
+                        results.values = salaryOptions
+                        results.count = salaryOptions.size
+                        return results
+                    }
+
+                    override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                        notifyDataSetChanged()
+                    }
+                }
+            }
+        }
+
+        expectedSalaryInput.setAdapter(salaryAdapter)
         expectedSalaryInput.setOnClickListener {
             expectedSalaryInput.showDropDown()
         }
 
         // Field options - get directly from FieldCategories to ensure consistency
         val fieldOptions = FieldCategories.fields.keys.toTypedArray()
-        val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, fieldOptions)
-        fieldInput.setAdapter(fieldAdapter)
 
-        // Make dropdown show all options when clicked
+        // Create custom adapter for field
+        val fieldAdapter = object : ArrayAdapter<String>(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            fieldOptions
+        ) {
+            override fun getFilter(): Filter {
+                return object : Filter() {
+                    override fun performFiltering(constraint: CharSequence?): FilterResults {
+                        val results = FilterResults()
+                        results.values = fieldOptions
+                        results.count = fieldOptions.size
+                        return results
+                    }
+
+                    override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                        notifyDataSetChanged()
+                    }
+                }
+            }
+        }
+
+        fieldInput.setAdapter(fieldAdapter)
         fieldInput.setOnClickListener {
             fieldInput.showDropDown()
         }
-
-        // Initially disable subfield dropdown
-        subFieldInput.isEnabled = false
 
         // Setup field selection listener to update subfields
         fieldInput.setOnItemClickListener { _, _, _, _ ->
             val selectedField = fieldInput.text.toString()
             updateSubFieldDropdown(selectedField)
         }
+
+        // Initially disable subfield dropdown
+        subFieldInput.isEnabled = false
     }
 
     private fun loadUserData() {
@@ -403,7 +484,12 @@ class ProfileActivity : AppCompatActivity() {
                             Glide.with(this)
                                 .load(imageUrl)
                                 .transform(CircleCrop())
+                                .placeholder(R.drawable.ic_person)
+                                .error(R.drawable.ic_person)
                                 .into(profileImage)
+                        } else {
+                            // Set default image if no profile image is available
+                            profileImage.setImageResource(R.drawable.ic_person)
                         }
                     } else {
                         Log.d(TAG, "No such document")
@@ -534,6 +620,9 @@ class ProfileActivity : AppCompatActivity() {
         val userId = auth.currentUser?.uid ?: return
         val storageRef = storage.reference.child("profile_images/$userId.jpg")
 
+        // Show loading toast
+        Toast.makeText(this, "Uploading profile picture...", Toast.LENGTH_SHORT).show()
+
         storageRef.putFile(imageUri)
             .addOnSuccessListener {
                 storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
@@ -545,8 +634,14 @@ class ProfileActivity : AppCompatActivity() {
                             Glide.with(this)
                                 .load(downloadUri)
                                 .transform(CircleCrop())
+                                .placeholder(R.drawable.ic_person)
+                                .error(R.drawable.ic_person)
                                 .into(profileImage)
-                            Toast.makeText(this, "Profile picture updated", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Profile picture updated successfully", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Error updating profile image URL in Firestore", e)
+                            Toast.makeText(this, "Error saving profile picture URL", Toast.LENGTH_SHORT).show()
                         }
                 }
             }
@@ -608,13 +703,34 @@ class ProfileActivity : AppCompatActivity() {
         val subFields = FieldCategories.fields[field] ?: listOf()
 
         if (subFields.isNotEmpty()) {
-            // Create a new adapter each time to ensure fresh data
-            val subFieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, subFields)
-            subFieldInput.setAdapter(subFieldAdapter)
+            // Create custom adapter for subfield
+            val subFieldAdapter = object : ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                subFields.toTypedArray()
+            ) {
+                override fun getFilter(): Filter {
+                    return object : Filter() {
+                        override fun performFiltering(constraint: CharSequence?): FilterResults {
+                            val results = FilterResults()
+                            results.values = subFields.toTypedArray()
+                            results.count = subFields.size
+                            return results
+                        }
+
+                        override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                            notifyDataSetChanged()
+                        }
+                    }
+                }
+            }
+
+            // Enable the subfield input
             subFieldInput.isEnabled = true
             subFieldInput.setText("", false) // Clear previous selection
+            subFieldInput.setAdapter(subFieldAdapter)
 
-            // Force dropdown to show all options when clicked
+            // Set up click listener for subfield dropdown
             subFieldInput.setOnClickListener {
                 subFieldInput.showDropDown()
             }

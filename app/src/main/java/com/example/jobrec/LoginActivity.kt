@@ -17,10 +17,9 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var emailInput: TextInputEditText
     private lateinit var passwordInput: TextInputEditText
     private lateinit var loginButton: Button
-    private lateinit var signupLink: TextView
-    private lateinit var companySignupLink: TextView
-    private lateinit var adminLoginLink: TextView
+    private lateinit var signupButton: Button
     private lateinit var debugButton: Button
+    private lateinit var userTypeRadioGroup: android.widget.RadioGroup
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
 
@@ -36,10 +35,9 @@ class LoginActivity : AppCompatActivity() {
         emailInput = findViewById(R.id.emailInput)
         passwordInput = findViewById(R.id.passwordInput)
         loginButton = findViewById(R.id.loginButton)
-        signupLink = findViewById(R.id.signupLink)
-        companySignupLink = findViewById(R.id.companySignupLink)
-        adminLoginLink = findViewById(R.id.adminLoginLink)
+        signupButton = findViewById(R.id.signupButton)
         debugButton = findViewById(R.id.debugButton)
+        userTypeRadioGroup = findViewById(R.id.userTypeRadioGroup)
 
         // Apply animations
         val slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up)
@@ -49,9 +47,8 @@ class LoginActivity : AppCompatActivity() {
         findViewById<View>(R.id.emailInput).startAnimation(slideUp)
         findViewById<View>(R.id.passwordInput).startAnimation(slideUp)
         findViewById<View>(R.id.loginButton).startAnimation(slideUp)
-        findViewById<View>(R.id.signupLink).startAnimation(fadeIn)
-        findViewById<View>(R.id.companySignupLink).startAnimation(fadeIn)
-        findViewById<View>(R.id.adminLoginLink).startAnimation(fadeIn)
+        findViewById<View>(R.id.userTypeRadioGroup).startAnimation(fadeIn)
+        findViewById<View>(R.id.signupButton).startAnimation(fadeIn)
 
         // Check if user is already logged in
         val currentUser = auth.currentUser
@@ -63,18 +60,8 @@ class LoginActivity : AppCompatActivity() {
             loginUser()
         }
 
-        signupLink.setOnClickListener {
-            startActivity(Intent(this, SignupActivity::class.java))
-            overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
-        }
-
-        companySignupLink.setOnClickListener {
-            startActivity(Intent(this, CompanySignupActivity::class.java))
-            overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
-        }
-
-        adminLoginLink.setOnClickListener {
-            startActivity(Intent(this, AdminLoginActivity::class.java))
+        signupButton.setOnClickListener {
+            startActivity(Intent(this, UnifiedSignupActivity::class.java))
             overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
         }
 
@@ -91,34 +78,58 @@ class LoginActivity : AppCompatActivity() {
         val email = emailInput.text.toString().trim()
         val password = passwordInput.text.toString().trim()
 
+        // Get the selected user type
+        val selectedUserType = when (userTypeRadioGroup.checkedRadioButtonId) {
+            R.id.studentRadioButton -> "student"
+            R.id.companyRadioButton -> "company"
+            R.id.adminRadioButton -> "admin"
+            else -> "student" // Default to student
+        }
+
+        // Handle admin login separately
+        if (selectedUserType == "admin") {
+            if (email == "admin@jobrec.com" && password == "admin123") {
+                startActivity(Intent(this, AdminDashboardActivity::class.java))
+                overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
+                finish()
+                return
+            } else {
+                Toast.makeText(this, "Invalid admin credentials", Toast.LENGTH_SHORT).show()
+                return
+            }
+        }
+
         if (validateInput(email, password)) {
+            // Show loading indicator
+            Toast.makeText(this, "Logging in...", Toast.LENGTH_SHORT).show()
+
             // Use FirebaseHelper to check user credentials
             FirebaseHelper.getInstance().checkUser(email, password) { success, userType, error ->
                 if (success) {
-                    // Login successful, redirect based on user type
-                    when (userType) {
-                        "user" -> {
+                    // Login successful, check if user type matches selected type
+                    val actualUserType = userType ?: "unknown"
+
+                    when {
+                        // Student login
+                        selectedUserType == "student" && (actualUserType == "user" || actualUserType == "unknown") -> {
                             runOnUiThread {
                                 val intent = Intent(this, HomeActivity::class.java)
                                 startActivity(intent)
                                 finish()
                             }
                         }
-                        "company" -> {
+                        // Company login
+                        selectedUserType == "company" && (actualUserType == "company" || actualUserType == "unknown") -> {
                             runOnUiThread {
                                 val intent = Intent(this, CompanyDashboardActivity::class.java)
                                 startActivity(intent)
                                 finish()
                             }
                         }
+                        // User type mismatch
                         else -> {
-                            // User authenticated but not found in either collection
-                            // This is a recoverable situation
                             runOnUiThread {
-                                Toast.makeText(this, "Account found but profile is incomplete. Please complete registration.", Toast.LENGTH_LONG).show()
-                                val intent = Intent(this, SignupActivity::class.java)
-                                intent.putExtra("email", email)
-                                startActivity(intent)
+                                Toast.makeText(this, "This account is not registered as a ${selectedUserType}. Please select the correct user type.", Toast.LENGTH_LONG).show()
                             }
                         }
                     }

@@ -41,6 +41,9 @@ class ApplicationDetailsActivity : AppCompatActivity() {
             title = "Application Details"
         }
 
+        // Explicitly set white navigation icon
+        toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
+
         // Get the application ID and view type from intent
         applicationId = intent.getStringExtra("applicationId")
         isStudentView = intent.getBooleanExtra("isStudentView", false)
@@ -91,11 +94,11 @@ class ApplicationDetailsActivity : AppCompatActivity() {
                         applicantNameText.text = document.getString("applicantName")
                         applicantEmailText.text = document.getString("applicantEmail")
                         applicantPhoneText.text = document.getString("applicantPhone")
-                        
+
                         val status = document.getString("status") ?: "pending"
                         statusText.text = status.capitalize()
                         statusText.setTextColor(getStatusColor(status))
-                        
+
                         // Format the date
                         val timestamp = document.getTimestamp("timestamp")?.toDate()
                         val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
@@ -148,4 +151,4 @@ class ApplicationDetailsActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-} 
+}

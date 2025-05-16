@@ -60,7 +60,13 @@ class ConversationAdapter(
                 profileImageView.setImageResource(R.drawable.ic_person)
             } else {
                 // Candidate viewing company
-                participantNameText.text = conversation.companyName
+                // Make sure we display the company name (not empty or default)
+                val displayName = when {
+                    conversation.companyName.isBlank() -> "Company"
+                    conversation.companyName == "unknown" -> "Company"
+                    else -> conversation.companyName
+                }
+                participantNameText.text = displayName
                 // Use a building icon for companies
                 profileImageView.setImageResource(R.drawable.ic_company_placeholder)
             }
@@ -70,9 +76,8 @@ class ConversationAdapter(
                 // Company viewing candidate - show job title
                 jobTitleText.text = conversation.jobTitle
             } else {
-                // Candidate viewing company - show company name (already shown in participant name)
-                // So we'll show the job title here for context
-                jobTitleText.text = "Job: ${conversation.jobTitle}"
+                // Candidate viewing company - show only the job title without prefix
+                jobTitleText.text = conversation.jobTitle
             }
 
             // Set last message with preview

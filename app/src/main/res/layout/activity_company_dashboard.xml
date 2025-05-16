@@ -8,17 +8,16 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        app:elevation="0dp">
+        android:background="@color/primary"
+        app:elevation="4dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/white"
+            style="@style/Widget.CareerWorx.Toolbar"
             app:title="Dashboard"
-            app:titleTextColor="@android:color/black"
-            app:titleTextAppearance="@style/TextAppearance.AppCompat.Large" />
+            app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

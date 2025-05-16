@@ -10,4 +10,13 @@
         <item name="textAllCaps">false</item>
         <item name="android:textStyle">bold</item>
     </style>
-</resources> 
+
+    <!-- Button Styles for JobRec (aliases to CareerWorx styles) -->
+    <style name="Widget.JobRec.Button" parent="Widget.CareerWorx.Button">
+        <!-- This style inherits all attributes from Widget.CareerWorx.Button -->
+    </style>
+
+    <style name="Widget.JobRec.Button.Outlined" parent="Widget.CareerWorx.Button.Outlined">
+        <!-- This style inherits all attributes from Widget.CareerWorx.Button.Outlined -->
+    </style>
+</resources>

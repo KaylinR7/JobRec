@@ -52,15 +52,22 @@ class EducationAdapter : RecyclerView.Adapter<EducationAdapter.ViewHolder>() {
             updatedList.add(education)
         }
 
-        return updatedList.map { education ->
-            mapOf(
-                "institution" to education.institution,
-                "degree" to education.degree,
-                "startDate" to education.startDate,
-                "endDate" to education.endDate,
-                "description" to education.description
-            )
-        }
+        // Filter out empty education entries before returning
+        return updatedList
+            .filter { edu ->
+                !(edu.institution.isBlank() && edu.degree.isBlank() &&
+                  edu.startDate.isBlank() && edu.endDate.isBlank() &&
+                  edu.description.isBlank())
+            }
+            .map { education ->
+                mapOf(
+                    "institution" to education.institution,
+                    "degree" to education.degree,
+                    "startDate" to education.startDate,
+                    "endDate" to education.endDate,
+                    "description" to education.description
+                )
+            }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

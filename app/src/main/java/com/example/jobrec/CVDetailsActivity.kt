@@ -17,7 +17,7 @@ class CVDetailsActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
     private lateinit var educationAdapter: EducationAdapter
-    
+
     // User data from SignupActivity
     private lateinit var name: String
     private lateinit var surname: String
@@ -39,6 +39,9 @@ class CVDetailsActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
             title = "CV Details"
         }
+
+        // Explicitly set white navigation icon
+        toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
 
         // Get user data from intent
         name = intent.getStringExtra("name") ?: ""

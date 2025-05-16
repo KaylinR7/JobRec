@@ -44,7 +44,7 @@ class ChatbotActivity : AppCompatActivity() {
         setupClickListeners()
 
         // Add welcome message
-        addBotMessage("Hi there! I'm your JobRec assistant. How can I help you today?")
+        addBotMessage("Hi there! I'm your CareerWorx assistant. How can I help you today?")
     }
 
     private fun initializeViews() {
@@ -60,7 +60,7 @@ class ChatbotActivity : AppCompatActivity() {
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
-            title = "JobRec Assistant"
+            title = "CareerWorx Assistant"
         }
     }
 

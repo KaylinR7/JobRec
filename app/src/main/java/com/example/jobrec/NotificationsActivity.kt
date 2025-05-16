@@ -2,6 +2,7 @@ package com.example.jobrec
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
@@ -78,6 +79,10 @@ class NotificationsActivity : AppCompatActivity() {
                     }
                     startActivity(intent)
                 }
+            },
+            onDeleteClick = { notification ->
+                println("NotificationsActivity: Delete clicked for notification: ${notification.id}")
+                deleteNotification(notification)
             }
         )
 
@@ -249,13 +254,94 @@ class NotificationsActivity : AppCompatActivity() {
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
-            onBackPressed()
-            return true
-        }
-        return super.onOptionsItemSelected(item)
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_notifications, menu)
+        return true
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            R.id.action_delete_test_notifications -> {
+                deleteAllTestNotifications()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
+    private fun deleteNotification(notification: NotificationRepository.Notification) {
+        lifecycleScope.launch {
+            try {
+                // Delete the notification from Firestore
+                notificationRepository.deleteNotification(notification.id)
+
+                // Remove from our local list
+                val currentList = notifications.toMutableList()
+                currentList.removeIf { it.id == notification.id }
+
+                // Update the adapter with the new list
+                notifications.clear()
+                notifications.addAll(currentList)
+
+                val finalNotifications = notifications
+                    .sortedByDescending { it.timestamp.seconds }
+                    .distinctBy { Triple(it.title, it.message, it.jobId) }
+
+                notificationsAdapter.submitList(ArrayList(finalNotifications))
+
+                // Show empty view if needed
+                if (notifications.isEmpty()) {
+                    emptyView.visibility = View.VISIBLE
+                    notificationsRecyclerView.visibility = View.GONE
+                }
+
+                Toast.makeText(this@NotificationsActivity, "Notification deleted", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this@NotificationsActivity, "Error deleting notification: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // Add a method to delete all test notifications
+    private fun deleteAllTestNotifications() {
+        lifecycleScope.launch {
+            try {
+                val testNotifications = notifications.filter { notification ->
+                    notification.title.contains("Test", ignoreCase = true) ||
+                    notification.message.contains("Test", ignoreCase = true) ||
+                    notification.message.isEmpty() ||
+                    notification.message.isBlank() ||
+                    notification.title.contains("test notification", ignoreCase = true)
+                }
+
+                if (testNotifications.isEmpty()) {
+                    Toast.makeText(this@NotificationsActivity, "No test notifications found", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                // Show loading indicator
+                swipeRefreshLayout.isRefreshing = true
+
+                for (notification in testNotifications) {
+                    notificationRepository.deleteNotification(notification.id)
+                }
+
+                // Reload notifications after deletion
+                loadNotifications()
+
+                Toast.makeText(
+                    this@NotificationsActivity,
+                    "${testNotifications.size} test notifications deleted",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } catch (e: Exception) {
+                Toast.makeText(this@NotificationsActivity, "Error deleting test notifications: ${e.message}", Toast.LENGTH_SHORT).show()
+                swipeRefreshLayout.isRefreshing = false
+            }
+        }
+    }
 }

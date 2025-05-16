@@ -15,7 +15,8 @@ import java.util.Locale
 
 class NotificationsAdapter(
     private val onNotificationClick: (NotificationRepository.Notification) -> Unit,
-    private val onApplyClick: (NotificationRepository.Notification) -> Unit
+    private val onApplyClick: (NotificationRepository.Notification) -> Unit,
+    private val onDeleteClick: (NotificationRepository.Notification) -> Unit = {}
 ) : ListAdapter<NotificationRepository.Notification, NotificationsAdapter.NotificationViewHolder>(NotificationDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NotificationViewHolder {
@@ -35,6 +36,7 @@ class NotificationsAdapter(
         private val messageTextView: TextView = itemView.findViewById(R.id.notificationMessage)
         private val timeTextView: TextView = itemView.findViewById(R.id.notificationTime)
         private val applyButton: Button = itemView.findViewById(R.id.applyButton)
+        private val deleteButton: View = itemView.findViewById(R.id.deleteButton)
 
         fun bind(notification: NotificationRepository.Notification) {
 
@@ -61,6 +63,11 @@ class NotificationsAdapter(
             // Set click listener for the whole card
             cardView.setOnClickListener {
                 onNotificationClick(notification)
+            }
+
+            // Set click listener for delete button
+            deleteButton.setOnClickListener {
+                onDeleteClick(notification)
             }
         }
     }
