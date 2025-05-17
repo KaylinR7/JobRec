@@ -21,7 +21,7 @@ class ConversationAdapter(
 ) : ListAdapter<Conversation, ConversationAdapter.ViewHolder>(ConversationDiffCallback()) {
 
     private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-    private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
+    private val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     private val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
     private val calendar = Calendar.getInstance()
     private val today = Calendar.getInstance().apply {
@@ -88,7 +88,7 @@ class ConversationAdapter(
                 profileImageView.setImageResource(R.drawable.ic_company_placeholder)
             }
 
-            // Set company name or job title based on view
+            // Set job title based on view
             if (isCompanyView) {
                 // Company viewing candidate - show job title
                 jobTitleText.text = conversation.jobTitle
@@ -131,25 +131,8 @@ class ConversationAdapter(
         }
 
         private fun formatMessageTime(date: Date): String {
-            calendar.time = date
-            val messageCalendar = calendar.clone() as Calendar
-
-            return when {
-                // Today
-                messageCalendar.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR) &&
-                messageCalendar.get(Calendar.DAY_OF_YEAR) == Calendar.getInstance().get(Calendar.DAY_OF_YEAR) -> {
-                    timeFormat.format(date)
-                }
-                // This week
-                date.after(Date(today.time - 6 * 24 * 60 * 60 * 1000)) -> {
-                    val dayFormat = SimpleDateFormat("EEE", Locale.getDefault())
-                    dayFormat.format(date)
-                }
-                // Older
-                else -> {
-                    dateFormat.format(date)
-                }
-            }
+            // Always use the date format (MMM dd, yyyy) for consistency
+            return dateFormat.format(date)
         }
     }
 

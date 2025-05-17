@@ -87,7 +87,10 @@ class CompanyProfileFragment : Fragment() {
         }
 
         editProfileButton.setOnClickListener {
-            startActivity(Intent(requireContext(), EditCompanyProfileActivity::class.java))
+            val userId = auth.currentUser?.uid ?: return@setOnClickListener
+            val intent = Intent(requireContext(), EditCompanyProfileActivity::class.java)
+            intent.putExtra("companyId", userId)
+            startActivity(intent)
         }
     }
 
@@ -165,4 +168,4 @@ class CompanyProfileFragment : Fragment() {
                 activeJobsText.text = documents.size().toString()
             }
     }
-} 
+}

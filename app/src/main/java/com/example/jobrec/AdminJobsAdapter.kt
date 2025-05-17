@@ -3,9 +3,9 @@ package com.example.jobrec
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 
 class AdminJobsAdapter(
     private var jobs: List<Job>,
@@ -17,9 +17,10 @@ class AdminJobsAdapter(
     inner class JobViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleText: TextView = itemView.findViewById(R.id.jobTitleText)
         val companyText: TextView = itemView.findViewById(R.id.jobCompanyText)
-        val viewButton: Button = itemView.findViewById(R.id.viewJobButton)
-        val editButton: Button = itemView.findViewById(R.id.editJobButton)
-        val deleteButton: Button = itemView.findViewById(R.id.deleteJobButton)
+        val statusText: TextView = itemView.findViewById(R.id.jobStatusText)
+        val viewButton: MaterialButton = itemView.findViewById(R.id.viewJobButton)
+        val editButton: MaterialButton = itemView.findViewById(R.id.editJobButton)
+        val deleteButton: MaterialButton = itemView.findViewById(R.id.deleteJobButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobViewHolder {
@@ -32,6 +33,21 @@ class AdminJobsAdapter(
         val job = jobs[position]
         holder.titleText.text = job.title
         holder.companyText.text = job.companyName
+
+        // Set status with appropriate color
+        val statusText = "Status: ${job.status.replaceFirstChar { it.uppercase() }}"
+        holder.statusText.text = statusText
+
+        // Set status color based on status
+        val statusColor = when (job.status.lowercase()) {
+            "active" -> "#4CAF50" // Green
+            "inactive" -> "#FF9800" // Orange
+            "expired" -> "#F44336" // Red
+            "draft" -> "#2196F3" // Blue
+            else -> "#757575" // Gray
+        }
+        holder.statusText.setTextColor(android.graphics.Color.parseColor(statusColor))
+
         holder.viewButton.setOnClickListener { onViewClick(job) }
         holder.editButton.setOnClickListener { onEditClick(job) }
         holder.deleteButton.setOnClickListener { onDeleteClick(job) }
@@ -46,4 +62,4 @@ class AdminJobsAdapter(
 
     val jobsList: List<Job>
         get() = jobs
-} 
+}

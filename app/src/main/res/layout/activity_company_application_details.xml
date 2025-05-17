@@ -193,14 +193,15 @@
         android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Chat Button (visible only when application is accepted) -->
+        <!-- Chat Button (always visible to allow messaging at any stage) -->
         <Button
             android:id="@+id/chatButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="Chat with Applicant"
-            android:visibility="gone" />
+            android:text="Message Applicant"
+            android:backgroundTint="@color/primary"
+            android:textColor="@android:color/white" />
 
         <LinearLayout
             android:layout_width="match_parent"

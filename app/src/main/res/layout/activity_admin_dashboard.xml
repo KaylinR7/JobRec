@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="#FFFFFF">
 
-    <!-- Include the toolbar -->
+    <!-- Include the admin toolbar -->
     <include
         android:id="@+id/toolbar_layout"
-        layout="@layout/toolbar_main" />
+        layout="@layout/layout_admin_toolbar" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -30,7 +30,9 @@
                 android:textSize="24sp"
                 android:textStyle="bold"
                 android:textColor="#000000"
-                android:layout_marginBottom="24dp"/>
+                android:layout_marginBottom="16dp"/>
+
+
 
             <!-- Stats Cards -->
             <LinearLayout
@@ -57,7 +59,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="16dp"
-                        android:background="#000000">
+                        android:background="#FF0000">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -96,7 +98,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="16dp"
-                        android:background="#212121">
+                        android:background="#FF0000">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -142,7 +144,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="16dp"
-                        android:background="#424242">
+                        android:background="#FF0000">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -181,7 +183,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="16dp"
-                        android:background="#616161">
+                        android:background="#FF0000">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -225,7 +227,7 @@
                     android:layout_height="wrap_content"
                     android:text="Manage Users"
                     android:textColor="@android:color/white"
-                    app:backgroundTint="#000000"
+                    app:backgroundTint="#FF0000"
                     app:cornerRadius="8dp"
                     android:layout_marginBottom="8dp"/>
 
@@ -235,7 +237,7 @@
                     android:layout_height="wrap_content"
                     android:text="Manage Companies"
                     android:textColor="@android:color/white"
-                    app:backgroundTint="#000000"
+                    app:backgroundTint="#FF0000"
                     app:cornerRadius="8dp"
                     android:layout_marginBottom="8dp"/>
 
@@ -245,7 +247,7 @@
                     android:layout_height="wrap_content"
                     android:text="Manage Jobs"
                     android:textColor="@android:color/white"
-                    app:backgroundTint="#000000"
+                    app:backgroundTint="#FF0000"
                     app:cornerRadius="8dp"
                     android:layout_marginBottom="8dp"/>
 
@@ -255,7 +257,7 @@
                     android:layout_height="wrap_content"
                     android:text="Manage Applications"
                     android:textColor="@android:color/white"
-                    app:backgroundTint="#000000"
+                    app:backgroundTint="#FF0000"
                     app:cornerRadius="8dp"/>
             </LinearLayout>
         </LinearLayout>

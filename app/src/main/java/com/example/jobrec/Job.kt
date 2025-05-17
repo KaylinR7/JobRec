@@ -18,6 +18,7 @@ data class Job(
     val description: String = "",
     val requirements: String = "",
     val postedDate: Timestamp = Timestamp.now(),
+    val updatedDate: Timestamp = Timestamp.now(),
     val status: String = "active",
     // New fields for enhanced search functionality
     val jobField: String = "",
@@ -47,6 +48,7 @@ data class Job(
         parcel.readString() ?: "",
         parcel.readString() ?: "",
         Timestamp(parcel.readLong(), parcel.readInt()),
+        Timestamp(parcel.readLong(), parcel.readInt()),
         parcel.readString() ?: "",
         parcel.readString() ?: "",
         parcel.readString() ?: "",
@@ -67,6 +69,8 @@ data class Job(
         parcel.writeString(requirements)
         parcel.writeLong(postedDate.seconds)
         parcel.writeInt(postedDate.nanoseconds)
+        parcel.writeLong(updatedDate.seconds)
+        parcel.writeInt(updatedDate.nanoseconds)
         parcel.writeString(status)
         parcel.writeString(jobField)
         parcel.writeString(specialization)

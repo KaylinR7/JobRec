@@ -13,6 +13,7 @@ import com.example.jobrec.R
 import com.example.jobrec.models.Application
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.chip.Chip
+import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -69,23 +70,30 @@ class RecentApplicationsAdapter(
             companyNameText.text = applicantName
 
             // Format and set applied date with more user-friendly format
-            // Handle different timestamp field names to get the actual applied date
+            // Directly use the timestamp field which is working in the application details view
             val appliedDate = try {
-                // Try to use appliedDate first (from the main Application class)
+                // First try to use timestamp directly (this is what works in the details view)
+                val date = application.timestamp?.toDate()
+                android.util.Log.d("RecentApplicationsAdapter", "Successfully got timestamp: $date")
+                date
+            } catch (e: Exception) {
+                android.util.Log.e("RecentApplicationsAdapter", "Error getting timestamp: ${e.message}")
+                // If that fails, try other fields as fallback
                 try {
-                    (application as? com.example.jobrec.Application)?.appliedDate?.toDate()
-                } catch (e3: Exception) {
-                    // Then try appliedAt (from the models.Application class)
+                    val date = (application as? com.example.jobrec.Application)?.appliedDate?.toDate()
+                    android.util.Log.d("RecentApplicationsAdapter", "Successfully got appliedDate: $date")
+                    date
+                } catch (e2: Exception) {
+                    android.util.Log.e("RecentApplicationsAdapter", "Error getting appliedDate: ${e2.message}")
                     try {
-                        application.appliedAt?.toDate()
-                    } catch (e: Exception) {
-                        // Fall back to timestamp as last resort
-                        application.timestamp?.toDate()
+                        val date = application.appliedAt?.toDate()
+                        android.util.Log.d("RecentApplicationsAdapter", "Successfully got appliedAt: $date")
+                        date
+                    } catch (e3: Exception) {
+                        android.util.Log.e("RecentApplicationsAdapter", "Error getting appliedAt: ${e3.message}")
+                        null
                     }
                 }
-            } catch (e: Exception) {
-                // If all else fails, use current time
-                java.util.Date()
             }
 
             val now = Calendar.getInstance().time
@@ -93,26 +101,19 @@ class RecentApplicationsAdapter(
             // Handle nullable date safely
             val safeAppliedDate = appliedDate ?: java.util.Date()
 
-            // Format date based on how recent it is
-            val formattedDate = when {
-                // Today
-                DateUtils.isToday(safeAppliedDate.time) -> {
-                    "Applied today at ${timeFormat.format(safeAppliedDate)}"
-                }
-                // Yesterday
-                DateUtils.isToday(safeAppliedDate.time + DateUtils.DAY_IN_MILLIS) -> {
-                    "Applied yesterday at ${timeFormat.format(safeAppliedDate)}"
-                }
-                // Within the last week
-                now.time - safeAppliedDate.time < 7 * DateUtils.DAY_IN_MILLIS -> {
-                    val dayFormat = SimpleDateFormat("EEEE", Locale.getDefault())
-                    "Applied on ${dayFormat.format(safeAppliedDate)}"
-                }
-                // Older
-                else -> {
-                    "Applied on ${dateFormat.format(safeAppliedDate)}"
-                }
+            // Log the date for debugging
+            android.util.Log.d("RecentApplicationsAdapter", "Applied date before formatting: $appliedDate")
+
+            // Always format date as "MMM dd, yyyy" instead of showing day of week
+            val formattedDate = if (appliedDate == null) {
+                "Application date unknown"
+            } else {
+                // Always use the date format (MMM dd, yyyy) for consistency
+                "Applied on ${dateFormat.format(safeAppliedDate)}"
             }
+
+            // Log the formatted date for debugging
+            android.util.Log.d("RecentApplicationsAdapter", "Formatted date: $formattedDate")
             appliedDateText.text = formattedDate
 
             // Get status safely with fallback

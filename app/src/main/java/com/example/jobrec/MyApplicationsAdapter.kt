@@ -43,11 +43,16 @@ class MyApplicationsAdapter(
         fun bind(application: ApplicationsActivity.Application) {
             jobTitle.text = application.jobTitle
             companyName.text = "Company: Loading..."
-            
+
             // Format and set the date
-            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            appliedDate.text = dateFormat.format(application.timestamp)
-            
+            try {
+                val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                appliedDate.text = dateFormat.format(application.timestamp)
+            } catch (e: Exception) {
+                android.util.Log.e("MyApplicationsAdapter", "Error formatting date: ${e.message}")
+                appliedDate.text = "Unknown date"
+            }
+
             // Set status chip
             statusChip.text = application.status.capitalize()
             statusChip.setChipBackgroundColorResource(
@@ -104,13 +109,18 @@ class MyApplicationsAdapter(
             db.collection("companies").document(companyId).get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
-                        companyName.text = document.getString("name") ?: "Unknown Company"
+                        // Try to get companyName first, then fall back to name field for backward compatibility
+                        val name = document.getString("companyName") ?: document.getString("name") ?: "Unknown Company"
+                        companyName.text = name
+                        android.util.Log.d("MyApplicationsAdapter", "Loaded company name: $name for ID: $companyId")
                     } else {
                         companyName.text = "Unknown Company"
+                        android.util.Log.d("MyApplicationsAdapter", "Company document doesn't exist for ID: $companyId")
                     }
                 }
-                .addOnFailureListener {
+                .addOnFailureListener { e ->
                     companyName.text = "Unknown Company"
+                    android.util.Log.e("MyApplicationsAdapter", "Failed to load company name for ID: $companyId", e)
                 }
         }
     }

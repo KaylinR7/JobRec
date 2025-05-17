@@ -31,11 +31,14 @@ class AdminDashboardActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
 
         // Setup toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        val toolbar = findViewById<Toolbar>(R.id.adminToolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
-            title = "Admin Dashboard"
+            title = ""
         }
+
+        // Set toolbar title
+        findViewById<TextView>(R.id.adminToolbarTitle).text = "Admin Dashboard"
 
         // Initialize views
         usersCountText = findViewById(R.id.usersCount)

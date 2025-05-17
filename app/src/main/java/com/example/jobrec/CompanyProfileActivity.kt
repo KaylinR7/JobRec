@@ -151,7 +151,9 @@ class CompanyProfileActivity : AppCompatActivity() {
         }
 
         editProfileButton.setOnClickListener {
-            startActivity(Intent(this, EditCompanyProfileActivity::class.java))
+            val intent = Intent(this, EditCompanyProfileActivity::class.java)
+            intent.putExtra("companyId", companyId)
+            startActivity(intent)
         }
     }
 

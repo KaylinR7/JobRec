@@ -697,15 +697,32 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
             // Sort applications by applied date (most recent first)
             // Since we're using simpler queries without ordering, this in-memory sort is crucial
             val sortedApplications = applications.sortedByDescending {
-                // Handle both timestamp and appliedAt fields for compatibility
+                // Try multiple field names for the application date
                 try {
-                    it.timestamp.seconds
-                } catch (e: Exception) {
+                    // First try to get the applieddate field (lowercase, as used in Firestore)
                     try {
-                        it.appliedAt?.seconds ?: 0
-                    } catch (e2: Exception) {
-                        0 // Default value if neither field exists
+                        // Try to access the field using reflection
+                        val appliedDateField = it.javaClass.getDeclaredField("applieddate")
+                        appliedDateField.isAccessible = true
+                        val appliedDateValue = appliedDateField.get(it) as? Timestamp
+                        appliedDateValue?.seconds ?: 0
+                    } catch (e: Exception) {
+                        // Then try appliedDate (from the main Application class)
+                        try {
+                            (it as? com.example.jobrec.Application)?.appliedDate?.seconds ?: 0
+                        } catch (e3: Exception) {
+                            // Then try appliedAt (from the models.Application class)
+                            try {
+                                it.appliedAt?.seconds ?: 0
+                            } catch (e2: Exception) {
+                                // Fall back to timestamp as last resort
+                                it.timestamp.seconds
+                            }
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.e("CompanyDashboard", "Error getting application date for sorting", e)
+                    0 // Default value if all attempts fail
                 }
             }
 

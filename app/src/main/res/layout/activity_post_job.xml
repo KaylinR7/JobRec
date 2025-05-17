@@ -8,17 +8,15 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        app:elevation="0dp">
+        android:background="@color/primary"
+        app:elevation="4dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/white"
-            app:title="Post a Job"
-            app:titleTextColor="@color/black"
-            app:navigationIconTint="@color/white"/>
+            style="@style/Widget.CareerWorx.Toolbar"
+            app:title="Post a Job"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 

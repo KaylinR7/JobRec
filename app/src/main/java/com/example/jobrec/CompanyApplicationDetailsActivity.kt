@@ -106,7 +106,7 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                 }
                 startActivity(intent)
             } else {
-                Toast.makeText(this, "Cannot start chat: Missing application information", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Cannot start messaging: Missing application information", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -381,12 +381,8 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                         acceptButton.isEnabled = isActionable
                         rejectButton.isEnabled = isActionable
 
-                        // Show chat button only if application is accepted
-                        if (status == "accepted") {
-                            chatButton.visibility = android.view.View.VISIBLE
-                        } else {
-                            chatButton.visibility = android.view.View.GONE
-                        }
+                        // Always show chat button to allow messaging before accepting applications
+                        chatButton.visibility = android.view.View.VISIBLE
 
                         // Always enable the view resume button
                         viewResumeButton.isEnabled = true

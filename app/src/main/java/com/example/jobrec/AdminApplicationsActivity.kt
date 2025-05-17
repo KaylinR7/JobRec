@@ -5,20 +5,32 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.jobrec.databinding.ActivityAdminApplicationsBinding
+import com.example.jobrec.utils.AdminPagination
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
 class AdminApplicationsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAdminApplicationsBinding
     private lateinit var adapter: AdminApplicationsAdapter
-    private val applications = ArrayList<Application>()
+    private lateinit var searchEditText: TextInputEditText
+    private lateinit var searchButton: MaterialButton
+    private lateinit var pagination: AdminPagination
+
+    private val allApplications = ArrayList<Application>()
+    private val filteredApplications = ArrayList<Application>()
     private val db = FirebaseFirestore.getInstance()
     private val TAG = "AdminApplicationsActivity"
+
+    private var searchQuery: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,25 +38,57 @@ class AdminApplicationsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Setup toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        val toolbar = findViewById<Toolbar>(R.id.adminToolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
-            title = "Manage Applications"
+            title = ""
         }
+
+        // Set toolbar title
+        findViewById<TextView>(R.id.adminToolbarTitle).text = "Manage Applications"
+
+        // Initialize views
+        searchEditText = findViewById(R.id.searchEditText)
+        searchButton = findViewById(R.id.searchButton)
 
         // Setup RecyclerView with empty adapter initially
         setupRecyclerView()
 
+        // Setup pagination
+        pagination = AdminPagination(
+            findViewById(R.id.pagination_layout),
+            pageSize = 5
+        ) { page ->
+            updateApplicationsList()
+        }
+
         // Setup search functionality
         setupSearch()
 
-        // Load applications data
-        loadApplications()
+        // Setup FAB
+        findViewById<FloatingActionButton>(R.id.addApplicationFab).setOnClickListener {
+            addApplication()
+        }
 
-        // Add a test application to verify the adapter is working
-        addTestApplication()
+        // Check for search query from intent
+        intent.getStringExtra("SEARCH_QUERY")?.let { query ->
+            if (query.isNotEmpty()) {
+                searchEditText.setText(query)
+                searchApplications(query)
+            } else {
+                loadApplications()
+            }
+        } ?: loadApplications()
+    }
+
+    private fun addApplication() {
+        val dialog = AdminEditApplicationDialog.newInstance(Application())
+        dialog.onApplicationUpdated = {
+            loadApplications()
+        }
+        dialog.show(supportFragmentManager, "AdminEditApplicationDialog")
     }
 
     private fun addTestApplication() {
@@ -61,7 +105,7 @@ class AdminApplicationsActivity : AppCompatActivity() {
         Log.d(TAG, "Setting up RecyclerView")
 
         // Create adapter with the applications list
-        adapter = AdminApplicationsAdapter(applications) { application ->
+        adapter = AdminApplicationsAdapter(filteredApplications) { application ->
             showApplicationDetails(application)
         }
 
@@ -75,29 +119,50 @@ class AdminApplicationsActivity : AppCompatActivity() {
     }
 
     private fun setupSearch() {
-        binding.searchEditText.addTextChangedListener(object : TextWatcher {
+        // Setup search text change listener
+        searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                val query = s.toString().trim()
-                if (query.isEmpty()) {
-                    loadApplications()
-                } else {
-                    searchApplications(query)
-                }
+                // We'll handle search on button click
             }
         })
+
+        // Setup search button click listener
+        searchButton.setOnClickListener {
+            val query = searchEditText.text.toString().trim()
+            if (query.isEmpty()) {
+                loadApplications()
+            } else {
+                searchApplications(query)
+            }
+        }
+    }
+
+    private fun updateApplicationsList() {
+        val pageItems = pagination.getPageItems(filteredApplications)
+
+        // Update adapter with current page items
+        adapter = AdminApplicationsAdapter(pageItems) { application ->
+            showApplicationDetails(application)
+        }
+        binding.recyclerView.adapter = adapter
+
+        // Update pagination info
+        pagination.updateItemCount(filteredApplications.size)
+
+        // Show empty state if no applications found
+        updateEmptyState()
     }
 
     private fun loadApplications() {
         Log.d(TAG, "Loading applications...")
         binding.progressIndicator.visibility = View.VISIBLE
+        searchQuery = ""
 
         // Clear existing applications
-        applications.clear()
-
-        // Always add the test application first to ensure something is displayed
-        addTestApplication()
+        allApplications.clear()
+        filteredApplications.clear()
 
         // Log that we're querying the applications collection
         Log.d(TAG, "Querying the 'applications' collection in Firestore")
@@ -107,16 +172,6 @@ class AdminApplicationsActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { documents ->
                 Log.d(TAG, "Found ${documents.size()} applications in Firestore")
-
-                // Log all document IDs and fields for debugging
-                documents.forEach { doc ->
-                    Log.d(TAG, "Document ID: ${doc.id}")
-                    Log.d(TAG, "All fields: ${doc.data}")
-                    // Log every field in the document to find the status field
-                    doc.data.forEach { (key, value) ->
-                        Log.d(TAG, "Field: $key = $value")
-                    }
-                }
 
                 // Process each document
                 for (document in documents) {
@@ -140,17 +195,22 @@ class AdminApplicationsActivity : AppCompatActivity() {
                             appliedDate = document.getTimestamp("appliedDate") ?: com.google.firebase.Timestamp.now()
                         )
 
-                        applications.add(application)
+                        allApplications.add(application)
                         Log.d(TAG, "Added application: ${application.jobTitle} - ${application.applicantName}")
                     } catch (e: Exception) {
                         Log.e(TAG, "Error processing document: ${e.message}", e)
                     }
                 }
 
+                // Update the filtered list
+                filteredApplications.addAll(allApplications)
+
+                // Reset pagination to first page
+                pagination.resetToFirstPage()
+
                 // Update the UI
-                Log.d(TAG, "Total applications loaded: ${applications.size}")
-                adapter.notifyDataSetChanged()
-                updateEmptyState()
+                Log.d(TAG, "Total applications loaded: ${allApplications.size}")
+                updateApplicationsList()
                 binding.progressIndicator.visibility = View.GONE
             }
             .addOnFailureListener { e ->
@@ -163,71 +223,29 @@ class AdminApplicationsActivity : AppCompatActivity() {
     private fun searchApplications(query: String) {
         Log.d(TAG, "Searching applications with query: $query")
         binding.progressIndicator.visibility = View.VISIBLE
+        searchQuery = query.lowercase()
 
-        // Clear existing applications
-        applications.clear()
+        // Filter applications based on search query
+        filteredApplications.clear()
+        filteredApplications.addAll(allApplications.filter { application ->
+            application.jobTitle.lowercase().contains(searchQuery) ||
+            application.applicantName.lowercase().contains(searchQuery) ||
+            application.companyName.lowercase().contains(searchQuery) ||
+            application.status.lowercase().contains(searchQuery) ||
+            application.applicantEmail.lowercase().contains(searchQuery)
+        })
 
-        // Always add the test application to ensure something is displayed
-        addTestApplication()
+        // Reset pagination to first page
+        pagination.resetToFirstPage()
 
-        // Log that we're searching the applications collection
-        Log.d(TAG, "Searching the 'applications' collection in Firestore with query: $query")
-
-        // Query Firestore for all applications without ordering
-        db.collection("applications")
-            .get()
-            .addOnSuccessListener { documents ->
-                Log.d(TAG, "Found ${documents.size()} applications to filter")
-
-                // Process and filter each document
-                for (document in documents) {
-                    try {
-                        // Create application manually from document fields
-                        // Get the status and log it
-                        val status = getStatusFromDocument(document)
-                        Log.d(TAG, "Final application status for search: $status")
-
-                        val application = Application(
-                            id = document.id,
-                            jobId = document.getString("jobId") ?: "",
-                            jobTitle = document.getString("jobTitle") ?: "Unknown Job",
-                            companyName = document.getString("companyName") ?: "Unknown Company",
-                            userId = document.getString("userId") ?: "",
-                            applicantName = document.getString("applicantName") ?: "Unknown Applicant",
-                            applicantEmail = document.getString("applicantEmail") ?: "",
-                            applicantPhone = document.getString("applicantPhone") ?: "",
-                            status = status,
-                            // Use the current timestamp if appliedDate is missing
-                            appliedDate = document.getTimestamp("appliedDate") ?: com.google.firebase.Timestamp.now()
-                        )
-
-                        // Filter by query
-                        if (application.jobTitle.contains(query, ignoreCase = true) ||
-                            application.applicantName.contains(query, ignoreCase = true) ||
-                            application.status.contains(query, ignoreCase = true)) {
-                            applications.add(application)
-                            Log.d(TAG, "Matched application: ${application.jobTitle}")
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error processing document: ${e.message}", e)
-                    }
-                }
-
-                // Update the UI
-                Log.d(TAG, "Filtered to ${applications.size} applications")
-                adapter.notifyDataSetChanged()
-                updateEmptyState()
-                binding.progressIndicator.visibility = View.GONE
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error searching applications: ${e.message}", e)
-                Toast.makeText(this, "Error searching applications: ${e.message}", Toast.LENGTH_SHORT).show()
-                binding.progressIndicator.visibility = View.GONE
-            }
+        // Update the UI
+        Log.d(TAG, "Filtered to ${filteredApplications.size} applications")
+        updateApplicationsList()
+        binding.progressIndicator.visibility = View.GONE
     }
 
     private fun updateEmptyState() {
-        val isEmpty = applications.isEmpty()
+        val isEmpty = filteredApplications.isEmpty()
         Log.d(TAG, "Updating empty state. Applications list is empty: $isEmpty")
 
         // Update visibility of empty state and recycler view

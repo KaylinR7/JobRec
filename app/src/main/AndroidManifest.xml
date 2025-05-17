@@ -245,6 +245,7 @@
         <activity
             android:name=".EmployerAnalyticsActivity"
             android:label="Analytics Dashboard"
+            android:windowSoftInputMode="adjustResize"
             android:parentActivityName=".CompanyDashboardActivityNew">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -253,13 +254,18 @@
 
         <activity
             android:name=".EmployerJobsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".EditJobActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
-        <activity android:name=".CompanyAnalyticsActivity" />
+        <activity
+            android:name=".CompanyAnalyticsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- Chat Activities -->
         <activity

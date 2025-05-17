@@ -46,7 +46,7 @@ class CandidateSearchAdapter(
             } catch (e: NumberFormatException) {
                 Date() // Fallback to current date if parsing fails
             }
-            
+
             val endDate = try {
                 if (experience.endDate.isNotEmpty()) {
                     Date(experience.endDate.toLong())
@@ -56,7 +56,7 @@ class CandidateSearchAdapter(
             } catch (e: NumberFormatException) {
                 Date() // Fallback to current date if parsing fails
             }
-            
+
             val diffInMillis = endDate.time - startDate.time
             return TimeUnit.MILLISECONDS.toDays(diffInMillis) / 365
         }
@@ -72,13 +72,13 @@ class CandidateSearchAdapter(
 
             // Set text fields
             nameText.text = "${candidate.name} ${candidate.surname}"
-            
+
             // Get highest education
             val highestEducation = candidate.education.maxByOrNull { it.degree }?.degree ?: "No education specified"
             educationText.text = highestEducation
-            
-            locationText.text = candidate.address
-            
+
+            locationText.text = candidate.province
+
             // Format skills
             val skillsFormatted = if (candidate.skills.isNotEmpty()) {
                 "Skills: ${candidate.skills.joinToString(", ")}"
@@ -86,7 +86,7 @@ class CandidateSearchAdapter(
                 "No skills specified"
             }
             skillsText.text = skillsFormatted
-            
+
             // Format experience
             val experienceFormatted = if (candidate.experience.isNotEmpty()) {
                 val totalExperience = candidate.experience.sumOf { exp ->
@@ -114,4 +114,4 @@ class CandidateSearchAdapter(
             return oldItem == newItem
         }
     }
-} 
+}

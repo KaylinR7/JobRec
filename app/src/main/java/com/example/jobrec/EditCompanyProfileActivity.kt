@@ -29,7 +29,7 @@ class EditCompanyProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_company_profile)
 
-        // Set up toolbar with back button
+        // Set up toolbar with white back button
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -38,16 +38,27 @@ class EditCompanyProfileActivity : AppCompatActivity() {
             title = "Edit Company Profile"
         }
 
+        // Set white navigation icon for red toolbar
+        toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
+
         // Initialize Firestore
         db = FirebaseFirestore.getInstance()
 
-        // Get company ID from intent
+        // Get company ID from intent or use current user ID as fallback
         companyId = intent.getStringExtra("companyId") ?: ""
-        
+
+        // If company ID is not provided in the intent, try to use the current user ID
         if (companyId.isEmpty()) {
-            Toast.makeText(this, "Error: Company ID not found", Toast.LENGTH_SHORT).show()
-            finish()
-            return
+            val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+            val currentUserId = auth.currentUser?.uid
+
+            if (currentUserId != null) {
+                companyId = currentUserId
+            } else {
+                Toast.makeText(this, "Error: Company ID not found and user not logged in", Toast.LENGTH_SHORT).show()
+                finish()
+                return
+            }
         }
 
         // Initialize UI elements
@@ -196,4 +207,4 @@ class EditCompanyProfileActivity : AppCompatActivity() {
         onBackPressed()
         return true
     }
-} 
+}

@@ -327,6 +327,7 @@ class JobDetailsActivity : AppCompatActivity() {
                             "applicantExperience" to it.experience,
                             "companyId" to companyId,
                             "timestamp" to com.google.firebase.Timestamp.now(),
+                            "applieddate" to com.google.firebase.Timestamp.now(), // Use lowercase field name as in Firestore
                             "status" to "pending",
                             "resumeUrl" to cvUrl,
                             "coverLetter" to coverLetter

@@ -167,9 +167,9 @@ class CandidateSearchActivity : AppCompatActivity() {
                                 allSkills[skill] = allSkills.getOrDefault(skill, 0) + 1
                             }
 
-                            // Count locations
-                            if (user.address.isNotEmpty()) {
-                                allLocations[user.address] = allLocations.getOrDefault(user.address, 0) + 1
+                            // Count locations (using province instead of address)
+                            if (user.province.isNotEmpty()) {
+                                allLocations[user.province] = allLocations.getOrDefault(user.province, 0) + 1
                             }
 
                             // Count fields/industries
@@ -383,7 +383,7 @@ class CandidateSearchActivity : AppCompatActivity() {
         phoneText.text = candidate.phoneNumber
 
         val locationText = view.findViewById<TextView>(R.id.locationText)
-        locationText.text = candidate.address
+        locationText.text = candidate.province
 
         val summaryText = view.findViewById<TextView>(R.id.summaryText)
         summaryText.text = candidate.summary
@@ -616,9 +616,9 @@ class CandidateSearchActivity : AppCompatActivity() {
                         }
                     }
 
-                    // Filter by location
+                    // Filter by location (using province instead of address)
                     if (location.isNotEmpty() && location != "Any") {
-                        matches = matches && candidate.address.contains(location, ignoreCase = true)
+                        matches = matches && candidate.province.contains(location, ignoreCase = true)
                     }
 
                     // Filter by field/industry

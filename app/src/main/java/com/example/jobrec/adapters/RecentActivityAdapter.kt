@@ -49,26 +49,8 @@ class RecentActivityAdapter(
             val date = activity.timestamp.toDate()
             val now = Calendar.getInstance().time
 
-            // Format date based on how recent it is
-            timeTextView.text = when {
-                // Today
-                DateUtils.isToday(date.time) -> {
-                    "Today at ${timeFormat.format(date)}"
-                }
-                // Yesterday
-                DateUtils.isToday(date.time + DateUtils.DAY_IN_MILLIS) -> {
-                    "Yesterday at ${timeFormat.format(date)}"
-                }
-                // Within the last week
-                now.time - date.time < 7 * DateUtils.DAY_IN_MILLIS -> {
-                    val dayFormat = SimpleDateFormat("EEEE", Locale.getDefault())
-                    "${dayFormat.format(date)} at ${timeFormat.format(date)}"
-                }
-                // Older
-                else -> {
-                    dateFormat.format(date)
-                }
-            }
+            // Always format date as "MMM dd, yyyy" for consistency
+            timeTextView.text = dateFormat.format(date)
 
             // Set card background color based on activity type
             val cardColor = when (activity.type) {

@@ -3,9 +3,9 @@ package com.example.jobrec
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 
 class AdminCompaniesAdapter(
     private var companies: List<Company>,
@@ -17,9 +17,9 @@ class AdminCompaniesAdapter(
     inner class CompanyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val nameText: TextView = itemView.findViewById(R.id.companyNameText)
         val emailText: TextView = itemView.findViewById(R.id.companyEmailText)
-        val viewButton: Button = itemView.findViewById(R.id.viewCompanyButton)
-        val editButton: Button = itemView.findViewById(R.id.editCompanyButton)
-        val deleteButton: Button = itemView.findViewById(R.id.deleteCompanyButton)
+        val viewButton: MaterialButton = itemView.findViewById(R.id.viewCompanyButton)
+        val editButton: MaterialButton = itemView.findViewById(R.id.editCompanyButton)
+        val deleteButton: MaterialButton = itemView.findViewById(R.id.deleteCompanyButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CompanyViewHolder {
@@ -46,4 +46,4 @@ class AdminCompaniesAdapter(
 
     val companiesList: List<Company>
         get() = companies
-} 
+}
