@@ -18,7 +18,6 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var passwordInput: TextInputEditText
     private lateinit var loginButton: Button
     private lateinit var signupButton: Button
-    private lateinit var debugButton: Button
     private lateinit var userTypeRadioGroup: android.widget.RadioGroup
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -36,7 +35,7 @@ class LoginActivity : AppCompatActivity() {
         passwordInput = findViewById(R.id.passwordInput)
         loginButton = findViewById(R.id.loginButton)
         signupButton = findViewById(R.id.signupButton)
-        debugButton = findViewById(R.id.debugButton)
+
         userTypeRadioGroup = findViewById(R.id.userTypeRadioGroup)
 
         // Apply animations
@@ -63,14 +62,6 @@ class LoginActivity : AppCompatActivity() {
         signupButton.setOnClickListener {
             startActivity(Intent(this, UnifiedSignupActivity::class.java))
             overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
-        }
-
-        // Set up debug button
-        debugButton.setOnClickListener {
-            Log.d(TAG, "Debug button clicked - logging all database data")
-            Toast.makeText(this, "Logging database data to Logcat...", Toast.LENGTH_SHORT).show()
-            logAllUsersAndCompanies()
-            logAllConversations()
         }
     }
 
@@ -121,7 +112,7 @@ class LoginActivity : AppCompatActivity() {
                         // Company login
                         selectedUserType == "company" && (actualUserType == "company" || actualUserType == "unknown") -> {
                             runOnUiThread {
-                                val intent = Intent(this, CompanyDashboardActivity::class.java)
+                                val intent = Intent(this, CompanyDashboardActivityNew::class.java)
                                 startActivity(intent)
                                 finish()
                             }
@@ -163,7 +154,7 @@ class LoginActivity : AppCompatActivity() {
     private fun checkEmailExistsInAuth(email: String, callback: (Boolean) -> Unit) {
         Log.d(TAG, "Checking if email exists in Firebase Authentication: $email")
 
-        // Use the fetchSignInMethodsForEmail method to check if the email is registered
+
         auth.fetchSignInMethodsForEmail(email)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -180,7 +171,7 @@ class LoginActivity : AppCompatActivity() {
                     callback(exists)
                 } else {
                     Log.e(TAG, "Error checking email in Firebase Authentication", task.exception)
-                    // If there's an error, we'll assume the email doesn't exist
+
                     callback(false)
                 }
             }
@@ -189,7 +180,7 @@ class LoginActivity : AppCompatActivity() {
     private fun checkUserExistsInFirestore(email: String) {
         Log.d(TAG, "Checking if user exists in Firestore with email: $email")
 
-        // Check in users collection
+
         db.collection("users")
             .whereEqualTo("email", email)
             .get()
@@ -203,7 +194,7 @@ class LoginActivity : AppCompatActivity() {
                 } else {
                     Log.d(TAG, "User NOT found in 'users' collection with email: $email")
 
-                    // Check in companies collection
+
                     db.collection("companies")
                         .whereEqualTo("email", email)
                         .get()
@@ -232,7 +223,7 @@ class LoginActivity : AppCompatActivity() {
     private fun logAllUsersAndCompanies() {
         Log.d(TAG, "======= LOGGING ALL DATABASE USERS AND COMPANIES =======")
 
-        // Log all users
+
         db.collection("users")
             .get()
             .addOnSuccessListener { userDocuments ->
@@ -243,13 +234,13 @@ class LoginActivity : AppCompatActivity() {
                     val id = doc.id
                     Log.d(TAG, "User: ID=$id, Email=$email, Name=$name")
 
-                    // Log all fields for debugging
+
                     doc.data?.forEach { (key, value) ->
                         Log.d(TAG, "  - $key: $value")
                     }
                 }
 
-                // Log all companies after users are logged
+
                 db.collection("companies")
                     .get()
                     .addOnSuccessListener { companyDocuments ->
@@ -340,23 +331,23 @@ class LoginActivity : AppCompatActivity() {
         Log.d(TAG, "Checking user type for email: $email")
         Log.d(TAG, "Current Firebase Auth user ID: ${auth.currentUser?.uid}")
 
-        // First check if it's a company (case-insensitive)
+
         val userEmail = email.lowercase()
         Log.d(TAG, "Looking for company with email (lowercase): $userEmail")
 
-        // Get all companies and filter by email case-insensitively
+
         db.collection("companies")
             .get()
             .addOnSuccessListener { documents ->
                 Log.d(TAG, "Total companies in database: ${documents.size()}")
 
-                // Find company with matching email (case-insensitive)
+
                 val companyDoc = documents.find { doc ->
                     doc.getString("email")?.lowercase() == userEmail
                 }
 
                 if (companyDoc != null) {
-                    // It's a company
+
                     val registrationNumber = companyDoc.getString("registrationNumber")
                     val companyName = companyDoc.getString("companyName") ?: "unknown"
                     val userId = companyDoc.getString("userId")
@@ -365,7 +356,7 @@ class LoginActivity : AppCompatActivity() {
                         Log.d(TAG, "User is a company, redirecting to CompanyDashboardActivity")
                         Log.d(TAG, "Company details - Registration Number: $registrationNumber, Name: $companyName, UserId: $userId")
 
-                        // Update the company document with the userId field if it doesn't exist
+
                         if (userId == null) {
                             val currentUserId = auth.currentUser?.uid
                             if (currentUserId != null) {
@@ -381,7 +372,7 @@ class LoginActivity : AppCompatActivity() {
                             }
                         }
 
-                        val intent = Intent(this, CompanyDashboardActivity::class.java)
+                        val intent = Intent(this, CompanyDashboardActivityNew::class.java)
                         intent.putExtra("companyId", registrationNumber)
                         startActivity(intent)
                         finish()
@@ -391,7 +382,7 @@ class LoginActivity : AppCompatActivity() {
                         auth.signOut()
                     }
                 } else {
-                    // Check if it's a regular user
+
                     Log.d(TAG, "Not a company, checking if it's a regular user")
                     db.collection("users")
                         .whereEqualTo("email", email)
@@ -400,7 +391,7 @@ class LoginActivity : AppCompatActivity() {
                             Log.d(TAG, "User query result size: ${userDocuments.size()}")
 
                             if (!userDocuments.isEmpty) {
-                                // It's a regular user
+
                                 val userDoc = userDocuments.documents[0]
                                 val userId = auth.currentUser?.uid
                                 val userName = userDoc.getString("name") ?: "unknown"
@@ -413,13 +404,13 @@ class LoginActivity : AppCompatActivity() {
                                 startActivity(intent)
                                 finish()
                             } else {
-                                // User not found in either collection
+
                                 Log.e(TAG, "User not found in any collection")
                                 Log.e(TAG, "Firebase Auth user exists but no matching Firestore document")
                                 Log.e(TAG, "Firebase Auth user ID: ${auth.currentUser?.uid}")
                                 Log.e(TAG, "Firebase Auth user email: ${auth.currentUser?.email}")
 
-                                // Log all users and companies again to verify
+                                
                                 logAllUsersAndCompanies()
 
                                 Toast.makeText(this, "User not found in database. Please try again or contact support.", Toast.LENGTH_LONG).show()

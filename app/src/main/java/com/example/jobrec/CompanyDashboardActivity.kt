@@ -125,8 +125,7 @@ class CompanyDashboardActivity : AppCompatActivity() {
         recentActivityDescription = findViewById(R.id.recentActivityDescription)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
 
-        // Add chatbot button
-        ChatbotHelper.addChatbotButton(this)
+        // Chatbot now in bottom navigation
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -144,22 +143,7 @@ class CompanyDashboardActivity : AppCompatActivity() {
                 startActivity(Intent(this, ConversationsActivity::class.java))
                 true
             }
-            R.id.action_chatbot -> {
-                startActivity(Intent(this, com.example.jobrec.chatbot.ChatbotActivity::class.java))
-                true
-            }
-            R.id.action_switch_to_student -> {
-                // Enable student view override
-                val sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
-                sharedPreferences.edit().putBoolean("override_to_student", true).apply()
 
-                // Restart the app to apply the change
-                val intent = Intent(this, SplashActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finish()
-                true
-            }
             R.id.action_logout -> {
                 // Clear all user session data when logging out
                 val sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
@@ -202,6 +186,11 @@ class CompanyDashboardActivity : AppCompatActivity() {
                 R.id.nav_profile -> {
                     val intent = Intent(this, CompanyProfileActivity::class.java)
                     intent.putExtra("companyId", companyId)
+                    startActivity(intent)
+                    true
+                }
+                R.id.nav_ai_assistant -> {
+                    val intent = Intent(this, com.example.jobrec.chatbot.ChatbotActivity::class.java)
                     startActivity(intent)
                     true
                 }

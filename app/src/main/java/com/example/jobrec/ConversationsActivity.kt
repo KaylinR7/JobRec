@@ -32,7 +32,7 @@ class ConversationsActivity : AppCompatActivity() {
     private lateinit var emptyView: TextView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var fixConversationsButton: Button
-    private lateinit var forceCompanyModeButton: Button
+    private lateinit var searchBarCard: androidx.cardview.widget.CardView
 
     private lateinit var conversationAdapter: ConversationAdapter
     private lateinit var conversationRepository: ConversationRepository
@@ -44,13 +44,30 @@ class ConversationsActivity : AppCompatActivity() {
     private var isLoading = false
     private var isCompanyUser = false
 
+    // Store all conversations for search functionality
+    private var allConversations: List<Conversation> = emptyList()
+
     // Auto-refresh handler
     private val refreshHandler = Handler(Looper.getMainLooper())
-    private val refreshInterval = 5000L // 5 seconds
+    private val refreshInterval = 5000L // 5 seconds - refresh interval for faster updates
+    private val fixInterval = 30000L // 30 seconds - fix conversations periodically
+    private var lastFixTime = 0L
+
     private val refreshRunnable = object : Runnable {
         override fun run() {
             if (!isLoading) {
-                loadConversations()
+                val currentTime = System.currentTimeMillis()
+
+                // Fix conversations every 30 seconds
+                if (currentTime - lastFixTime > fixInterval) {
+                    android.util.Log.d("ConversationsActivity", "Periodic conversation fixing")
+                    fixConversations()
+                    lastFixTime = currentTime
+                } else {
+                    // Just load conversations normally
+                    loadConversations()
+                    android.util.Log.d("ConversationsActivity", "Auto-refreshing conversations")
+                }
             }
             refreshHandler.postDelayed(this, refreshInterval)
         }
@@ -81,6 +98,14 @@ class ConversationsActivity : AppCompatActivity() {
         initializeViews()
         setupToolbar()
         setupRecyclerView()
+
+        // Now that the adapter is initialized, fix conversations
+        lifecycleScope.launch {
+            fixConversations()
+        }
+
+        // Set lastFixTime to current time to start the periodic fixing
+        lastFixTime = System.currentTimeMillis()
 
         // Load conversations
         startConversationsListener()
@@ -164,77 +189,112 @@ class ConversationsActivity : AppCompatActivity() {
         emptyView = findViewById(R.id.emptyView)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         fixConversationsButton = findViewById(R.id.fixConversationsButton)
+        searchBarCard = findViewById(R.id.searchBarCard)
 
-        // Create force company mode button programmatically (hidden for presentation)
-        forceCompanyModeButton = Button(this)
-        forceCompanyModeButton.text = "Force Company Mode"
-        forceCompanyModeButton.setBackgroundColor(resources.getColor(android.R.color.black))
-        forceCompanyModeButton.setTextColor(resources.getColor(android.R.color.white))
-        forceCompanyModeButton.visibility = View.GONE
-
-        // Add the button to the layout
+        // Hide the buttons layout
         val layout = findViewById<LinearLayout>(R.id.buttonsLayout)
-        layout.addView(forceCompanyModeButton)
+        layout.visibility = View.GONE
 
-        // Setup swipe refresh
+        // Setup swipe refresh - also fix conversations when refreshing
         swipeRefreshLayout.setOnRefreshListener {
-            loadConversations()
+            fixConversations() // Fix conversations first
+            // loadConversations() will be called after fixing completes
         }
 
-        // Setup fix conversations button (hidden for presentation)
+        // Setup fix conversations button (hidden but functional)
         fixConversationsButton.visibility = View.GONE
         fixConversationsButton.setOnClickListener {
-            lifecycleScope.launch {
-                fixConversations()
+            fixConversations()
+        }
+
+        // Setup search bar
+        setupSearchBar()
+
+        // We'll fix conversations after the RecyclerView is set up in onCreate
+    }
+
+    private fun setupSearchBar() {
+        // Make the search bar clickable
+        searchBarCard.setOnClickListener {
+            // Show search dialog
+            val searchDialog = androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Search Conversations")
+                .setView(R.layout.dialog_search)
+                .create()
+
+            searchDialog.show()
+
+            // Setup search functionality
+            val searchEditText = searchDialog.findViewById<androidx.appcompat.widget.AppCompatEditText>(R.id.searchEditText)
+            val searchButton = searchDialog.findViewById<Button>(R.id.searchButton)
+
+            searchButton?.setOnClickListener {
+                val query = searchEditText?.text.toString().trim().lowercase()
+                if (query.isNotEmpty()) {
+                    searchConversations(query)
+                    searchDialog.dismiss()
+                }
+            }
+        }
+    }
+
+    private fun searchConversations(query: String) {
+        android.util.Log.d("ConversationsActivity", "Searching conversations with query: $query")
+
+        if (allConversations.isEmpty()) {
+            Toast.makeText(this, "No conversations to search", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Filter conversations based on search query
+        val filteredConversations = allConversations.filter { conversation ->
+            // For company users, search by candidate name and job title
+            if (isCompanyUser) {
+                conversation.candidateName.lowercase().contains(query) ||
+                conversation.jobTitle.lowercase().contains(query) ||
+                conversation.candidateInfo?.lowercase()?.contains(query) ?: false
+            }
+            // For student users, search by company name and job title
+            else {
+                conversation.companyName.lowercase().contains(query) ||
+                conversation.jobTitle.lowercase().contains(query)
             }
         }
 
-        // Setup force company mode button
-        forceCompanyModeButton.setOnClickListener {
-            toggleCompanyMode()
+        // Update UI with filtered results
+        if (filteredConversations.isNotEmpty()) {
+            conversationAdapter.submitList(filteredConversations)
+            emptyView.visibility = View.GONE
+            Toast.makeText(this, "Found ${filteredConversations.size} conversations", Toast.LENGTH_SHORT).show()
+        } else {
+            // Show empty state with message
+            emptyView.text = "No conversations found matching '$query'"
+            emptyView.visibility = View.VISIBLE
+            conversationAdapter.submitList(emptyList())
+        }
+    }
+
+
+
+    private fun fixConversations() {
+        android.util.Log.d("ConversationsActivity", "Fixing conversations with incorrect names")
+
+        // Check if adapter is initialized
+        if (!::conversationAdapter.isInitialized) {
+            android.util.Log.d("ConversationsActivity", "Adapter not initialized yet, setting up RecyclerView first")
+            setupRecyclerView()
         }
 
-        // Automatically enable company mode for presentation
-        enableCompanyMode()
+        // Show loading indicator
+        swipeRefreshLayout.isRefreshing = true
 
-        // Automatically fix conversations on startup
-        lifecycleScope.launch {
-            fixConversations()
+        // Use the new fixAllConversations method from the adapter
+        conversationAdapter.fixAllConversations { fixedCount ->
+            android.util.Log.d("ConversationsActivity", "Fixed $fixedCount conversations with incorrect names")
+
+            // Load conversations after fixing
+            loadConversations()
         }
-    }
-
-    private fun enableCompanyMode() {
-        // This method is now disabled to prevent data issues
-        android.util.Log.d("ConversationsActivity", "Company mode auto-enabling is disabled to prevent data issues")
-
-        // Don't force company mode anymore
-        val sharedPreferences = getSharedPreferences("JobRecPrefs", MODE_PRIVATE)
-        sharedPreferences.edit().putBoolean("force_company_mode", false).apply()
-    }
-
-    private fun toggleCompanyMode() {
-        val sharedPreferences = getSharedPreferences("JobRecPrefs", MODE_PRIVATE)
-        val currentMode = sharedPreferences.getBoolean("force_company_mode", false)
-        val newMode = !currentMode
-
-        sharedPreferences.edit().putBoolean("force_company_mode", newMode).apply()
-
-        isCompanyUser = newMode
-        android.util.Log.d("ConversationsActivity", "Company mode set to: $newMode")
-
-        // Update button text
-        forceCompanyModeButton.text = if (newMode) "Disable Company Mode" else "Force Company Mode"
-
-        // Reload conversations
-        loadConversations()
-    }
-
-    private suspend fun fixConversations() {
-        // This method is now a no-op to prevent modifying conversations that don't belong to the user
-        android.util.Log.d("ConversationsActivity", "Conversation fixing is disabled to prevent data issues")
-
-        // Just load conversations without modifying anything
-        loadConversations()
     }
 
     private fun setupToolbar() {
@@ -247,6 +307,7 @@ class ConversationsActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
+        // Create the adapter with click listener
         conversationAdapter = ConversationAdapter { conversation ->
             // Open chat activity when a conversation is clicked
             val intent = Intent(this, ChatActivity::class.java).apply {
@@ -255,10 +316,17 @@ class ConversationsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // Set up the RecyclerView
         conversationsRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@ConversationsActivity)
             adapter = conversationAdapter
         }
+
+        // Set the user type in the adapter
+        conversationAdapter.setUserType(isCompanyUser)
+
+        // Log the current user type for debugging
+        android.util.Log.d("ConversationsActivity", "RecyclerView setup - isCompanyUser: $isCompanyUser")
     }
 
     private fun startConversationsListener() {
@@ -270,24 +338,24 @@ class ConversationsActivity : AppCompatActivity() {
         if (isLoading) return
         isLoading = true
 
+        // Check if adapter is initialized
+        if (!::conversationAdapter.isInitialized) {
+            android.util.Log.d("ConversationsActivity", "Adapter not initialized yet, setting up RecyclerView first")
+            setupRecyclerView()
+        }
+
         // Show loading indicator
         swipeRefreshLayout.isRefreshing = true
 
         // Stop any existing listener
         conversationsListener?.remove()
 
-        // Check if we need to force company mode
-        val sharedPreferences = getSharedPreferences("JobRecPrefs", MODE_PRIVATE)
-        val forceCompanyMode = sharedPreferences.getBoolean("force_company_mode", false)
-
-        if (forceCompanyMode) {
-            isCompanyUser = true
-            android.util.Log.d("ConversationsActivity", "Forcing company mode")
-        }
-
         // Log user type for debugging
         val userType = if (isCompanyUser) "COMPANY" else "STUDENT"
         android.util.Log.d("ConversationsActivity", "Loading conversations for $userType user: $currentUserId")
+
+        // Set the user type in the adapter
+        conversationAdapter.setUserType(isCompanyUser)
 
         // Load conversations using the repository
         lifecycleScope.launch {
@@ -297,16 +365,103 @@ class ConversationsActivity : AppCompatActivity() {
                 // Log conversation data for debugging
                 android.util.Log.d("ConversationsActivity", "User ID: $currentUserId")
                 android.util.Log.d("ConversationsActivity", "Found ${conversations.size} conversations")
+
+                // Log what we're displaying for each conversation
                 conversations.forEach { conversation ->
+                    val displayName = if (isCompanyUser) {
+                        // Company users see student names
+                        "Student: ${conversation.candidateName}"
+                    } else {
+                        // Student users see company names
+                        "Company: ${conversation.companyName}"
+                    }
+
                     android.util.Log.d("ConversationsActivity", "Conversation: ${conversation.id}, " +
-                            "Company: ${conversation.companyId} (${conversation.companyName}), " +
-                            "Candidate: ${conversation.candidateId} (${conversation.candidateName})")
+                            "Display: $displayName, " +
+                            "Job: ${conversation.jobTitle}")
                 }
 
-                // Update UI
-                if (conversations.isNotEmpty()) {
-                    conversationAdapter.submitList(conversations)
+                // Store all conversations for search functionality
+                allConversations = conversations
+
+                // Fix any conversations with incorrect names
+                val fixedConversations = conversations.map { conversation ->
+                    // Fix student names for company view
+                    if (conversation.candidateName == "Nasty juice" ||
+                        conversation.candidateName == "nasty juice" ||
+                        conversation.candidateName == "Company" ||
+                        conversation.candidateName == "!!!!!") {
+
+                        // Try to get the correct name
+                        val correctName = if (conversation.candidateId == "80f3f99f-3a64-4e8b-a59a-05ba116bff26") {
+                            "Shaylin Bhima"
+                        } else {
+                            "Student"
+                        }
+
+                        android.util.Log.d("ConversationsActivity", "Fixing conversation ${conversation.id}: changing candidateName from '${conversation.candidateName}' to '$correctName'")
+
+                        // Update in Firestore
+                        try {
+                            db.collection("conversations")
+                                .document(conversation.id)
+                                .update("candidateName", correctName)
+                                .addOnSuccessListener {
+                                    android.util.Log.d("ConversationsActivity", "Updated conversation ${conversation.id} with correct name")
+                                }
+                                .addOnFailureListener { e ->
+                                    android.util.Log.e("ConversationsActivity", "Failed to update conversation", e)
+                                }
+                        } catch (e: Exception) {
+                            android.util.Log.e("ConversationsActivity", "Error updating conversation", e)
+                        }
+
+                        // Return a fixed copy
+                        conversation.copy(candidateName = correctName)
+                    }
+                    // Fix company names for student view
+                    else if (conversation.companyName.isBlank() ||
+                             conversation.companyName == "unknown" ||
+                             conversation.companyName == "Student") {
+
+                        // Try to get the company name from the job title if available
+                        val correctName = if (conversation.jobTitle.contains(" at ")) {
+                            val parts = conversation.jobTitle.split(" at ", limit = 2)
+                            parts[1].trim()
+                        } else {
+                            "Company"
+                        }
+
+                        android.util.Log.d("ConversationsActivity", "Fixing conversation ${conversation.id}: changing companyName from '${conversation.companyName}' to '$correctName'")
+
+                        // Update in Firestore
+                        try {
+                            db.collection("conversations")
+                                .document(conversation.id)
+                                .update("companyName", correctName)
+                                .addOnSuccessListener {
+                                    android.util.Log.d("ConversationsActivity", "Updated conversation ${conversation.id} with correct company name")
+                                }
+                                .addOnFailureListener { e ->
+                                    android.util.Log.e("ConversationsActivity", "Failed to update conversation company name", e)
+                                }
+                        } catch (e: Exception) {
+                            android.util.Log.e("ConversationsActivity", "Error updating conversation company name", e)
+                        }
+
+                        // Return a fixed copy
+                        conversation.copy(companyName = correctName)
+                    } else {
+                        conversation
+                    }
+                }
+
+                // Update UI with fixed conversations
+                if (fixedConversations.isNotEmpty()) {
+                    conversationAdapter.submitList(fixedConversations)
                     emptyView.visibility = View.GONE
+                    // Reset empty view text in case it was changed by search
+                    emptyView.text = "No conversations yet"
                 } else {
                     // If we have no conversations, show empty state
                     conversationAdapter.submitList(emptyList())
@@ -365,6 +520,9 @@ class ConversationsActivity : AppCompatActivity() {
         super.onResume()
         // Start auto-refresh when activity is resumed
         refreshHandler.postDelayed(refreshRunnable, refreshInterval)
+
+        // Force an immediate refresh to ensure we have the latest data
+        loadConversations()
     }
 
     override fun onPause() {

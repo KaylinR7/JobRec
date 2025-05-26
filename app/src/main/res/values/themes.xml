@@ -26,6 +26,8 @@
         <!-- Card colors -->
         <item name="cardBackgroundColor">@color/surface</item>
         <item name="cardForegroundColor">@color/on_surface</item>
+        <!-- Outline color -->
+        <item name="colorOutline">@color/colorOutline</item>
         <!-- Overflow menu icon color -->
         <item name="actionOverflowButtonStyle">@style/OverflowButtonStyle</item>
     </style>
@@ -40,7 +42,7 @@
 
     <!-- Button Styles -->
     <style name="Widget.CareerWorx.Button" parent="Widget.MaterialComponents.Button">
-        <item name="backgroundTint">@color/button_primary</item>
+        <item name="backgroundTint">@color/primary</item>
         <item name="android:textColor">@color/white</item>
         <item name="cornerRadius">8dp</item>
         <item name="android:paddingTop">12dp</item>

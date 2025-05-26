@@ -15,7 +15,7 @@
             android:background="?attr/colorPrimary"
             app:navigationIcon="@drawable/ic_back"
             app:title="Job Details"
-            app:titleTextColor="@android:color/white" />
+            app:titleTextColor="?attr/colorOnPrimary" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -214,4 +214,4 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout> 
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

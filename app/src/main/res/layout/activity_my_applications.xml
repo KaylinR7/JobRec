@@ -44,9 +44,9 @@
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        app:itemIconTint="@color/primary"
-        app:itemTextColor="@color/primary"
+        android:background="?android:colorBackground"
+        app:itemIconTint="@color/student_bottom_nav_item_color"
+        app:itemTextColor="@color/student_bottom_nav_item_color"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/application_status_menu"
         app:layout_constraintBottom_toBottomOf="parent" />

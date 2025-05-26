@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="No applications yet"
-                android:textColor="@color/black"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="16sp"
                 android:visibility="gone"/>
 
@@ -57,7 +57,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@color/white"
-        app:menu="@menu/menu_application_status"/>
+        android:background="?attr/colorSurface"
+        app:menu="@menu/menu_application_status"
+        app:itemIconTint="@color/company_bottom_nav_item_color"
+        app:itemTextColor="@color/company_bottom_nav_item_color"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

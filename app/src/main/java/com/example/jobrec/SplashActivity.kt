@@ -61,11 +61,19 @@ class SplashActivity : AppCompatActivity() {
         // Check for saved user type in SharedPreferences
         val savedUserType = sharedPreferences.getString("user_type", null)
         val savedUserId = sharedPreferences.getString("user_id", null)
+        val overrideToStudent = sharedPreferences.getBoolean("override_to_student", false)
 
-        Log.d(TAG, "Saved user type: $savedUserType, Saved user ID: $savedUserId")
+        Log.d(TAG, "Saved user type: $savedUserType, Saved user ID: $savedUserId, Override to student: $overrideToStudent")
 
         if (currentUser != null) {
             Log.d(TAG, "User is logged in, checking user type")
+
+            // Check if we need to override to student view
+            if (overrideToStudent) {
+                Log.d(TAG, "Overriding to student view")
+                navigateToStudentView()
+                return
+            }
 
             // If we have a saved user type, use it for faster startup
             if (savedUserType != null && savedUserId != null) {

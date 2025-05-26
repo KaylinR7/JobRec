@@ -9,6 +9,7 @@ data class Conversation(
     val jobTitle: String = "",
     val candidateId: String = "",
     val candidateName: String = "",
+    val candidateInfo: String? = null, // Additional candidate profile information
     val companyId: String = "",
     val companyName: String = "",
     val lastMessage: String = "",

@@ -152,8 +152,7 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
         // Setup RecyclerViews
         setupRecyclerViews()
 
-        // Add chatbot button
-        ChatbotHelper.addChatbotButton(this)
+        // Chatbot now in bottom navigation
     }
 
     private fun setupRecyclerViews() {
@@ -219,22 +218,7 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
                 startActivity(Intent(this, ConversationsActivity::class.java))
                 true
             }
-            R.id.action_chatbot -> {
-                startActivity(Intent(this, com.example.jobrec.chatbot.ChatbotActivity::class.java))
-                true
-            }
-            R.id.action_switch_to_student -> {
-                // Enable student view override
-                val sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
-                sharedPreferences.edit().putBoolean("override_to_student", true).apply()
 
-                // Restart the app to apply the change
-                val intent = Intent(this, SplashActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finish()
-                true
-            }
             R.id.action_logout -> {
                 // Clear all user session data when logging out
                 val sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
@@ -279,6 +263,11 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
                 R.id.nav_profile -> {
                     val intent = Intent(this, CompanyProfileActivity::class.java)
                     intent.putExtra("companyId", companyId)
+                    startActivity(intent)
+                    true
+                }
+                R.id.nav_ai_assistant -> {
+                    val intent = Intent(this, com.example.jobrec.chatbot.ChatbotActivity::class.java)
                     startActivity(intent)
                     true
                 }
@@ -353,13 +342,6 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
 
                     // Apply animations
                     applyAnimations()
-
-                    // Show a success message
-                    Toast.makeText(
-                        this@CompanyDashboardActivityNew,
-                        "Dashboard updated",
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
             } catch (e: Exception) {
                 Log.e("CompanyDashboard", "Error loading dashboard data", e)
@@ -436,13 +418,27 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
                     // Get candidate name if not already set
                     var candidateName = application.candidateName ?: ""
                     if (candidateName.isBlank()) {
-                        val candidateDoc = db.collection("users")
-                            .document(application.candidateId)
-                            .get()
-                            .await()
+                        try {
+                            // Check if candidateId is valid before using it
+                            if (application.candidateId.isNotBlank() && application.candidateId != "users") {
+                                val candidateDoc = db.collection("users")
+                                    .document(application.candidateId)
+                                    .get()
+                                    .await()
 
-                        if (candidateDoc.exists()) {
-                            candidateName = candidateDoc.getString("name") ?: "Unknown Candidate"
+                                if (candidateDoc.exists()) {
+                                    candidateName = candidateDoc.getString("name") ?: "Unknown Candidate"
+                                    application.candidateName = candidateName
+                                }
+                            } else {
+                                // Log the invalid candidateId for debugging
+                                Log.e("CompanyDashboard", "Error processing application document (Invalid candidateId): '${application.candidateId}'")
+                                candidateName = "Unknown Candidate"
+                                application.candidateName = candidateName
+                            }
+                        } catch (e: Exception) {
+                            Log.e("CompanyDashboard", "Error processing application document (Ask Gemini)", e)
+                            candidateName = "Unknown Candidate"
                             application.candidateName = candidateName
                         }
                     }
@@ -649,17 +645,25 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
                                 val userId = application.candidateId.takeIf { it.isNotEmpty() }
                                     ?: doc.getString("userId") // Try to get userId as fallback
 
-                                if (!userId.isNullOrEmpty()) {
-                                    val candidateDoc = db.collection("users")
-                                        .document(userId)
-                                        .get()
-                                        .await()
+                                if (!userId.isNullOrEmpty() && userId != "users") {
+                                    try {
+                                        val candidateDoc = db.collection("users")
+                                            .document(userId)
+                                            .get()
+                                            .await()
 
-                                    if (candidateDoc.exists()) {
-                                        val candidateName = candidateDoc.getString("name") ?: "Unknown Candidate"
-                                        application.candidateName = candidateName
-                                        Log.d("CompanyDashboard", "Got name from users collection: ${application.candidateName}")
+                                        if (candidateDoc.exists()) {
+                                            val candidateName = candidateDoc.getString("name") ?: "Unknown Candidate"
+                                            application.candidateName = candidateName
+                                            Log.d("CompanyDashboard", "Got name from users collection: ${application.candidateName}")
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("CompanyDashboard", "Error getting user document for userId: $userId", e)
+                                        application.candidateName = "Unknown Candidate"
                                     }
+                                } else {
+                                    Log.e("CompanyDashboard", "Invalid userId: '$userId'")
+                                    application.candidateName = "Unknown Candidate"
                                 }
                             }
                         } catch (e: Exception) {
@@ -746,14 +750,6 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
                         startActivity(intent)
                     }
 
-                    // Show a toast message indicating there are more applications
-                    if (sortedApplications.size > 3) {
-                        Toast.makeText(
-                            this@CompanyDashboardActivityNew,
-                            "Showing 3 most recent applications. Tap 'Applications' to view all.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
                 } else {
                     recentApplicationsRecyclerView.visibility = View.GONE
                     emptyApplicationsView.visibility = View.VISIBLE

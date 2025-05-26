@@ -14,17 +14,9 @@
         android:icon="@android:drawable/ic_dialog_email"
         app:showAsAction="never"/>
 
-    <item
-        android:id="@+id/action_switch_to_student"
-        android:title="Switch to Student View"
-        android:icon="@android:drawable/ic_menu_view"
-        app:showAsAction="never"/>
 
-    <item
-        android:id="@+id/action_chatbot"
-        android:title="Get Help"
-        android:icon="@drawable/ic_chatbot"
-        app:showAsAction="never"/>
+
+
 
     <item
         android:id="@+id/action_logout"

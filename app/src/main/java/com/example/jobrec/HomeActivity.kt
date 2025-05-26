@@ -198,27 +198,8 @@ class HomeActivity : AppCompatActivity() {
         // Check if this is a default student view (company user viewing as student)
         val isDefaultStudent = intent.getBooleanExtra("isDefaultStudent", false)
 
-        if (isDefaultStudent) {
-            Log.d(TAG, "Using default student view")
-            binding.welcomeText.text = "Welcome to Student View!"
-
-            // Add a button to return to company view
-            binding.returnToCompanyView.visibility = View.VISIBLE
-            binding.returnToCompanyView.setOnClickListener {
-                // Disable student view override
-                val sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
-                sharedPreferences.edit().putBoolean("override_to_student", false).apply()
-
-                // Restart the app to apply the change
-                val intent = Intent(this, SplashActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finish()
-            }
-            return
-        } else {
-            binding.returnToCompanyView.visibility = View.GONE
-        }
+        // Always hide the return to company view button
+        binding.returnToCompanyView.visibility = View.GONE
 
         val userId = intent.getStringExtra("userId") ?: FirebaseAuth.getInstance().currentUser?.uid
         Log.d(TAG, "Loading user data for userId: $userId")

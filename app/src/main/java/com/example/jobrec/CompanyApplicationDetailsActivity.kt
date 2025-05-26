@@ -26,6 +26,7 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
     private lateinit var rejectButton: Button
     private lateinit var viewResumeButton: Button
     private lateinit var chatButton: Button
+    private lateinit var reviewCvButton: Button
     private var applicationId: String? = null
     private var resumeUrl: String? = null
     private var applicantId: String? = null
@@ -65,6 +66,7 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
         rejectButton = findViewById(R.id.rejectButton)
         viewResumeButton = findViewById(R.id.viewResumeButton)
         chatButton = findViewById(R.id.chatButton)
+        reviewCvButton = findViewById(R.id.reviewCvButton)
 
         // Initialize Firestore
         db = FirebaseFirestore.getInstance()
@@ -82,19 +84,63 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
         }
 
         viewResumeButton.setOnClickListener {
+            android.util.Log.d("CompanyApplicationDetails", "View resume button clicked. " +
+                    "applicantId=$applicantId, resumeUrl=$resumeUrl")
+
             // If we have the applicant ID, show the full profile directly
             if (!applicantId.isNullOrEmpty()) {
+                android.util.Log.d("CompanyApplicationDetails", "Showing applicant profile")
                 showApplicantProfile(applicantId!!)
             } else if (!resumeUrl.isNullOrEmpty()) {
-                if (resumeUrl!!.startsWith("http")) {
-                    // If it's a direct URL (PDF from storage)
-                    openResume(resumeUrl!!)
-                } else {
-                    // If it's a Firestore document ID (CV content)
-                    loadCvContent(resumeUrl!!)
+                android.util.Log.d("CompanyApplicationDetails", "Resume URL found: $resumeUrl")
+                try {
+                    if (resumeUrl!!.startsWith("http")) {
+                        // If it's a direct URL (PDF from storage)
+                        android.util.Log.d("CompanyApplicationDetails", "Opening resume as URL")
+                        openResume(resumeUrl!!)
+                    } else {
+                        // If it's a Firestore document ID (CV content)
+                        android.util.Log.d("CompanyApplicationDetails", "Loading CV content from Firestore")
+                        loadCvContent(resumeUrl!!)
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("CompanyApplicationDetails", "Error processing resume URL: ${e.message}", e)
+                    Toast.makeText(this, "Error loading resume: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             } else {
+                android.util.Log.d("CompanyApplicationDetails", "No resume available")
                 Toast.makeText(this, "No resume available", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        reviewCvButton.setOnClickListener {
+            android.util.Log.d("CompanyApplicationDetails", "Review CV button clicked. " +
+                    "applicantId=$applicantId, resumeUrl=$resumeUrl")
+
+            // First update the application status to "reviewed"
+            updateApplicationStatus("reviewed")
+
+            // Then show the applicant profile for review
+            if (!applicantId.isNullOrEmpty()) {
+                android.util.Log.d("CompanyApplicationDetails", "Showing applicant profile for review")
+                showApplicantProfile(applicantId!!)
+            } else if (!resumeUrl.isNullOrEmpty()) {
+                android.util.Log.d("CompanyApplicationDetails", "Resume URL found for review: $resumeUrl")
+                try {
+                    if (resumeUrl!!.startsWith("http")) {
+                        android.util.Log.d("CompanyApplicationDetails", "Opening resume as URL for review")
+                        openResume(resumeUrl!!)
+                    } else {
+                        android.util.Log.d("CompanyApplicationDetails", "Loading CV content from Firestore for review")
+                        loadCvContent(resumeUrl!!)
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("CompanyApplicationDetails", "Error processing resume URL for review: ${e.message}", e)
+                    Toast.makeText(this, "Error loading resume for review: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                android.util.Log.d("CompanyApplicationDetails", "No CV available to review")
+                Toast.makeText(this, "No CV available to review", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -118,6 +164,15 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
             return
         }
 
+        // Check if cvId is a URL
+        if (cvId.startsWith("http")) {
+            openResume(cvId)
+            return
+        }
+
+        // Log the CV ID for debugging
+        android.util.Log.d("CompanyApplicationDetails", "Loading CV with ID: $cvId")
+
         // Fallback to old CV content if no applicant ID
         db.collection("cvs")
             .document(cvId)
@@ -128,14 +183,32 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                     if (!cvContent.isNullOrEmpty()) {
                         showCvContent(cvContent)
                     } else {
+                        android.util.Log.e("CompanyApplicationDetails", "CV document exists but has no content")
                         Toast.makeText(this, "No resume content available", Toast.LENGTH_SHORT).show()
+
+                        // Try to find the user profile as a last resort
+                        if (!applicantId.isNullOrEmpty()) {
+                            showApplicantProfile(applicantId!!)
+                        }
                     }
                 } else {
+                    android.util.Log.e("CompanyApplicationDetails", "CV document does not exist: $cvId")
                     Toast.makeText(this, "Resume not found", Toast.LENGTH_SHORT).show()
+
+                    // Try to find the user profile as a last resort
+                    if (!applicantId.isNullOrEmpty()) {
+                        showApplicantProfile(applicantId!!)
+                    }
                 }
             }
             .addOnFailureListener { e ->
+                android.util.Log.e("CompanyApplicationDetails", "Error loading CV: ${e.message}", e)
                 Toast.makeText(this, "Error loading resume: ${e.message}", Toast.LENGTH_SHORT).show()
+
+                // Try to find the user profile as a last resort
+                if (!applicantId.isNullOrEmpty()) {
+                    showApplicantProfile(applicantId!!)
+                }
             }
     }
 
@@ -328,24 +401,57 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
     private fun openResume(url: String) {
         // If we have the applicant ID, show the full profile instead
         if (!applicantId.isNullOrEmpty()) {
+            android.util.Log.d("CompanyApplicationDetails", "Using applicant profile instead of resume URL")
             showApplicantProfile(applicantId!!)
+            return
+        }
+
+        android.util.Log.d("CompanyApplicationDetails", "Opening resume URL: $url")
+
+        // Validate the URL
+        if (!url.startsWith("http")) {
+            android.util.Log.e("CompanyApplicationDetails", "Invalid resume URL format: $url")
+            Toast.makeText(this, "Invalid resume URL format", Toast.LENGTH_SHORT).show()
             return
         }
 
         // Fallback to PDF viewer if no applicant ID
         try {
+            val uri = Uri.parse(url)
+            android.util.Log.d("CompanyApplicationDetails", "Opening PDF with URI: $uri")
+
             val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(Uri.parse(url), "application/pdf")
+                setDataAndType(uri, "application/pdf")
                 flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            startActivity(intent)
+
+            // Check if there's an app that can handle this intent
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
+            } else {
+                android.util.Log.e("CompanyApplicationDetails", "No PDF viewer app found")
+                Toast.makeText(this, "No PDF viewer app found. Please install a PDF viewer.", Toast.LENGTH_LONG).show()
+            }
         } catch (e: Exception) {
-            Toast.makeText(this, "No PDF viewer app found. Please install a PDF viewer.", Toast.LENGTH_LONG).show()
+            android.util.Log.e("CompanyApplicationDetails", "Error opening PDF: ${e.message}", e)
+            Toast.makeText(this, "Error opening PDF: ${e.message}", Toast.LENGTH_LONG).show()
+
+            // Try to open in browser as fallback
+            try {
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(browserIntent)
+            } catch (e2: Exception) {
+                android.util.Log.e("CompanyApplicationDetails", "Error opening in browser: ${e2.message}", e2)
+                Toast.makeText(this, "Could not open the resume. Please check if the URL is valid.", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
     private fun loadApplicationDetails() {
         applicationId?.let { id ->
+            android.util.Log.d("CompanyApplicationDetails", "Loading application with ID: $id")
+
             db.collection("applications").document(id)
                 .get()
                 .addOnSuccessListener { document ->
@@ -371,6 +477,11 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                         companyId = document.getString("companyId")
                         companyName = document.getString("companyName")
 
+                        // Log the values for debugging
+                        android.util.Log.d("CompanyApplicationDetails", "Application data: " +
+                                "resumeUrl=$resumeUrl, applicantId=$applicantId, " +
+                                "jobId=$jobId, companyId=$companyId")
+
                         // Format the date
                         val timestamp = document.getTimestamp("timestamp")?.toDate()
                         val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
@@ -384,13 +495,29 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                         // Always show chat button to allow messaging before accepting applications
                         chatButton.visibility = android.view.View.VISIBLE
 
-                        // Always enable the view resume button
-                        viewResumeButton.isEnabled = true
+                        // Enable the view resume button only if we have a resume URL or applicant ID
+                        viewResumeButton.isEnabled = !resumeUrl.isNullOrEmpty() || !applicantId.isNullOrEmpty()
+
+                        // If we don't have a resume URL but we have an applicant ID, try to generate a CV from the profile
+                        if (resumeUrl.isNullOrEmpty() && !applicantId.isNullOrEmpty()) {
+                            android.util.Log.d("CompanyApplicationDetails", "No resume URL, will use profile data")
+                            // The view resume button will show the profile when clicked
+                        }
+                    } else {
+                        android.util.Log.e("CompanyApplicationDetails", "Application document does not exist: $id")
+                        Toast.makeText(this, "Application not found", Toast.LENGTH_SHORT).show()
+                        finish()
                     }
                 }
                 .addOnFailureListener { e ->
+                    android.util.Log.e("CompanyApplicationDetails", "Error loading application: ${e.message}", e)
                     Toast.makeText(this, "Error loading application: ${e.message}", Toast.LENGTH_SHORT).show()
+                    finish()
                 }
+        } ?: run {
+            android.util.Log.e("CompanyApplicationDetails", "No application ID provided")
+            Toast.makeText(this, "No application ID provided", Toast.LENGTH_SHORT).show()
+            finish()
         }
     }
 

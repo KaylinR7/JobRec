@@ -10,7 +10,7 @@
         <item name="textAllCaps">false</item>
         <item name="android:textStyle">bold</item>
     </style>
-    
+
     <!-- Button Styles for JobRec (aliases to CareerWorx styles) -->
     <style name="Widget.JobRec.Button" parent="Widget.CareerWorx.Button">
         <!-- This style inherits all attributes from Widget.CareerWorx.Button -->
@@ -18,5 +18,16 @@
 
     <style name="Widget.JobRec.Button.Outlined" parent="Widget.CareerWorx.Button.Outlined">
         <!-- This style inherits all attributes from Widget.CareerWorx.Button.Outlined -->
+    </style>
+
+    <!-- TextInput Styles -->
+    <style name="Widget.CareerWorx.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">?attr/colorPrimary</item>
+        <item name="hintTextColor">?attr/colorPrimary</item>
+    </style>
+
+    <style name="Widget.CareerWorx.TextInputEditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColorHint">?android:attr/textColorSecondary</item>
     </style>
 </resources>

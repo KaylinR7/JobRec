@@ -122,7 +122,9 @@ class ChatActivity : AppCompatActivity() {
             onMeetingAccept = { message ->
                 lifecycleScope.launch {
                     try {
-                        conversationRepository.updateMeetingStatus(message.id, "accepted")
+                        // Call the updateMeetingStatus method from the repository
+                        val repo = ConversationRepository()
+                        repo.updateMeetingStatus(message.id, "accepted")
                         Toast.makeText(this@ChatActivity, "Meeting accepted", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         Toast.makeText(this@ChatActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -132,7 +134,9 @@ class ChatActivity : AppCompatActivity() {
             onMeetingDecline = { message ->
                 lifecycleScope.launch {
                     try {
-                        conversationRepository.updateMeetingStatus(message.id, "rejected")
+                        // Call the updateMeetingStatus method from the repository
+                        val repo = ConversationRepository()
+                        repo.updateMeetingStatus(message.id, "rejected")
                         Toast.makeText(this@ChatActivity, "Meeting declined", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         Toast.makeText(this@ChatActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -219,6 +223,51 @@ class ChatActivity : AppCompatActivity() {
                                 }
                             }
 
+                            // Get candidate info for better display in company view
+                            var candidateInfo = ""
+                            try {
+                                val userDoc = db.collection("users")
+                                    .document(candidateId)
+                                    .get()
+                                    .await()
+
+                                if (userDoc.exists()) {
+                                    // Extract relevant candidate information
+                                    val skills = userDoc.get("skills") as? List<String>
+                                    val education = userDoc.get("education") as? List<Map<String, Any>>
+                                    val province = userDoc.getString("province")
+
+                                    val infoBuilder = StringBuilder()
+
+                                    // Add location if available
+                                    if (!province.isNullOrBlank()) {
+                                        infoBuilder.append(province)
+                                    }
+
+                                    // Add education info
+                                    val highestEducation = education?.maxByOrNull {
+                                        (it["degree"] as? String)?.length ?: 0
+                                    }
+                                    highestEducation?.let {
+                                        val degree = it["degree"] as? String
+                                        if (!degree.isNullOrBlank()) {
+                                            if (infoBuilder.isNotEmpty()) infoBuilder.append(" • ")
+                                            infoBuilder.append(degree)
+                                        }
+                                    }
+
+                                    // Add skills
+                                    if (!skills.isNullOrEmpty() && skills.isNotEmpty()) {
+                                        if (infoBuilder.isNotEmpty()) infoBuilder.append(" • ")
+                                        infoBuilder.append("Skills: ${skills.take(3).joinToString(", ")}")
+                                    }
+
+                                    candidateInfo = infoBuilder.toString()
+                                }
+                            } catch (e: Exception) {
+                                Log.e("ChatActivity", "Error getting candidate info", e)
+                            }
+
                             // Create the conversation
                             conversationId = conversationRepository.createConversation(
                                 applicationId = applicationId!!,
@@ -227,7 +276,8 @@ class ChatActivity : AppCompatActivity() {
                                 candidateId = candidateId,
                                 candidateName = candidateName,
                                 companyId = companyUserId,
-                                companyName = companyName
+                                companyName = companyName,
+                                candidateInfo = candidateInfo
                             )
 
                             // Load the newly created conversation
@@ -244,7 +294,8 @@ class ChatActivity : AppCompatActivity() {
                     startMessagesListener()
 
                     // Mark conversation as read
-                    conversationRepository.markConversationAsRead(conversationId!!)
+                    val repo = ConversationRepository()
+                    repo.markConversationAsRead(conversationId!!)
                 } else {
                     Toast.makeText(this@ChatActivity, "Error: Conversation not found", Toast.LENGTH_SHORT).show()
                     finish()
@@ -265,11 +316,63 @@ class ChatActivity : AppCompatActivity() {
             if (isCompanyUser) {
                 // Company viewing candidate
                 receiverId = conversation.candidateId
-                // Set toolbar title to candidate name, use default if empty
-                val candidateName = if (conversation.candidateName.isNullOrEmpty()) "Candidate" else conversation.candidateName
+
+                // Set toolbar title to candidate name, use default if empty or contains invalid values
+                val candidateName = when {
+                    conversation.candidateName.isNullOrEmpty() -> "Student"
+                    conversation.candidateName == "!!!!!" -> "Student"
+                    conversation.candidateName == "Company" -> "Student"
+                    else -> conversation.candidateName
+                }
                 supportActionBar?.title = candidateName
+
                 // Log the title being set
                 Log.d("ChatActivity", "Setting title to candidate name: $candidateName")
+
+                // If the name is invalid, try to update it in the database
+                if (conversation.candidateName.isNullOrEmpty() ||
+                    conversation.candidateName == "!!!!!" ||
+                    conversation.candidateName == "Company") {
+
+                    // Launch a coroutine to update the name in the background
+                    lifecycleScope.launch {
+                        try {
+                            // Try to get the user document to get the correct name
+                            val userDoc = db.collection("users")
+                                .document(conversation.candidateId)
+                                .get()
+                                .await()
+
+                            if (userDoc.exists()) {
+                                val name = userDoc.getString("name") ?: ""
+                                val surname = userDoc.getString("surname") ?: ""
+
+                                val fullName = when {
+                                    name.isNotEmpty() && surname.isNotEmpty() -> "$name $surname"
+                                    name.isNotEmpty() -> name
+                                    surname.isNotEmpty() -> surname
+                                    else -> "Student" // Default fallback
+                                }
+
+                                if (fullName.isNotEmpty() && fullName != "Student") {
+                                    // Update the conversation document
+                                    db.collection("conversations")
+                                        .document(conversationId!!)
+                                        .update("candidateName", fullName)
+                                        .await()
+
+                                    // Update the UI
+                                    runOnUiThread {
+                                        supportActionBar?.title = fullName
+                                        Log.d("ChatActivity", "Updated candidate name to: $fullName")
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("ChatActivity", "Error updating candidate name", e)
+                        }
+                    }
+                }
             } else {
                 // Candidate viewing company
                 receiverId = conversation.companyId
@@ -400,7 +503,6 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun startMessagesListener() {
-        // Stop any existing listener
         messagesListener?.remove()
 
         // Start new listener
@@ -423,7 +525,8 @@ class ChatActivity : AppCompatActivity() {
                     // Mark messages as read
                     lifecycleScope.launch {
                         try {
-                            conversationRepository.markConversationAsRead(conversationId!!)
+                            val repo = ConversationRepository()
+                            repo.markConversationAsRead(conversationId!!)
                         } catch (e: Exception) {
                             // Ignore errors here
                         }
@@ -438,7 +541,8 @@ class ChatActivity : AppCompatActivity() {
     private fun sendMessage(content: String) {
         lifecycleScope.launch {
             try {
-                conversationRepository.sendMessage(conversationId!!, content, receiverId)
+                val repo = ConversationRepository()
+                repo.sendMessage(conversationId!!, content, receiverId)
                 messageInput.text?.clear()
             } catch (e: Exception) {
                 Toast.makeText(this@ChatActivity, "Error sending message: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -561,7 +665,8 @@ class ChatActivity : AppCompatActivity() {
             // Send meeting invitation
             lifecycleScope.launch {
                 try {
-                    conversationRepository.sendMeetingInvite(
+                    val repo = ConversationRepository()
+                    repo.sendMeetingInvite(
                         conversationId = conversationId!!,
                         receiverId = receiverId,
                         date = Timestamp(selectedDate),

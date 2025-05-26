@@ -106,32 +106,124 @@ class EditJobActivity : AppCompatActivity() {
         val type = typeInput.text.toString().trim()
         val salary = salaryInput.text.toString().trim()
 
-        if (title.isEmpty() || description.isEmpty() || requirements.isEmpty() || 
+        if (title.isEmpty() || description.isEmpty() || requirements.isEmpty() ||
             location.isEmpty() || type.isEmpty() || salary.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val jobData = mapOf(
-            "title" to title,
-            "description" to description,
-            "requirements" to requirements,
-            "location" to location,
-            "type" to type,
-            "salary" to salary,
-            "companyId" to companyId,
-            "status" to "active"
-        )
-
+        // First get the current job data to preserve fields we're not updating
         db.collection("jobs")
             .document(jobId)
-            .update(jobData)
-            .addOnSuccessListener {
-                Toast.makeText(this, "Job updated successfully", Toast.LENGTH_SHORT).show()
-                finish()
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    // Get existing job data
+                    val existingJob = document.toObject(Job::class.java)
+
+                    // Create updated job object with all fields
+                    val updatedJob = existingJob?.copy(
+                        title = title,
+                        description = description,
+                        requirements = requirements,
+                        location = location,
+                        type = type,
+                        salary = salary,
+                        companyId = companyId,
+                        updatedDate = com.google.firebase.Timestamp.now(),
+                        status = "active"
+                    ) ?: Job(
+                        id = jobId,
+                        title = title,
+                        description = description,
+                        requirements = requirements,
+                        location = location,
+                        type = type,
+                        salary = salary,
+                        companyId = companyId,
+                        status = "active"
+                    )
+
+                    // Convert to map for Firestore (excluding id field which is handled separately)
+                    val jobData = mapOf(
+                        "title" to updatedJob.title,
+                        "description" to updatedJob.description,
+                        "requirements" to updatedJob.requirements,
+                        "location" to updatedJob.location,
+                        "type" to updatedJob.type,
+                        "salary" to updatedJob.salary,
+                        "companyId" to updatedJob.companyId,
+                        "companyName" to (existingJob?.companyName ?: ""),
+                        "jobType" to (existingJob?.jobType ?: updatedJob.type),
+                        "updatedDate" to updatedJob.updatedDate,
+                        "postedDate" to (existingJob?.postedDate ?: updatedJob.postedDate),
+                        "status" to updatedJob.status,
+                        "jobField" to (existingJob?.jobField ?: ""),
+                        "specialization" to (existingJob?.specialization ?: ""),
+                        "province" to (existingJob?.province ?: ""),
+                        "experienceLevel" to (existingJob?.experienceLevel ?: "")
+                    )
+
+                    // Use set with merge option to update the document
+                    db.collection("jobs")
+                        .document(jobId)
+                        .set(jobData)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Job updated successfully", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Error updating job: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    // If document doesn't exist, create a new one
+                    val newJob = Job(
+                        id = jobId,
+                        title = title,
+                        description = description,
+                        requirements = requirements,
+                        location = location,
+                        type = type,
+                        salary = salary,
+                        companyId = companyId,
+                        status = "active"
+                    )
+
+                    // Convert to map for Firestore
+                    val jobData = mapOf(
+                        "title" to newJob.title,
+                        "description" to newJob.description,
+                        "requirements" to newJob.requirements,
+                        "location" to newJob.location,
+                        "type" to newJob.type,
+                        "salary" to newJob.salary,
+                        "companyId" to newJob.companyId,
+                        "companyName" to newJob.companyName,
+                        "jobType" to newJob.jobType,
+                        "updatedDate" to newJob.updatedDate,
+                        "postedDate" to newJob.postedDate,
+                        "status" to newJob.status,
+                        "jobField" to newJob.jobField,
+                        "specialization" to newJob.specialization,
+                        "province" to newJob.province,
+                        "experienceLevel" to newJob.experienceLevel
+                    )
+
+                    // Create a new document
+                    db.collection("jobs")
+                        .document(jobId)
+                        .set(jobData)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Job created successfully", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Error creating job: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error updating job: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Error retrieving job data: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-} 
+}

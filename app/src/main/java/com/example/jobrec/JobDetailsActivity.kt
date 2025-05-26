@@ -176,6 +176,8 @@ class JobDetailsActivity : AppCompatActivity() {
         val userId = auth.currentUser?.uid ?: return
         val userEmail = auth.currentUser?.email ?: return
 
+        Log.d("JobDetailsActivity", "Creating CV from profile for user: $userEmail (ID: $userId)")
+
         // Simplified query
         db.collection("users")
             .whereEqualTo("email", userEmail)
@@ -183,52 +185,78 @@ class JobDetailsActivity : AppCompatActivity() {
             .addOnSuccessListener { documents ->
                 if (!documents.isEmpty) {
                     val userDoc = documents.documents[0]
-                    val user = userDoc.toObject(User::class.java)
-                    user?.let {
-                        // Create a CV-like document from the user's profile
-                        val cvContent = buildString {
-                            append("${it.name} ${it.surname}\n")
-                            append("${it.email}\n")
-                            append("${it.phoneNumber}\n")
-                            append("${it.address}\n\n")
+                    try {
+                        val user = userDoc.toObject(User::class.java)
+                        if (user != null) {
+                            Log.d("JobDetailsActivity", "Successfully retrieved user profile for CV creation")
 
-                            append("SUMMARY\n")
-                            append("${it.summary}\n\n")
+                            // Create a CV-like document from the user's profile
+                            val cvContent = buildString {
+                                append("${user.name} ${user.surname}\n")
+                                append("${user.email}\n")
+                                append("${user.phoneNumber}\n")
+                                append("${user.address}\n\n")
 
-                            append("SKILLS\n")
-                            append(it.skills.joinToString(", ").plus("\n\n"))
+                                append("SUMMARY\n")
+                                append("${user.summary}\n\n")
 
-                            append("EDUCATION\n")
-                            it.education.forEach { education ->
-                                append("${education.institution} - ${education.degree}\n")
-                                append("${education.startDate} to ${education.endDate}\n\n")
+                                append("SKILLS\n")
+                                append(user.skills.joinToString(", ").plus("\n\n"))
+
+                                append("EDUCATION\n")
+                                if (user.education.isNotEmpty()) {
+                                    user.education.forEach { education ->
+                                        append("${education.institution} - ${education.degree}\n")
+                                        append("${education.startDate} to ${education.endDate}\n\n")
+                                    }
+                                } else {
+                                    append("No education information provided\n\n")
+                                }
+
+                                append("EXPERIENCE\n")
+                                if (user.experience.isNotEmpty()) {
+                                    user.experience.forEach { experience ->
+                                        append("${experience.position} at ${experience.company}\n")
+                                        append("${experience.startDate} to ${experience.endDate}\n")
+                                        append("${experience.description}\n\n")
+                                    }
+                                } else {
+                                    append("No experience information provided\n\n")
+                                }
                             }
 
-                            append("EXPERIENCE\n")
-                            it.experience.forEach { experience ->
-                                append("${experience.position} at ${experience.company}\n")
-                                append("${experience.startDate} to ${experience.endDate}\n")
-                                append("${experience.description}\n\n")
-                            }
-                        }
+                            // Store the CV content in Firestore
+                            val cvRef = db.collection("cvs").document()
+                            Log.d("JobDetailsActivity", "Creating CV document with ID: ${cvRef.id}")
 
-                        // Store the CV content in Firestore
-                        val cvRef = db.collection("cvs").document()
-                        cvRef.set(hashMapOf(
-                            "userId" to userId,
-                            "content" to cvContent,
-                            "createdAt" to System.currentTimeMillis()
-                        )).addOnSuccessListener {
-                            currentCvUrl = cvRef.id
-                            showCoverLetterDialog()
-                        }.addOnFailureListener { e ->
-                            Log.e("JobDetailsActivity", "Error creating CV from profile", e)
-                            Toast.makeText(this, "Error creating CV from profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                            cvRef.set(hashMapOf(
+                                "userId" to userId,
+                                "content" to cvContent,
+                                "createdAt" to System.currentTimeMillis()
+                            )).addOnSuccessListener {
+                                Log.d("JobDetailsActivity", "Successfully created CV document: ${cvRef.id}")
+                                currentCvUrl = cvRef.id
+                                showCoverLetterDialog()
+                            }.addOnFailureListener { e ->
+                                Log.e("JobDetailsActivity", "Error creating CV from profile", e)
+                                Toast.makeText(this, "Error creating CV from profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                                applyButton.isEnabled = true
+                                applyButton.text = "Apply Now"
+                            }
+                        } else {
+                            Log.e("JobDetailsActivity", "User object is null after conversion")
+                            Toast.makeText(this, "Error creating profile: Invalid user data", Toast.LENGTH_SHORT).show()
                             applyButton.isEnabled = true
                             applyButton.text = "Apply Now"
                         }
+                    } catch (e: Exception) {
+                        Log.e("JobDetailsActivity", "Error converting user document to User object", e)
+                        Toast.makeText(this, "Error processing profile data: ${e.message}", Toast.LENGTH_SHORT).show()
+                        applyButton.isEnabled = true
+                        applyButton.text = "Apply Now"
                     }
                 } else {
+                    Log.e("JobDetailsActivity", "No user document found for email: $userEmail")
                     Toast.makeText(this, "Profile not found", Toast.LENGTH_SHORT).show()
                     applyButton.isEnabled = true
                     applyButton.text = "Apply Now"
@@ -252,29 +280,114 @@ class JobDetailsActivity : AppCompatActivity() {
     }
 
     private fun uploadCv(uri: Uri) {
-        val userId = auth.currentUser?.uid ?: return
-        val cvFileName = "CV_${userId}_${UUID.randomUUID()}.pdf"
-        val cvRef = storage.reference.child("cvs/$cvFileName")
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            Log.e("JobDetailsActivity", "Cannot upload CV: User ID is null")
+            Toast.makeText(this, "Error: User not authenticated", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        applyButton.isEnabled = false
-        applyButton.text = "Uploading CV..."
+        Log.d("JobDetailsActivity", "Starting CV upload for user: $userId")
 
-        cvRef.putFile(uri)
-            .addOnProgressListener { taskSnapshot ->
-                val progress = (100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount)
-                applyButton.text = "Uploading CV... ${progress.toInt()}%"
+        try {
+            // Verify the URI is valid and accessible
+            try {
+                val inputStream = contentResolver.openInputStream(uri)
+                inputStream?.close()
+            } catch (e: Exception) {
+                Log.e("JobDetailsActivity", "Cannot access file at URI: $uri", e)
+                Toast.makeText(this, "Cannot access the selected file. Please try again with a different file.", Toast.LENGTH_LONG).show()
+                return
             }
-            .addOnSuccessListener {
-                cvRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                    currentCvUrl = downloadUri.toString()
-                    showCoverLetterDialog()
+
+            // Create a unique filename with timestamp to avoid collisions
+            val timestamp = System.currentTimeMillis()
+            val cvFileName = "CV_${userId}_${timestamp}_${UUID.randomUUID()}.pdf"
+            val cvRef = storage.reference.child("cvs/$cvFileName")
+
+            applyButton.isEnabled = false
+            applyButton.text = "Uploading CV..."
+
+            // Log the URI for debugging
+            Log.d("JobDetailsActivity", "Uploading CV from URI: $uri to path: cvs/$cvFileName")
+
+            // Create metadata for the file
+            val metadata = storageMetadata {
+                contentType = "application/pdf"
+                setCustomMetadata("userId", userId)
+                setCustomMetadata("uploadTime", timestamp.toString())
+            }
+
+            // Upload the file with metadata
+            cvRef.putFile(uri, metadata)
+                .addOnProgressListener { taskSnapshot ->
+                    val progress = (100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount)
+                    Log.d("JobDetailsActivity", "Upload progress: ${progress.toInt()}%")
+                    applyButton.text = "Uploading CV... ${progress.toInt()}%"
                 }
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(this, "Error uploading CV: ${e.message}", Toast.LENGTH_SHORT).show()
-                applyButton.isEnabled = true
-                applyButton.text = "Apply Now"
-            }
+                .addOnSuccessListener {
+                    Log.d("JobDetailsActivity", "CV file uploaded successfully, getting download URL")
+
+                    // Get the download URL
+                    cvRef.downloadUrl
+                        .addOnSuccessListener { downloadUri ->
+                            Log.d("JobDetailsActivity", "Got download URL: $downloadUri")
+
+                            // Store the URL as a string
+                            currentCvUrl = downloadUri.toString()
+
+                            // Verify the URL is valid
+                            if (currentCvUrl.isNullOrEmpty() || !currentCvUrl!!.startsWith("http")) {
+                                Log.e("JobDetailsActivity", "Invalid download URL: $currentCvUrl")
+                                Toast.makeText(this, "Error: Could not get valid CV URL", Toast.LENGTH_SHORT).show()
+                                applyButton.isEnabled = true
+                                applyButton.text = "Apply Now"
+                                return@addOnSuccessListener
+                            }
+
+                            // Create a record in Firestore to track the CV
+                            val cvData = hashMapOf(
+                                "userId" to userId,
+                                "fileName" to cvFileName,
+                                "fileUrl" to currentCvUrl,
+                                "uploadTime" to com.google.firebase.Timestamp.now(),
+                                "fileType" to "application/pdf"
+                            )
+
+                            // Store CV metadata in Firestore for better tracking
+                            db.collection("cv_files")
+                                .add(cvData)
+                                .addOnSuccessListener { docRef ->
+                                    Log.d("JobDetailsActivity", "CV metadata stored in Firestore with ID: ${docRef.id}")
+                                    // Proceed to cover letter dialog
+                                    showCoverLetterDialog()
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e("JobDetailsActivity", "Failed to store CV metadata in Firestore", e)
+                                    // Still proceed to cover letter dialog even if metadata storage fails
+                                    // The CV is already uploaded to Storage
+                                    showCoverLetterDialog()
+                                }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("JobDetailsActivity", "Failed to get download URL", e)
+                            Toast.makeText(this, "Error getting CV download link: ${e.message}", Toast.LENGTH_SHORT).show()
+                            applyButton.isEnabled = true
+                            applyButton.text = "Apply Now"
+                        }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("JobDetailsActivity", "Failed to upload CV file", e)
+                    Toast.makeText(this, "Error uploading CV: ${e.message}", Toast.LENGTH_SHORT).show()
+                    applyButton.isEnabled = true
+                    applyButton.text = "Apply Now"
+                }
+        } catch (e: Exception) {
+            Log.e("JobDetailsActivity", "Exception during CV upload setup", e)
+            Toast.makeText(this, "Error preparing CV upload: ${e.message}", Toast.LENGTH_SHORT).show()
+            applyButton.isEnabled = true
+            applyButton.text = "Apply Now"
+        }
     }
 
     private fun showCoverLetterDialog() {
@@ -299,10 +412,43 @@ class JobDetailsActivity : AppCompatActivity() {
     }
 
     private fun submitApplication(coverLetter: String) {
-        val userId = auth.currentUser?.uid ?: return
-        val jobId = jobId ?: return
-        val companyId = companyId ?: return
-        val cvUrl = currentCvUrl ?: return
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            Log.e("JobDetailsActivity", "Cannot submit application: User ID is null")
+            Toast.makeText(this, "Error: User not authenticated", Toast.LENGTH_SHORT).show()
+            applyButton.isEnabled = true
+            applyButton.text = "Apply Now"
+            return
+        }
+
+        val jobId = jobId
+        if (jobId == null) {
+            Log.e("JobDetailsActivity", "Cannot submit application: Job ID is null")
+            Toast.makeText(this, "Error: Job information missing", Toast.LENGTH_SHORT).show()
+            applyButton.isEnabled = true
+            applyButton.text = "Apply Now"
+            return
+        }
+
+        val companyId = companyId
+        if (companyId == null) {
+            Log.e("JobDetailsActivity", "Cannot submit application: Company ID is null")
+            Toast.makeText(this, "Error: Company information missing", Toast.LENGTH_SHORT).show()
+            applyButton.isEnabled = true
+            applyButton.text = "Apply Now"
+            return
+        }
+
+        val cvUrl = currentCvUrl
+        if (cvUrl == null) {
+            Log.e("JobDetailsActivity", "Cannot submit application: CV URL is null")
+            Toast.makeText(this, "Error: Resume information missing", Toast.LENGTH_SHORT).show()
+            applyButton.isEnabled = true
+            applyButton.text = "Apply Now"
+            return
+        }
+
+        Log.d("JobDetailsActivity", "Submitting application - userId: $userId, jobId: $jobId, companyId: $companyId, cvUrl: $cvUrl")
 
         // First get the user's profile information
         db.collection("users")
@@ -311,45 +457,67 @@ class JobDetailsActivity : AppCompatActivity() {
             .addOnSuccessListener { documents ->
                 if (!documents.isEmpty) {
                     val userDoc = documents.documents[0]
-                    val user = userDoc.toObject(User::class.java)
-                    user?.let {
-                        val application = hashMapOf(
-                            "jobId" to jobId,
-                            "jobTitle" to jobTitle.text.toString(),
-                            "userId" to userId,
-                            "applicantName" to "${it.name} ${it.surname}",
-                            "applicantEmail" to it.email,
-                            "applicantPhone" to it.phoneNumber,
-                            "applicantAddress" to it.address,
-                            "applicantSummary" to it.summary,
-                            "applicantSkills" to it.skills,
-                            "applicantEducation" to it.education,
-                            "applicantExperience" to it.experience,
-                            "companyId" to companyId,
-                            "timestamp" to com.google.firebase.Timestamp.now(),
-                            "applieddate" to com.google.firebase.Timestamp.now(), // Use lowercase field name as in Firestore
-                            "status" to "pending",
-                            "resumeUrl" to cvUrl,
-                            "coverLetter" to coverLetter
-                        )
+                    try {
+                        val user = userDoc.toObject(User::class.java)
+                        if (user != null) {
+                            Log.d("JobDetailsActivity", "Successfully retrieved user profile for application")
 
-                        db.collection("applications")
-                            .add(application)
-                            .addOnSuccessListener { documentReference ->
-                                Toast.makeText(this, "Application submitted successfully", Toast.LENGTH_SHORT).show()
-                                finish()
-                            }
-                            .addOnFailureListener { e ->
-                                Toast.makeText(this, "Error submitting application: ${e.message}", Toast.LENGTH_SHORT).show()
-                            }
+                            val application = hashMapOf(
+                                "jobId" to jobId,
+                                "jobTitle" to jobTitle.text.toString(),
+                                "userId" to userId,
+                                "applicantName" to "${user.name} ${user.surname}",
+                                "applicantEmail" to user.email,
+                                "applicantPhone" to user.phoneNumber,
+                                "applicantAddress" to user.address,
+                                "applicantSummary" to user.summary,
+                                "applicantSkills" to user.skills,
+                                "applicantEducation" to user.education,
+                                "applicantExperience" to user.experience,
+                                "companyId" to companyId,
+                                "companyName" to companyName.text.toString(), // Add company name for easier reference
+                                "timestamp" to com.google.firebase.Timestamp.now(),
+                                "applieddate" to com.google.firebase.Timestamp.now(), // Use lowercase field name as in Firestore
+                                "status" to "pending",
+                                "resumeUrl" to cvUrl,
+                                "coverLetter" to coverLetter
+                            )
+
+                            Log.d("JobDetailsActivity", "Adding application to Firestore")
+                            db.collection("applications")
+                                .add(application)
+                                .addOnSuccessListener { documentReference ->
+                                    Log.d("JobDetailsActivity", "Application submitted successfully with ID: ${documentReference.id}")
+                                    Toast.makeText(this, "Application submitted successfully", Toast.LENGTH_SHORT).show()
+                                    finish()
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e("JobDetailsActivity", "Error submitting application", e)
+                                    Toast.makeText(this, "Error submitting application: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    applyButton.isEnabled = true
+                                    applyButton.text = "Apply Now"
+                                }
+                        } else {
+                            Log.e("JobDetailsActivity", "User object is null after conversion")
+                            Toast.makeText(this, "Error submitting application: Invalid user data", Toast.LENGTH_SHORT).show()
+                            applyButton.isEnabled = true
+                            applyButton.text = "Apply Now"
+                        }
+                    } catch (e: Exception) {
+                        Log.e("JobDetailsActivity", "Error converting user document to User object", e)
+                        Toast.makeText(this, "Error processing user data: ${e.message}", Toast.LENGTH_SHORT).show()
+                        applyButton.isEnabled = true
+                        applyButton.text = "Apply Now"
                     }
                 } else {
+                    Log.e("JobDetailsActivity", "No user document found for email: ${auth.currentUser?.email}")
                     Toast.makeText(this, "User profile not found", Toast.LENGTH_SHORT).show()
                     applyButton.isEnabled = true
                     applyButton.text = "Apply Now"
                 }
             }
             .addOnFailureListener { e ->
+                Log.e("JobDetailsActivity", "Error fetching user profile", e)
                 Toast.makeText(this, "Error loading user profile: ${e.message}", Toast.LENGTH_SHORT).show()
                 applyButton.isEnabled = true
                 applyButton.text = "Apply Now"

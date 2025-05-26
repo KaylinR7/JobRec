@@ -1,10 +1,14 @@
 package com.example.jobrec.repositories
 
+import com.example.jobrec.models.Conversation
 import com.example.jobrec.models.Message
 import com.example.jobrec.models.InterviewDetails
+import com.example.jobrec.services.NotificationManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 class MessageRepository {
@@ -17,6 +21,7 @@ class MessageRepository {
 
         android.util.Log.d("MessageRepo", "Sending message: conversationId=${message.conversationId}, senderId=${message.senderId}, receiverId=${message.receiverId}")
 
+        // Save message to Firestore
         db.collection("messages")
             .document(messageId)
             .set(newMessage)
@@ -50,6 +55,7 @@ class MessageRepository {
             val candidateId = conversationDoc.getString("candidateId") ?: "null"
             android.util.Log.d("MessageRepo", "Conversation data: companyId=$companyId, candidateId=$candidateId")
 
+            // Update conversation with last message info
             db.collection("conversations")
                 .document(message.conversationId)
                 .update(
@@ -63,6 +69,27 @@ class MessageRepository {
                 .await()
 
             android.util.Log.d("MessageRepo", "Conversation updated successfully")
+
+            // Send notification to the receiver
+            try {
+                // Convert Firestore document to Conversation object
+                val conversation = conversationDoc.toObject(Conversation::class.java)
+
+                if (conversation != null) {
+                    // Send notification in a background context
+                    withContext(Dispatchers.IO) {
+                        try {
+                            val notificationManager = NotificationManager()
+                            notificationManager.sendNewMessageNotification(newMessage, conversation)
+                            android.util.Log.d("MessageRepo", "Message notification sent successfully")
+                        } catch (e: Exception) {
+                            android.util.Log.e("MessageRepo", "Error sending message notification", e)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MessageRepo", "Error preparing notification", e)
+            }
         }
 
         return messageId

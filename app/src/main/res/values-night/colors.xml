@@ -25,8 +25,8 @@
     <!-- Text colors -->
     <color name="text_primary">#FFFFFF</color>
     <color name="text_primary_dark">#FFFFFF</color>
-    <color name="text_secondary">#B3FFFFFF</color>
-    <color name="text_secondary_dark">#B3FFFFFF</color>
+    <color name="text_secondary">#DDDDDD</color>
+    <color name="text_secondary_dark">#DDDDDD</color>
 
     <!-- Error colors -->
     <color name="error">#CF6679</color>
@@ -47,6 +47,7 @@
     <!-- Card Colors -->
     <color name="card_border">#424242</color>
     <color name="card_background">#1E1E1E</color>
+    <color name="colorOutline">#424242</color>
 
     <!-- Button Colors -->
     <color name="button_primary">#EF5350</color>    <!-- Red 400 -->

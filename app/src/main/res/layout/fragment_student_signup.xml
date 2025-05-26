@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="?android:colorBackground"
     android:fillViewport="true">
 
     <LinearLayout
@@ -18,7 +18,7 @@
             android:text="Student Registration"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
+            style="@style/Widget.CareerWorx.TextInputEditText"
             android:layout_marginBottom="8dp"/>
 
         <TextView
@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:text="Create your account to find your dream job"
             android:textSize="16sp"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="?android:attr/textColorSecondary"
             android:layout_marginBottom="24dp"/>
 
         <!-- Personal Information Section -->
@@ -36,7 +36,7 @@
             android:text="Personal Information"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
+            style="@style/Widget.CareerWorx.TextInputEditText"
             android:layout_marginBottom="16dp"/>
 
         <!-- Name field -->
@@ -44,9 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+            style="@style/Widget.CareerWorx.TextInputLayout">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etName"
@@ -54,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:hint="Name"
                 android:inputType="textPersonName"
-                android:textColor="@android:color/black"/>
+                style="@style/Widget.CareerWorx.TextInputEditText"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Surname field -->
@@ -62,9 +60,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+            style="@style/Widget.CareerWorx.TextInputLayout">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etSurname"
@@ -72,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:hint="Surname"
                 android:inputType="textPersonName"
-                android:textColor="@android:color/black"/>
+                style="@style/Widget.CareerWorx.TextInputEditText"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Email field -->
@@ -80,9 +76,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black">
+            style="@style/Widget.CareerWorx.TextInputLayout">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEmail"
@@ -90,7 +84,7 @@
                 android:layout_height="wrap_content"
                 android:hint="Email"
                 android:inputType="textEmailAddress"
-                android:textColor="@android:color/black"/>
+                style="@style/Widget.CareerWorx.TextInputEditText"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Password field -->
@@ -98,11 +92,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@android:color/black"
-            app:hintTextColor="@android:color/black"
-            app:passwordToggleEnabled="true"
-            app:passwordToggleTint="@android:color/black">
+            style="@style/Widget.CareerWorx.TextInputLayout"
+            app:passwordToggleEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPassword"
@@ -110,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:hint="Password"
                 android:inputType="textPassword"
-                android:textColor="@android:color/black"/>
+                style="@style/Widget.CareerWorx.TextInputEditText"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Register Button -->

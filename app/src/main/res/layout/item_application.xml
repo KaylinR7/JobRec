@@ -7,7 +7,8 @@
     android:layout_marginVertical="8dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="2dp"
-    app:strokeWidth="0dp">
+    app:strokeWidth="0dp"
+    app:cardBackgroundColor="?attr/colorSurface">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -33,7 +34,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
+                    style="@style/Widget.CareerWorx.TextInputEditText"
                     android:maxLines="1"
                     android:ellipsize="end"/>
 
@@ -42,7 +43,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="#757575"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:layout_marginTop="4dp"
                     android:maxLines="1"
                     android:ellipsize="end"/>
@@ -62,7 +63,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#E0E0E0"
+            android:background="?attr/colorOutline"
             android:layout_marginVertical="12dp"/>
 
         <LinearLayout
@@ -76,20 +77,28 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Applied"
-                    android:textSize="12sp"
-                    android:textColor="#757575"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-                <TextView
-                    android:id="@+id/appliedDate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="@android:color/black"
-                    android:layout_marginTop="2dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Applied: "
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"/>
+
+                    <TextView
+                        android:id="@+id/appliedDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        style="@style/Widget.CareerWorx.TextInputEditText"
+                        android:maxLines="1"
+                        android:ellipsize="end"/>
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -99,20 +108,28 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Location"
-                    android:textSize="12sp"
-                    android:textColor="#757575"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-                <TextView
-                    android:id="@+id/jobLocation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="@android:color/black"
-                    android:layout_marginTop="2dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Location: "
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"/>
+
+                    <TextView
+                        android:id="@+id/jobLocation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        style="@style/Widget.CareerWorx.TextInputEditText"
+                        android:maxLines="1"
+                        android:ellipsize="end"/>
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -130,20 +147,28 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Salary"
-                    android:textSize="12sp"
-                    android:textColor="#757575"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-                <TextView
-                    android:id="@+id/jobSalary"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="@android:color/black"
-                    android:layout_marginTop="2dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Salary: "
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"/>
+
+                    <TextView
+                        android:id="@+id/jobSalary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        style="@style/Widget.CareerWorx.TextInputEditText"
+                        android:maxLines="1"
+                        android:ellipsize="end"/>
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -153,20 +178,28 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Type"
-                    android:textSize="12sp"
-                    android:textColor="#757575"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-                <TextView
-                    android:id="@+id/jobType"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="@android:color/black"
-                    android:layout_marginTop="2dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Type: "
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"/>
+
+                    <TextView
+                        android:id="@+id/jobType"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        style="@style/Widget.CareerWorx.TextInputEditText"
+                        android:maxLines="1"
+                        android:ellipsize="end"/>
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -180,7 +213,7 @@
             android:textSize="14sp"
             android:layout_marginTop="12dp"
             app:cornerRadius="8dp"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorOnPrimary"
             app:backgroundTint="@color/primary"/>
 
     </LinearLayout>

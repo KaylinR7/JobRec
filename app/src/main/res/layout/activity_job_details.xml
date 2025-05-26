@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="?android:colorBackground">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -86,7 +86,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_business"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <TextView
                             android:id="@+id/companyName"
@@ -110,7 +110,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_location"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <TextView
                             android:id="@+id/jobLocation"
@@ -133,7 +133,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_location"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <TextView
                             android:id="@+id/jobProvince"
@@ -156,7 +156,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_work"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <TextView
                             android:id="@+id/jobField"
@@ -179,7 +179,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_schedule"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <TextView
                             android:id="@+id/jobType"
@@ -202,7 +202,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_experience"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <TextView
                             android:id="@+id/jobExperience"
@@ -225,7 +225,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_attach_money"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <TextView
                             android:id="@+id/jobSalary"
@@ -248,7 +248,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_calendar"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <TextView
                             android:id="@+id/jobPostedDate"
@@ -337,7 +337,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@color/white"
+        android:background="?android:colorBackground"
         android:elevation="8dp"
         android:orientation="vertical"
         android:padding="16dp">
@@ -347,6 +347,8 @@
             style="@style/Widget.JobRec.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/white"
             android:text="Apply Now" />
 
         <LinearLayout

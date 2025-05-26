@@ -178,28 +178,121 @@ class EditCompanyProfileActivity : AppCompatActivity() {
     }
 
     private fun updateCompanyProfile() {
-        val companyUpdates = hashMapOf<String, Any>(
-            "companyName" to companyNameInput.text.toString(),
-            "industry" to industryInput.text.toString(),
-            "registrationNumber" to registrationNumberInput.text.toString(),
-            "companySize" to companySizeInput.text.toString(),
-            "location" to locationInput.text.toString(),
-            "website" to websiteInput.text.toString(),
-            "description" to descriptionInput.text.toString(),
-            "contactPersonName" to contactPersonNameInput.text.toString(),
-            "contactPersonEmail" to contactPersonEmailInput.text.toString(),
-            "contactPersonPhone" to contactPersonPhoneInput.text.toString()
-        )
-
+        // First get the current company data to preserve fields we're not updating
         db.collection("companies")
             .document(companyId)
-            .update(companyUpdates)
-            .addOnSuccessListener {
-                Toast.makeText(this, "Company profile updated successfully", Toast.LENGTH_SHORT).show()
-                finish()
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    // Get existing company data
+                    val existingCompany = document.toObject(Company::class.java)
+
+                    // Create updated company object with all fields
+                    val updatedCompany = existingCompany?.copy(
+                        companyName = companyNameInput.text.toString(),
+                        industry = industryInput.text.toString(),
+                        registrationNumber = registrationNumberInput.text.toString(),
+                        companySize = companySizeInput.text.toString(),
+                        location = locationInput.text.toString(),
+                        website = websiteInput.text.toString(),
+                        description = descriptionInput.text.toString(),
+                        contactPersonName = contactPersonNameInput.text.toString(),
+                        contactPersonEmail = contactPersonEmailInput.text.toString(),
+                        contactPersonPhone = contactPersonPhoneInput.text.toString()
+                    ) ?: Company(
+                        id = companyId,
+                        companyName = companyNameInput.text.toString(),
+                        industry = industryInput.text.toString(),
+                        registrationNumber = registrationNumberInput.text.toString(),
+                        companySize = companySizeInput.text.toString(),
+                        location = locationInput.text.toString(),
+                        website = websiteInput.text.toString(),
+                        description = descriptionInput.text.toString(),
+                        contactPersonName = contactPersonNameInput.text.toString(),
+                        contactPersonEmail = contactPersonEmailInput.text.toString(),
+                        contactPersonPhone = contactPersonPhoneInput.text.toString(),
+                        userId = companyId
+                    )
+
+                    // Convert to map for Firestore (excluding id field which is handled separately)
+                    val companyData = mapOf(
+                        "companyName" to updatedCompany.companyName,
+                        "industry" to updatedCompany.industry,
+                        "registrationNumber" to updatedCompany.registrationNumber,
+                        "companySize" to updatedCompany.companySize,
+                        "location" to updatedCompany.location,
+                        "website" to updatedCompany.website,
+                        "description" to updatedCompany.description,
+                        "contactPersonName" to updatedCompany.contactPersonName,
+                        "contactPersonEmail" to updatedCompany.contactPersonEmail,
+                        "contactPersonPhone" to updatedCompany.contactPersonPhone,
+                        "email" to (existingCompany?.email ?: ""),
+                        "profileImageUrl" to (existingCompany?.profileImageUrl ?: ""),
+                        "status" to (existingCompany?.status ?: "active"),
+                        "userId" to (existingCompany?.userId ?: companyId)
+                    )
+
+                    // Use set with merge option to update the document
+                    db.collection("companies")
+                        .document(companyId)
+                        .set(companyData)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Company profile updated successfully", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Error updating company profile: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+                } else {
+                    // If document doesn't exist, create a new one
+                    val newCompany = Company(
+                        id = companyId,
+                        companyName = companyNameInput.text.toString(),
+                        industry = industryInput.text.toString(),
+                        registrationNumber = registrationNumberInput.text.toString(),
+                        companySize = companySizeInput.text.toString(),
+                        location = locationInput.text.toString(),
+                        website = websiteInput.text.toString(),
+                        description = descriptionInput.text.toString(),
+                        contactPersonName = contactPersonNameInput.text.toString(),
+                        contactPersonEmail = contactPersonEmailInput.text.toString(),
+                        contactPersonPhone = contactPersonPhoneInput.text.toString(),
+                        userId = companyId
+                    )
+
+                    // Convert to map for Firestore
+                    val companyData = mapOf(
+                        "companyName" to newCompany.companyName,
+                        "industry" to newCompany.industry,
+                        "registrationNumber" to newCompany.registrationNumber,
+                        "companySize" to newCompany.companySize,
+                        "location" to newCompany.location,
+                        "website" to newCompany.website,
+                        "description" to newCompany.description,
+                        "contactPersonName" to newCompany.contactPersonName,
+                        "contactPersonEmail" to newCompany.contactPersonEmail,
+                        "contactPersonPhone" to newCompany.contactPersonPhone,
+                        "email" to newCompany.email,
+                        "profileImageUrl" to newCompany.profileImageUrl,
+                        "status" to newCompany.status,
+                        "userId" to newCompany.userId
+                    )
+
+                    // Create a new document
+                    db.collection("companies")
+                        .document(companyId)
+                        .set(companyData)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Company profile created successfully", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Error creating company profile: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+                }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error updating company profile: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error retrieving company data: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
 

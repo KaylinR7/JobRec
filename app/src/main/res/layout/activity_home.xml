@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="?android:colorBackground">
 
     <!-- Include the toolbar -->
     <include
@@ -43,7 +43,7 @@
                         android:text="Welcome back!"
                         android:textSize="28sp"
                         android:textStyle="bold"
-                        android:textColor="@color/primary"/>
+                        android:textColor="?attr/colorPrimary"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/returnToCompanyView"
@@ -309,11 +309,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@android:color/white"
+        android:background="?android:colorBackground"
         app:menu="@menu/bottom_nav_menu"
         app:labelVisibilityMode="labeled"
-        app:itemIconTint="@color/bottom_nav_item_color"
-        app:itemTextColor="@color/bottom_nav_item_color"
+        app:itemIconTint="@color/student_bottom_nav_item_color"
+        app:itemTextColor="@color/student_bottom_nav_item_color"
         app:elevation="8dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

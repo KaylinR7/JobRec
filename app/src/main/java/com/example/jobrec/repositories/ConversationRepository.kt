@@ -22,7 +22,8 @@ class ConversationRepository {
         candidateId: String,
         candidateName: String,
         companyId: String,
-        companyName: String
+        companyName: String,
+        candidateInfo: String? = null
     ): String {
         android.util.Log.d("ConversationRepo", "Creating conversation for application: $applicationId")
         android.util.Log.d("ConversationRepo", "Company ID: $companyId, Company Name: $companyName")
@@ -62,13 +63,113 @@ class ConversationRepository {
             }
         }
 
+        // Try to get candidate info if not provided
+        var candidateDetails = candidateInfo
+        if (candidateDetails.isNullOrBlank()) {
+            try {
+                val userDoc = db.collection("users")
+                    .document(candidateId)
+                    .get()
+                    .await()
+
+                if (userDoc.exists()) {
+                    // Extract relevant candidate information
+                    val skills = userDoc.get("skills") as? List<String>
+                    val education = userDoc.get("education") as? List<Map<String, Any>>
+                    val experience = userDoc.get("experience") as? List<Map<String, Any>>
+
+                    val infoBuilder = StringBuilder()
+
+                    // Add education info
+                    val highestEducation = education?.maxByOrNull {
+                        (it["degree"] as? String)?.length ?: 0
+                    }
+                    highestEducation?.let {
+                        val degree = it["degree"] as? String
+                        val institution = it["institution"] as? String
+                        if (!degree.isNullOrBlank()) {
+                            infoBuilder.append(degree)
+                            if (!institution.isNullOrBlank()) {
+                                infoBuilder.append(" at $institution")
+                            }
+                        }
+                    }
+
+                    // Add skills
+                    if (!skills.isNullOrEmpty() && skills.isNotEmpty()) {
+                        if (infoBuilder.isNotEmpty()) infoBuilder.append(" • ")
+                        infoBuilder.append("Skills: ${skills.take(3).joinToString(", ")}")
+                        if (skills.size > 3) infoBuilder.append("...")
+                    }
+
+                    // Add experience
+                    val totalExperience = experience?.sumOf { exp ->
+                        val startDate = (exp["startDate"] as? com.google.firebase.Timestamp)?.toDate()
+                        val endDate = (exp["endDate"] as? com.google.firebase.Timestamp)?.toDate()
+                        if (startDate != null && endDate != null) {
+                            val diff = endDate.time - startDate.time
+                            (diff / (1000L * 60 * 60 * 24 * 365)).toInt()
+                        } else {
+                            0
+                        }
+                    } ?: 0
+
+                    if (totalExperience > 0) {
+                        if (infoBuilder.isNotEmpty()) infoBuilder.append(" • ")
+                        infoBuilder.append("$totalExperience years experience")
+                    }
+
+                    candidateDetails = infoBuilder.toString()
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("ConversationRepo", "Error getting candidate info: ${e.message}")
+            }
+        }
+
+        // Ensure we have a valid candidate name
+        var validCandidateName = candidateName
+        if (validCandidateName.isBlank() || validCandidateName == "!!!!!" || validCandidateName == "Student") {
+            // Try to get a better name from the users collection
+            try {
+                val userDoc = db.collection("users")
+                    .document(candidateId)
+                    .get()
+                    .await()
+
+                if (userDoc.exists()) {
+                    val name = userDoc.getString("name") ?: ""
+                    val surname = userDoc.getString("surname") ?: ""
+
+                    // Debug log to see what values we're getting
+                    android.util.Log.d("ConversationRepo", "Retrieved candidate data for new conversation - name: '$name', surname: '$surname'")
+
+                    // Make sure we have a valid name, even if it's just one part
+                    validCandidateName = when {
+                        name.isNotEmpty() && surname.isNotEmpty() -> "$name $surname"
+                        name.isNotEmpty() -> name
+                        surname.isNotEmpty() -> surname
+                        else -> "Student" // Default fallback
+                    }
+
+                    android.util.Log.d("ConversationRepo", "Using candidate name for new conversation: $validCandidateName")
+                } else {
+                    validCandidateName = "Student"
+                    android.util.Log.d("ConversationRepo", "User document not found, using default candidate name: $validCandidateName")
+                }
+            } catch (e: Exception) {
+                validCandidateName = "Student"
+                android.util.Log.e("ConversationRepo", "Error getting candidate name for new conversation, using default: $validCandidateName", e)
+            }
+        }
+
         val conversation = Conversation(
             id = conversationId,
             applicationId = applicationId,
             jobId = jobId,
             jobTitle = jobTitle,
             candidateId = candidateId,
-            candidateName = candidateName,
+            candidateName = validCandidateName,
+            candidateInfo = candidateDetails,
             companyId = companyId,
             companyName = validCompanyName
         )
@@ -193,12 +294,146 @@ class ConversationRepository {
             val allCompanyConversations = (companyConversations + userIdConversations).distinctBy { it.id }
             android.util.Log.d("ConversationRepo", "Total company conversations: ${allCompanyConversations.size}")
 
+            // For each conversation, ensure we have the correct candidate name
+            val updatedCompanyConversations = allCompanyConversations.map { conversation ->
+                // Check if the candidate name is invalid or missing
+                val needsNameUpdate = conversation.candidateName.isBlank() ||
+                                     conversation.candidateName == "!!!!!" ||
+                                     conversation.candidateName == "Company" ||
+                                     conversation.candidateName == "Student" ||
+                                     conversation.candidateName == "nasty juice" // Fix for incorrect name
+
+                if (needsNameUpdate) {
+                    android.util.Log.d("ConversationRepo", "Conversation ${conversation.id} has invalid candidate name: '${conversation.candidateName}', attempting to fix")
+                }
+
+                // Always try to get the latest student name from the users collection
+                // This ensures we have the most up-to-date name
+                try {
+                    // First try to get name from the users collection
+                    val userDoc = db.collection("users")
+                        .document(conversation.candidateId)
+                        .get()
+                        .await()
+
+                    if (userDoc.exists()) {
+                        val name = userDoc.getString("name") ?: ""
+                        val surname = userDoc.getString("surname") ?: ""
+
+                        // Debug log to see what values we're getting
+                        android.util.Log.d("ConversationRepo", "Retrieved candidate data - name: '$name', surname: '$surname'")
+
+                        // Make sure we have a valid name, even if it's just one part
+                        val fullName = when {
+                            name.isNotEmpty() && surname.isNotEmpty() -> "$name $surname"
+                            name.isNotEmpty() -> name
+                            surname.isNotEmpty() -> surname
+                            else -> "" // Empty for now, we'll try other sources
+                        }
+
+                        if (fullName.isNotEmpty()) {
+                            android.util.Log.d("ConversationRepo", "Using name from user document: $fullName")
+
+                            // Update the conversation document with the correct name
+                            if (needsNameUpdate || fullName != conversation.candidateName) {
+                                try {
+                                    // Log the update for debugging
+                                    android.util.Log.d("ConversationRepo", "Updating conversation ${conversation.id} candidateName from '${conversation.candidateName}' to '$fullName'")
+
+                                    db.collection("conversations")
+                                        .document(conversation.id)
+                                        .update("candidateName", fullName)
+                                        .await()
+                                    android.util.Log.d("ConversationRepo", "Updated candidateName in Firestore: $fullName")
+
+                                    // Note: We can't directly modify the conversation object as it's immutable
+                                    // The copy() method in the return statement will handle creating a new object with the updated name
+                                } catch (e: Exception) {
+                                    android.util.Log.e("ConversationRepo", "Error updating candidateName in Firestore", e)
+                                }
+                            }
+
+                            return@map conversation.copy(candidateName = fullName)
+                        }
+                    }
+
+                    // If we couldn't get a name from the user document, try the applications collection
+                    val appSnapshot = db.collection("applications")
+                        .whereEqualTo("userId", conversation.candidateId)
+                        .get()
+                        .await()
+
+                    if (!appSnapshot.isEmpty) {
+                        val appDoc = appSnapshot.documents[0]
+                        val applicantName = appDoc.getString("applicantName")
+
+                        if (!applicantName.isNullOrEmpty() && applicantName != "!!!!!" && applicantName != "Company") {
+                            android.util.Log.d("ConversationRepo", "Using applicant name from application: $applicantName")
+
+                            // Update the conversation document
+                            try {
+                                db.collection("conversations")
+                                    .document(conversation.id)
+                                    .update("candidateName", applicantName)
+                                    .await()
+                                android.util.Log.d("ConversationRepo", "Updated candidateName in Firestore from application: $applicantName")
+                            } catch (e: Exception) {
+                                android.util.Log.e("ConversationRepo", "Error updating candidateName from application", e)
+                            }
+
+                            return@map conversation.copy(candidateName = applicantName)
+                        }
+                    }
+
+                    // Note: We removed the Firebase Auth user lookup as it's not available in this version
+
+                    // If we still don't have a name, use a default
+                    val defaultName = "Student"
+
+                    // Only update if the current name is invalid
+                    if (needsNameUpdate) {
+                        try {
+                            db.collection("conversations")
+                                .document(conversation.id)
+                                .update("candidateName", defaultName)
+                                .await()
+                            android.util.Log.d("ConversationRepo", "Updated candidateName in Firestore with default: $defaultName")
+                        } catch (e: Exception) {
+                            android.util.Log.e("ConversationRepo", "Error updating candidateName with default", e)
+                        }
+                    }
+
+                    return@map conversation.copy(candidateName = defaultName)
+                } catch (e: Exception) {
+                    android.util.Log.e("ConversationRepo", "Error getting candidate name: ${e.message}")
+
+                    // If there's an error, make sure we don't show invalid names
+                    if (needsNameUpdate) {
+                        val defaultName = "Student"
+
+                        // Try to update the conversation document with the default name
+                        try {
+                            db.collection("conversations")
+                                .document(conversation.id)
+                                .update("candidateName", defaultName)
+                                .await()
+                        } catch (ex: Exception) {
+                            android.util.Log.e("ConversationRepo", "Error updating candidateName with default after error: ${ex.message}")
+                        }
+
+                        return@map conversation.copy(candidateName = defaultName)
+                    }
+
+                    return@map conversation
+                }
+            }
+
             // Log each conversation for debugging
-            allCompanyConversations.forEach {
+            updatedCompanyConversations.forEach {
                 android.util.Log.d("ConversationRepo", "Company conversation: ${it.id}, with candidate: ${it.candidateName}")
             }
 
-            return allCompanyConversations.sortedByDescending { it.updatedAt.seconds }
+            return updatedCompanyConversations.sortedByDescending { it.updatedAt.seconds }
         } else {
             // This is a student user, get candidate conversations
             val candidateConversationsSnapshot = db.collection("conversations")

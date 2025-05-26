@@ -4,19 +4,24 @@
         android:id="@+id/nav_dashboard"
         android:icon="@drawable/ic_dashboard"
         android:title="Dashboard" />
-    
+
     <item
         android:id="@+id/nav_jobs"
         android:icon="@drawable/ic_work"
         android:title="Jobs" />
-    
+
     <item
         android:id="@+id/nav_applications"
         android:icon="@drawable/ic_applications"
         android:title="Applications" />
-    
+
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/ic_profile"
         android:title="Profile" />
-</menu> 
+
+    <item
+        android:id="@+id/nav_ai_assistant"
+        android:icon="@drawable/ic_chatbot"
+        android:title="Assistant" />
+</menu>

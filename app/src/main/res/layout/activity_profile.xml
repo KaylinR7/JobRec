@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="?android:colorBackground">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -64,7 +64,7 @@
                         android:layout_marginTop="16dp"
                         android:text="Change Photo"
                         style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:textColor="@color/black" />
+                        android:textColor="?android:attr/textColorPrimary" />
 
                 </LinearLayout>
 
@@ -92,21 +92,21 @@
                         android:text="Personal Information"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@color/black"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:layout_marginBottom="24dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.CareerWorx.TextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/nameInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Name"
-                            android:textColor="@color/black"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:inputType="textPersonName"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -114,14 +114,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.CareerWorx.TextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/surnameInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Surname"
-                            android:textColor="@color/black"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:inputType="textPersonName"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -129,14 +129,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.CareerWorx.TextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/emailInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Email"
-                            android:textColor="@color/black"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:inputType="textEmailAddress"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -144,14 +144,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.CareerWorx.TextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/phoneNumberInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Phone Number"
-                            android:textColor="@color/black"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:inputType="phone"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -175,7 +175,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.CareerWorx.TextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/addressInput"
@@ -212,7 +212,7 @@
                         android:text="Professional Summary"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@color/black"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:layout_marginBottom="16dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -284,14 +284,14 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.CareerWorx.TextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/summaryInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Write a brief summary about yourself"
-                            android:textColor="@color/black"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:inputType="textMultiLine"
                             android:minLines="3"
                             android:gravity="top"/>
@@ -303,7 +303,7 @@
                         android:layout_height="wrap_content"
                         android:text="Get Summary Suggestions"
                         style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:textColor="@color/black"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:layout_gravity="end"/>
 
 
@@ -334,21 +334,21 @@
                         android:text="Skills"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@color/black"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:layout_marginBottom="16dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.CareerWorx.TextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/skillsInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Add skills"
-                            android:textColor="@color/black"/>
+                            android:textColor="?android:attr/textColorPrimary"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.chip.ChipGroup
@@ -382,7 +382,7 @@
                         android:text="Work Experience"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@color/black"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:layout_marginBottom="16dp"/>
 
                     <androidx.recyclerview.widget.RecyclerView
@@ -397,7 +397,7 @@
                         android:layout_height="wrap_content"
                         android:text="Add Experience"
                         style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:textColor="@color/black"/>
+                        android:textColor="?android:attr/textColorPrimary"/>
 
                 </LinearLayout>
 
@@ -427,7 +427,7 @@
                         android:text="Education"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@color/black"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:layout_marginBottom="16dp"/>
 
                     <androidx.recyclerview.widget.RecyclerView
@@ -442,7 +442,7 @@
                         android:layout_height="wrap_content"
                         android:text="Add Education"
                         style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:textColor="@color/black"/>
+                        android:textColor="?android:attr/textColorPrimary"/>
 
                 </LinearLayout>
 
@@ -470,21 +470,21 @@
                         android:text="Social Links"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@color/black"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:layout_marginBottom="16dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.CareerWorx.TextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/linkedinInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="LinkedIn Profile"
-                            android:textColor="@color/black"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:inputType="textUri"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -492,28 +492,28 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.CareerWorx.TextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/githubInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="GitHub Profile"
-                            android:textColor="@color/black"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:inputType="textUri"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.CareerWorx.TextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/portfolioInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Portfolio Website"
-                            android:textColor="@color/black"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:inputType="textUri"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -543,7 +543,7 @@
                         android:text="References"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@color/black"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:layout_marginBottom="16dp"/>
 
                     <LinearLayout
@@ -559,7 +559,7 @@
                         android:layout_height="wrap_content"
                         android:text="Add Reference"
                         style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:textColor="@color/black"/>
+                        android:textColor="?android:attr/textColorPrimary"/>
 
                 </LinearLayout>
 

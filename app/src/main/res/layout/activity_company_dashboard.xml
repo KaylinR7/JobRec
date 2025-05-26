@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:background="?android:colorBackground">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -46,7 +46,7 @@
                     android:text="Welcome back!"
                     android:textSize="24sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
+                    android:textColor="?android:textColorPrimary"
                     android:layout_marginBottom="24dp"/>
 
                 <!-- Stats Cards Row -->
@@ -76,7 +76,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Active Jobs"
-                                android:textColor="@android:color/black"
+                                android:textColor="?android:textColorPrimary"
                                 android:textSize="14sp"/>
 
                             <TextView
@@ -84,7 +84,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textColor="@android:color/black"
+                                android:textColor="?android:textColorPrimary"
                                 android:textSize="24sp"
                                 android:textStyle="bold"
                                 android:layout_marginTop="8dp"/>
@@ -111,7 +111,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Applications"
-                                android:textColor="@android:color/black"
+                                android:textColor="?android:textColorPrimary"
                                 android:textSize="14sp"/>
 
                             <TextView
@@ -119,7 +119,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textColor="@android:color/black"
+                                android:textColor="?android:textColorPrimary"
                                 android:textSize="24sp"
                                 android:textStyle="bold"
                                 android:layout_marginTop="8dp"/>
@@ -134,7 +134,7 @@
                     android:text="Recent Activity"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
+                    android:textColor="?android:textColorPrimary"
                     android:layout_marginBottom="16dp"/>
 
                 <com.google.android.material.card.MaterialCardView
@@ -157,7 +157,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="No recent activity"
-                            android:textColor="@android:color/black"
+                            android:textColor="?android:textColorPrimary"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
 
@@ -179,7 +179,7 @@
                     android:text="Quick Actions"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
+                    android:textColor="?android:textColorPrimary"
                     android:layout_marginBottom="16dp"/>
 
                 <!-- First row of buttons -->
@@ -239,11 +239,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@android:color/white"
+        android:background="?android:colorBackground"
         app:menu="@menu/company_bottom_navigation"
         app:labelVisibilityMode="labeled"
-        app:itemIconTint="@color/bottom_nav_item_color"
-        app:itemTextColor="@color/bottom_nav_item_color"
+        app:itemIconTint="@color/company_bottom_nav_item_color"
+        app:itemTextColor="@color/company_bottom_nav_item_color"
         app:elevation="8dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

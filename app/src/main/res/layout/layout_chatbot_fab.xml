@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:layout_gravity="bottom|end"
     android:layout_margin="16dp"
-    android:backgroundTint="@color/primary"
+    android:backgroundTint="?attr/colorPrimary"
     android:contentDescription="Chat with assistant"
-    app:tint="@color/white"
+    app:tint="?attr/colorOnPrimary"
     app:srcCompat="@drawable/ic_chatbot" />

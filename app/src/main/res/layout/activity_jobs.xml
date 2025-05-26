@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            style="@style/Widget.CareerWorx.TextInputLayout">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/searchEditText"

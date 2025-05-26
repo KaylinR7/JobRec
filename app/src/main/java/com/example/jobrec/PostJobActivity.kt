@@ -6,13 +6,16 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Date
 import com.example.jobrec.databinding.ActivityPostJobBinding
 import com.example.jobrec.models.FieldCategories
+import com.example.jobrec.models.Job
+import com.example.jobrec.services.NotificationManager
+import kotlinx.coroutines.launch
 
 class PostJobActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
@@ -217,7 +220,8 @@ class PostJobActivity : AppCompatActivity() {
     }
 
     private fun postJob(company: Company) {
-        val job = hashMapOf(
+        // Create job data
+        val jobData = hashMapOf(
             "title" to jobTitleInput.text.toString(),
             "companyId" to companyId,
             "companyName" to company.companyName,
@@ -234,13 +238,64 @@ class PostJobActivity : AppCompatActivity() {
             "status" to "active"
         )
 
+        // Show loading state
+        postButton.isEnabled = false
+        postButton.text = "Posting..."
+
+        // Add job to Firestore
         db.collection("jobs")
-            .add(job)
+            .add(jobData)
             .addOnSuccessListener { documentReference ->
-                Toast.makeText(this, "Job posted successfully", Toast.LENGTH_SHORT).show()
-                finish()
+                // Create a Job object for notification
+                val jobId = documentReference.id
+
+                // Update the document with its ID
+                db.collection("jobs").document(jobId)
+                    .update("id", jobId)
+                    .addOnSuccessListener {
+                        // Create a Job object for notification
+                        val job = Job(
+                            id = jobId,
+                            title = jobTitleInput.text.toString(),
+                            companyId = companyId,
+                            companyName = company.companyName,
+                            jobField = jobFieldInput.text.toString(),
+                            specialization = jobSpecializationInput.text.toString(),
+                            province = provinceInput.text.toString(),
+                            location = locationInput.text.toString(),
+                            salary = salaryRangeInput.text.toString(),
+                            type = jobTypeInput.text.toString(),
+                            jobType = jobTypeInput.text.toString(),
+                            experienceLevel = experienceInput.text.toString(),
+                            description = descriptionInput.text.toString(),
+                            requirements = requirementsInput.text.toString(),
+                            postedDate = com.google.firebase.Timestamp.now(),
+                            status = "active"
+                        )
+
+                        // Send notification in a coroutine
+                        lifecycleScope.launch {
+                            try {
+                                val notificationManager = NotificationManager()
+                                notificationManager.sendNewJobNotification(job)
+                            } catch (e: Exception) {
+                                // Log error but don't block job posting
+                                android.util.Log.e("PostJobActivity", "Error sending notification", e)
+                            }
+                        }
+
+                        Toast.makeText(this, "Job posted successfully", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        postButton.isEnabled = true
+                        postButton.text = "Post Job"
+                        Toast.makeText(this, "Error updating job ID: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
             }
             .addOnFailureListener { e ->
+                postButton.isEnabled = true
+                postButton.text = "Post Job"
                 Toast.makeText(this, "Error posting job: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }

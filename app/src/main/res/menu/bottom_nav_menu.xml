@@ -19,4 +19,6 @@
         android:id="@+id/navigation_ai_assistant"
         android:icon="@drawable/ic_chatbot"
         android:title="Assistant" />
+
+
 </menu>

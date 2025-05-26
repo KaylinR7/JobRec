@@ -56,7 +56,7 @@
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/searchLayout"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            style="@style/Widget.CareerWorx.TextInputLayout"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -121,7 +121,7 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             android:src="@drawable/ic_search"
-            app:backgroundTint="@color/accent"
+            app:backgroundTint="@color/black"
             app:tint="@color/white"/>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

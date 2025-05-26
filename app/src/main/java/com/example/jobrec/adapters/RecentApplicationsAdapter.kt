@@ -104,12 +104,12 @@ class RecentApplicationsAdapter(
             // Log the date for debugging
             android.util.Log.d("RecentApplicationsAdapter", "Applied date before formatting: $appliedDate")
 
-            // Always format date as "MMM dd, yyyy" instead of showing day of week
+            // Format date concisely as just "MMM dd, yyyy" without prefix
             val formattedDate = if (appliedDate == null) {
-                "Application date unknown"
+                "Unknown"
             } else {
-                // Always use the date format (MMM dd, yyyy) for consistency
-                "Applied on ${dateFormat.format(safeAppliedDate)}"
+                // Just use the date format (MMM dd, yyyy) for consistency and conciseness
+                dateFormat.format(safeAppliedDate)
             }
 
             // Log the formatted date for debugging
@@ -146,25 +146,25 @@ class RecentApplicationsAdapter(
             // Make text white for better contrast
             statusChip.setTextColor(ContextCompat.getColor(itemView.context, android.R.color.white))
 
-            // Set additional job details
+            // Set additional job details with concise values
             // These fields might not exist in all Application classes, so handle them safely
             try {
-                // Try to get job location
+                // Try to get job location - keep it short
                 val location = "Remote" // Default value
                 jobLocationText.text = location
 
-                // Try to get job salary
+                // Try to get job salary - keep it short
                 val salary = "Competitive" // Default value
                 jobSalaryText.text = salary
 
-                // Try to get job type
+                // Try to get job type - keep it short
                 val type = "Full-time" // Default value
                 jobTypeText.text = type
             } catch (e: Exception) {
-                // Set default values if there's an error
-                jobLocationText.text = "Not specified"
-                jobSalaryText.text = "Not specified"
-                jobTypeText.text = "Not specified"
+                // Set concise default values if there's an error
+                jobLocationText.text = "N/A"
+                jobSalaryText.text = "N/A"
+                jobTypeText.text = "N/A"
             }
 
             // Add ripple effect to card

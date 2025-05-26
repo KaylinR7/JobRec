@@ -4,7 +4,7 @@
     android:layout_width="280dp"
     android:layout_height="match_parent"
     android:layout_gravity="end"
-    android:background="@color/background">
+    android:background="?android:colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
             android:text="Filter Jobs"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:textColor="@android:color/white"
             android:layout_marginBottom="16dp"/>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -107,6 +107,7 @@
             android:layout_height="wrap_content"
             android:text="Job Type"
             android:textStyle="bold"
+            android:textColor="@android:color/white"
             android:layout_marginBottom="8dp"/>
 
         <com.google.android.material.chip.ChipGroup

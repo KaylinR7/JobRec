@@ -45,9 +45,17 @@ class NotificationHelper(private val context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Job Notifications"
             val descriptionText = "Notifications for new jobs and application updates"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            // Use high importance to ensure notifications are shown in foreground
+            val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
+                // Enable lights and vibration
+                enableLights(true)
+                enableVibration(true)
+                // Set lockscreen visibility
+                lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
+                // Enable badge
+                setShowBadge(true)
             }
 
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -125,15 +133,21 @@ class NotificationHelper(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Create the notification
+        // Create the notification with high priority to ensure it shows in foreground
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_work)
             .setContentTitle("New Job Posted")
             .setContentText("${job.title} at ${job.companyName}")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            // Set high priority to ensure it shows as a heads-up notification
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setGroup(NOTIFICATION_GROUP)
+            // Add these flags to ensure the notification is shown in foreground
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            // Add category for job notifications
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
 
         // Show the notification
         with(NotificationManagerCompat.from(context)) {

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="?android:colorBackground">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -81,7 +81,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="#FFFFFF"
+            android:background="?attr/colorSurface"
             app:layout_constraintBottom_toTopOf="@id/messageInputLayout"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -101,7 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="No messages yet. Start the conversation!"
-            android:textColor="#757575"
+            android:textColor="?android:attr/textColorSecondary"
             android:textSize="16sp"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/messageInputLayout"
@@ -114,7 +114,7 @@
             android:id="@+id/messageInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#FFFFFF"
+            android:background="?attr/colorSurface"
             android:orientation="horizontal"
             android:padding="8dp"
             app:layout_constraintBottom_toBottomOf="parent">
@@ -126,7 +126,7 @@
                 app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="1dp"
-                app:strokeColor="#E0E0E0">
+                app:strokeColor="?attr/colorOutline">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/messageInput"
@@ -137,8 +137,8 @@
                     android:inputType="textMultiLine"
                     android:maxLines="4"
                     android:padding="12dp"
-                    android:textColor="#000000"
-                    android:textColorHint="#757575"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textColorHint="?android:attr/textColorSecondary"
                     android:textSize="16sp" />
 
             </com.google.android.material.card.MaterialCardView>

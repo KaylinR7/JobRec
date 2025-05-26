@@ -293,6 +293,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:menu="@menu/menu_company_bottom_nav"/>
+        android:background="?android:colorBackground"
+        app:menu="@menu/menu_company_bottom_nav"
+        app:itemIconTint="@color/company_bottom_nav_item_color"
+        app:itemTextColor="@color/company_bottom_nav_item_color"
+        app:elevation="8dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

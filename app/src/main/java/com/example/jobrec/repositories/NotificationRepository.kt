@@ -30,12 +30,6 @@ class NotificationRepository(private val context: Context) {
         const val TYPE_NEW_MESSAGE = "new_message"
     }
 
-
-
-    /**
-     * Get notifications for the current user with pagination
-     * Using a simpler query that doesn't require a composite index
-     */
     suspend fun getNotifications(pageSize: Int, lastDocument: DocumentSnapshot? = null): Pair<List<Notification>, DocumentSnapshot?> {
         try {
             val currentUser = auth.currentUser ?: return Pair(emptyList(), null)

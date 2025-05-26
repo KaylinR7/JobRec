@@ -201,7 +201,7 @@
 
         <!-- Firebase Messaging Service -->
         <service
-            android:name=".notifications.FirebaseMessagingService"
+            android:name=".services.FCMService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -289,6 +289,13 @@
             android:name=".NotificationsActivity"
             android:exported="false"
             android:label="Notifications"
+            android:parentActivityName=".HomeActivity" />
+
+        <!-- Notification Preferences Activity -->
+        <activity
+            android:name=".NotificationPreferencesActivity"
+            android:exported="false"
+            android:label="Notification Preferences"
             android:parentActivityName=".HomeActivity" />
 
     </application>

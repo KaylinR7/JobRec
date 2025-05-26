@@ -28,9 +28,16 @@ class NotificationService(private val context: Context) {
             val channel = NotificationChannel(
                 channelId,
                 channelName,
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = channelDescription
+                // Enable lights and vibration
+                enableLights(true)
+                enableVibration(true)
+                // Set lockscreen visibility
+                lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
+                // Enable badge
+                setShowBadge(true)
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -56,7 +63,7 @@ class NotificationService(private val context: Context) {
         val intent = Intent(context, HomeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        
+
         val pendingIntent = PendingIntent.getActivity(
             context,
             0,
@@ -68,9 +75,15 @@ class NotificationService(private val context: Context) {
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("New Job Alert")
             .setContentText("$jobTitle at $companyName")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            // Set high priority to ensure it shows as a heads-up notification
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
+            // Add these flags to ensure the notification is shown in foreground
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            // Add category for job notifications
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .build()
 
         notificationManager.notify(System.currentTimeMillis().toInt(), notification)
@@ -79,11 +92,11 @@ class NotificationService(private val context: Context) {
     fun handleRemoteMessage(message: RemoteMessage) {
         val title = message.notification?.title ?: "New Job Alert"
         val body = message.notification?.body ?: "Check out new job opportunities"
-        
+
         val intent = Intent(context, HomeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        
+
         val pendingIntent = PendingIntent.getActivity(
             context,
             0,
@@ -95,11 +108,17 @@ class NotificationService(private val context: Context) {
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(body)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            // Set high priority to ensure it shows as a heads-up notification
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
+            // Add these flags to ensure the notification is shown in foreground
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            // Add category for job notifications
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .build()
 
         notificationManager.notify(System.currentTimeMillis().toInt(), notification)
     }
-} 
+}

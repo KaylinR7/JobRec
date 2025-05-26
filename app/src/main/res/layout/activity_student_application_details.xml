@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="?android:colorBackground">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -58,7 +58,7 @@
                             android:layout_height="wrap_content"
                             android:text="Application Status"
                             android:textAppearance="?attr/textAppearanceHeadline6"
-                            android:textColor="@color/text_primary"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:textStyle="bold" />
 
                         <View
@@ -70,7 +70,7 @@
                             android:id="@+id/statusChip"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/white"
+                            android:textColor="?attr/colorOnPrimary"
                             app:chipBackgroundColor="@color/status_pending"
                             tools:text="Pending" />
                     </LinearLayout>
@@ -106,7 +106,7 @@
                         android:layout_height="wrap_content"
                         android:text="Job Details"
                         android:textAppearance="?attr/textAppearanceHeadline6"
-                        android:textColor="@color/primary"
+                        android:textColor="?attr/colorPrimary"
                         android:textStyle="bold" />
 
                     <LinearLayout
@@ -120,7 +120,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_work"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -157,7 +157,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_business"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -193,7 +193,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_location"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -232,7 +232,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_schedule"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -271,7 +271,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_attach_money"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -318,7 +318,7 @@
                         android:layout_height="wrap_content"
                         android:text="Application Timeline"
                         android:textAppearance="?attr/textAppearanceHeadline6"
-                        android:textColor="@color/primary"
+                        android:textColor="?attr/colorPrimary"
                         android:textStyle="bold" />
 
                     <LinearLayout
@@ -332,7 +332,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_calendar"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -368,7 +368,7 @@
                             android:layout_height="24dp"
                             android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_update"
-                            app:tint="@color/black" />
+                            app:tint="?android:attr/textColorPrimary" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -404,7 +404,7 @@
         android:id="@+id/buttonContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="?android:colorBackground"
         android:elevation="8dp"
         android:orientation="vertical"
         android:padding="16dp"
