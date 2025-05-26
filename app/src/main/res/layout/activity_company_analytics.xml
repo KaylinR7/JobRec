@@ -30,7 +30,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Applications Overview -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -203,7 +203,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Jobs Overview -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -302,7 +302,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Recent Activity -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -5,12 +5,12 @@
     android:layout_height="match_parent"
     android:background="?android:colorBackground">
 
-    <!-- Include the toolbar -->
+    
     <include
         android:id="@+id/toolbar_layout"
         layout="@layout/toolbar_main" />
 
-    <!-- Main Content -->
+    
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
@@ -29,7 +29,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Welcome Section -->
+                
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -56,7 +56,7 @@
                         app:cornerRadius="8dp"/>
                 </LinearLayout>
 
-                <!-- Search Bar -->
+                
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/searchCard"
                     android:layout_width="match_parent"
@@ -91,14 +91,14 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Stats Cards -->
+                
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginBottom="24dp">
 
-                    <!-- Applications Card -->
+                    
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -134,7 +134,7 @@
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Saved Jobs Card -->
+                    
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/savedJobsCard"
                         android:layout_width="0dp"
@@ -172,7 +172,7 @@
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
-                <!-- Quick Actions -->
+                
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -188,7 +188,7 @@
                     android:orientation="horizontal"
                     android:layout_marginBottom="24dp">
 
-                    <!-- My Applications Card -->
+                    
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/myApplicationsCard"
                         android:layout_width="0dp"
@@ -224,7 +224,7 @@
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Messages Card -->
+                    
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/jobAlertsCard"
                         android:layout_width="0dp"
@@ -261,7 +261,7 @@
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
-                <!-- Recently Posted Jobs Section -->
+                
                 <TextView
                     android:id="@+id/recentJobsLabel"
                     android:layout_width="match_parent"
@@ -281,7 +281,7 @@
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     android:layout_marginBottom="24dp"/>
 
-                <!-- Recommended Jobs Section -->
+                
                 <TextView
                     android:id="@+id/recommendedJobsLabel"
                     android:layout_width="match_parent"
@@ -303,7 +303,7 @@
         </androidx.core.widget.NestedScrollView>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <!-- Bottom Navigation -->
+    
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"

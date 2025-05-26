@@ -20,7 +20,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Job Title -->
+        
         <TextView
             android:id="@+id/jobTitleText"
             android:layout_width="match_parent"
@@ -31,7 +31,7 @@
             android:maxLines="1"
             android:ellipsize="end"/>
 
-        <!-- Applicant Name -->
+        
         <TextView
             android:id="@+id/applicantNameText"
             android:layout_width="match_parent"
@@ -42,7 +42,7 @@
             android:maxLines="1"
             android:ellipsize="end"/>
 
-        <!-- Date and Status Row -->
+        
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -50,7 +50,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <!-- Date -->
+            
             <TextView
                 android:id="@+id/dateText"
                 android:layout_width="0dp"
@@ -59,7 +59,7 @@
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="14sp"/>
 
-            <!-- Status Chip -->
+            
             <com.google.android.material.chip.Chip
                 android:id="@+id/statusChip"
                 android:layout_width="wrap_content"

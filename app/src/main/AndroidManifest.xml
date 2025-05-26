@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.jobrec">
 
-    <!-- Internet permission for Firebase -->
+    
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- Network state permission for checking connectivity -->
+    
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- Storage permission for profile images -->
+    
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -29,7 +29,7 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <!-- Splash Screen -->
+        
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -40,7 +40,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Main Activities -->
+        
         <activity
             android:name=".LoginActivity"
             android:exported="true"
@@ -92,7 +92,7 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Job Related Activities -->
+        
         <activity
             android:name=".JobDetailsActivity"
             android:exported="false"
@@ -108,7 +108,7 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Support Activities -->
+        
         <activity
             android:name=".HelpActivity"
             android:exported="false"
@@ -119,19 +119,19 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Add MyApplicationsActivity -->
+        
         <activity
             android:name=".MyApplicationsActivity"
             android:exported="false"
             android:parentActivityName=".HomeActivity" />
 
-        <!-- Add ApplicationsActivity -->
+        
         <activity
             android:name=".ApplicationsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Add missing activities -->
+        
         <activity
             android:name=".CVDetailsActivity"
             android:exported="false"
@@ -149,20 +149,20 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Job Alerts Activity -->
+        
         <activity
             android:name=".JobAlertsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Saved Jobs Activity -->
+        
         <activity
             android:name=".SavedJobsActivity"
             android:exported="false"
             android:label="Saved Jobs"
             android:parentActivityName=".HomeActivity" />
 
-        <!-- Application Details Activities -->
+        
         <activity
             android:name=".StudentApplicationDetailsActivity"
             android:exported="false"
@@ -175,13 +175,13 @@
             android:label="Application Review"
             android:parentActivityName=".ApplicationsActivity" />
 
-        <!-- Add ViewCvActivity -->
+        
         <activity
             android:name=".ViewCvActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Firebase Services -->
+        
         <service
             android:name="com.google.firebase.components.ComponentDiscoveryService"
             android:exported="false">
@@ -199,7 +199,7 @@
                 android:value="com.google.firebase.components.ComponentRegistrar" />
         </service>
 
-        <!-- Firebase Messaging Service -->
+        
         <service
             android:name=".services.FCMService"
             android:exported="false">
@@ -208,7 +208,7 @@
             </intent-filter>
         </service>
 
-        <!-- Notification Receiver -->
+        
         <receiver
             android:name=".notifications.NotificationReceiver"
             android:exported="false">
@@ -267,7 +267,7 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Chat Activities -->
+        
         <activity
             android:name=".ChatActivity"
             android:exported="false"
@@ -278,20 +278,20 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Chatbot Activity -->
+        
         <activity
             android:name=".chatbot.ChatbotActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Notifications Activity -->
+        
         <activity
             android:name=".NotificationsActivity"
             android:exported="false"
             android:label="Notifications"
             android:parentActivityName=".HomeActivity" />
 
-        <!-- Notification Preferences Activity -->
+        
         <activity
             android:name=".NotificationPreferencesActivity"
             android:exported="false"

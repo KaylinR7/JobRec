@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -15,7 +14,6 @@ import com.google.android.material.chip.Chip
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
-
 class StudentApplicationDetailsActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private lateinit var jobTitleText: TextView
@@ -31,17 +29,13 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
     private lateinit var jobTypeText: TextView
     private lateinit var salaryContainer: LinearLayout
     private lateinit var salaryText: TextView
-
     private var applicationId: String? = null
     private var jobId: String? = null
     private var companyId: String? = null
     private var companyName: String? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_student_application_details)
-
-        // Set up toolbar with back button
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -49,14 +43,8 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
             title = "Application Details"
         }
-
-        // Explicitly set white navigation icon
         toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
-
-        // Get the application ID from intent
         applicationId = intent.getStringExtra("applicationId")
-
-        // Initialize views
         jobTitleText = findViewById(R.id.jobTitleText)
         companyNameText = findViewById(R.id.companyNameText)
         jobLocationText = findViewById(R.id.jobLocationText)
@@ -70,51 +58,34 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
         jobTypeText = findViewById(R.id.jobTypeText)
         salaryContainer = findViewById(R.id.salaryContainer)
         salaryText = findViewById(R.id.salaryText)
-
-        // Initialize Firestore
         db = FirebaseFirestore.getInstance()
         loadApplicationDetails()
         setupButtons()
     }
-
     private fun loadApplicationDetails() {
         applicationId?.let { id ->
             db.collection("applications").document(id)
                 .get()
                 .addOnSuccessListener { document ->
                     if (document != null && document.exists()) {
-                        // Update UI with application details
                         jobTitleText.text = document.getString("jobTitle")
-
                         companyName = document.getString("companyName")
                         companyId = document.getString("companyId")
-
-                        // If company name is missing but we have company ID, load it from companies collection
                         if (companyName.isNullOrEmpty() && !companyId.isNullOrEmpty()) {
                             loadCompanyName(companyId!!)
                         } else {
                             companyNameText.text = companyName ?: "Unknown Company"
                         }
-
-                        // Get job details from the job document
                         jobId = document.getString("jobId")
                         companyId = document.getString("companyId")
-
                         if (!jobId.isNullOrEmpty()) {
                             loadJobDetails(jobId!!)
                         }
-
                         val status = document.getString("status") ?: "pending"
                         updateStatusUI(status)
-
-                        // Format dates
                         val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-
-                        // Applied date (timestamp)
                         val timestamp = document.getTimestamp("timestamp")?.toDate()
                         appliedDateText.text = timestamp?.let { dateFormat.format(it) } ?: "Not available"
-
-                        // Last updated date
                         val lastUpdated = document.getTimestamp("lastUpdated")?.toDate()
                         lastUpdatedText.text = lastUpdated?.let { dateFormat.format(it) } ?: "Not available"
                     }
@@ -124,16 +95,12 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
                 }
         }
     }
-
     private fun loadJobDetails(jobId: String) {
         db.collection("jobs").document(jobId)
             .get()
             .addOnSuccessListener { jobDoc ->
                 if (jobDoc != null && jobDoc.exists()) {
-                    // Basic job details
                     jobLocationText.text = jobDoc.getString("location") ?: "Location not specified"
-
-                    // Job type (if available)
                     val jobType = jobDoc.getString("jobType")
                     if (!jobType.isNullOrEmpty()) {
                         jobTypeText.text = jobType
@@ -141,13 +108,10 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
                     } else {
                         jobTypeContainer.visibility = View.GONE
                     }
-
-                    // Salary information (if available)
                     val salaryMin = jobDoc.getLong("salaryMin")
                     val salaryMax = jobDoc.getLong("salaryMax")
                     val salaryCurrency = jobDoc.getString("salaryCurrency") ?: "$"
                     val salaryPeriod = jobDoc.getString("salaryPeriod") ?: "year"
-
                     if (salaryMin != null && salaryMax != null) {
                         val formattedSalary = "$salaryCurrency${salaryMin.toInt().formatWithCommas()} - $salaryCurrency${salaryMax.toInt().formatWithCommas()} per $salaryPeriod"
                         salaryText.text = formattedSalary
@@ -161,11 +125,9 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error loading job details: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
     private fun Int.formatWithCommas(): String {
         return String.format("%,d", this)
     }
-
     private fun loadCompanyName(companyId: String) {
         db.collection("companies").document(companyId)
             .get()
@@ -187,23 +149,16 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
                 Log.e("StudentApplicationDetailsActivity", "Error loading company: ${e.message}")
             }
     }
-
     private fun updateStatusUI(status: String) {
-        // Update chip text and background color
         statusChip.text = status.capitalize()
         statusChip.chipBackgroundColor = getColorStateList(getStatusColor(status))
-
-        // Show chat button only if application is accepted
         if (status == "accepted") {
             chatButton.visibility = View.VISIBLE
         } else {
             chatButton.visibility = View.GONE
         }
-
-        // Set status description based on status
         statusDescriptionText.text = getStatusDescription(status)
     }
-
     private fun getStatusDescription(status: String): String {
         return when (status.lowercase()) {
             "pending" -> "Your application is being reviewed by the employer."
@@ -215,7 +170,6 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
             else -> "Your application status is: ${status.capitalize()}"
         }
     }
-
     private fun getStatusColor(status: String): Int {
         return when (status.lowercase()) {
             "pending" -> R.color.status_pending
@@ -227,12 +181,9 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
             else -> R.color.status_pending
         }
     }
-
     private fun setupButtons() {
-        // Chat button setup
         chatButton.setOnClickListener {
             if (applicationId != null) {
-                // Open chat activity with this application
                 val intent = Intent(this, ChatActivity::class.java).apply {
                     putExtra("applicationId", applicationId)
                 }
@@ -241,11 +192,8 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
                 Toast.makeText(this, "Cannot start chat: Missing application information", Toast.LENGTH_SHORT).show()
             }
         }
-
-        // View job details button setup
         viewJobDetailsButton.setOnClickListener {
             if (jobId != null) {
-                // Open job details activity
                 val intent = Intent(this, JobDetailsActivity::class.java).apply {
                     putExtra("jobId", jobId)
                 }
@@ -255,7 +203,6 @@ class StudentApplicationDetailsActivity : AppCompatActivity() {
             }
         }
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             onBackPressed()

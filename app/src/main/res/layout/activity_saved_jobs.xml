@@ -27,7 +27,7 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Loading State -->
+        
         <LinearLayout
             android:id="@+id/loadingLayout"
             android:layout_width="match_parent"
@@ -50,7 +50,7 @@
                 android:textSize="16sp" />
         </LinearLayout>
 
-        <!-- Empty State -->
+        
         <LinearLayout
             android:id="@+id/emptyStateLayout"
             android:layout_width="match_parent"
@@ -86,7 +86,7 @@
                 android:textSize="16sp" />
         </LinearLayout>
 
-        <!-- Jobs List -->
+        
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/savedJobsRecyclerView"
             android:layout_width="match_parent"

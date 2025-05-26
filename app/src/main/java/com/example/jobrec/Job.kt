@@ -1,11 +1,9 @@
 package com.example.jobrec
-
 import android.os.Parcel
 import android.os.Parcelable
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.Timestamp
 import java.util.*
-
 data class Job(
     var id: String = "",
     val title: String = "",
@@ -20,7 +18,6 @@ data class Job(
     val postedDate: Timestamp = Timestamp.now(),
     val updatedDate: Timestamp = Timestamp.now(),
     val status: String = "active",
-    // New fields for enhanced search functionality
     val jobField: String = "",
     val specialization: String = "",
     val province: String = "",
@@ -30,12 +27,10 @@ data class Job(
     fun getRequirementsList(): List<String> {
         return requirements.split("\n").filter { it.isNotEmpty() }
     }
-
     @Exclude
     fun getPostedDateMillis(): Long {
         return postedDate.toDate().time
     }
-
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",
         parcel.readString() ?: "",
@@ -55,7 +50,6 @@ data class Job(
         parcel.readString() ?: "",
         parcel.readString() ?: ""
     )
-
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(id)
         parcel.writeString(title)
@@ -77,16 +71,13 @@ data class Job(
         parcel.writeString(province)
         parcel.writeString(experienceLevel)
     }
-
     override fun describeContents(): Int {
         return 0
     }
-
     companion object CREATOR : Parcelable.Creator<Job> {
         override fun createFromParcel(parcel: Parcel): Job {
             return Job(parcel)
         }
-
         override fun newArray(size: Int): Array<Job?> {
             return arrayOfNulls(size)
         }

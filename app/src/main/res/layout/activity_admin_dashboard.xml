@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="?android:colorBackground">
 
-    <!-- Include the admin toolbar -->
+    
     <include
         android:id="@+id/toolbar_layout"
         layout="@layout/layout_admin_toolbar" />
@@ -22,7 +22,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Welcome Section -->
+            
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
                 android:textColor="@android:color/white"
                 android:layout_marginBottom="16dp"/>
 
-            <!-- Stats Section Header -->
+            
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -43,7 +43,7 @@
                 android:layout_marginBottom="12dp"/>
 
 
-            <!-- Stats Cards - Grid Layout -->
+            
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
                 android:rowCount="2"
                 android:layout_marginBottom="24dp">
 
-                <!-- Users Card -->
+                
                 <androidx.cardview.widget.CardView
                     android:id="@+id/usersCard"
                     android:layout_width="0dp"
@@ -91,7 +91,7 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Companies Card -->
+                
                 <androidx.cardview.widget.CardView
                     android:id="@+id/companiesCard"
                     android:layout_width="0dp"
@@ -131,7 +131,7 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Jobs Card -->
+                
                 <androidx.cardview.widget.CardView
                     android:id="@+id/jobsCard"
                     android:layout_width="0dp"
@@ -171,7 +171,7 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Applications Card -->
+                
                 <androidx.cardview.widget.CardView
                     android:id="@+id/applicationsCard"
                     android:layout_width="0dp"
@@ -212,7 +212,7 @@
                 </androidx.cardview.widget.CardView>
             </GridLayout>
 
-            <!-- Admin Actions Section -->
+            
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -222,7 +222,7 @@
                 android:textColor="@android:color/white"
                 android:layout_marginBottom="16dp"/>
 
-            <!-- Admin Actions Cards - Grid Layout -->
+            
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

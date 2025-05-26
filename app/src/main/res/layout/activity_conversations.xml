@@ -24,7 +24,7 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Search Bar -->
+        
         <androidx.cardview.widget.CardView
             android:id="@+id/searchBarCard"
             android:layout_width="match_parent"
@@ -90,7 +90,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Debug buttons for fixing conversation names -->
+        
         <LinearLayout
             android:id="@+id/buttonsLayout"
             android:layout_width="wrap_content"
@@ -118,7 +118,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- FAB for new conversation (optional) -->
+    
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/newConversationFab"
         android:layout_width="wrap_content"

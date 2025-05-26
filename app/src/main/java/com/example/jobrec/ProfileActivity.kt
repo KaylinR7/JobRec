@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
@@ -40,7 +39,6 @@ import android.view.MenuItem
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.example.jobrec.models.FieldCategories
 import com.example.jobrec.adapters.CertificateAdapter
-
 class ProfileActivity : AppCompatActivity() {
     private lateinit var toolbar: MaterialToolbar
     private lateinit var nameInput: TextInputEditText
@@ -78,7 +76,6 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var addCertificateButton: MaterialButton
     private lateinit var getSuggestionsButton: MaterialButton
     private val TAG = "ProfileActivity"
-
     private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
@@ -86,7 +83,6 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
     }
-
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -96,12 +92,9 @@ class ProfileActivity : AppCompatActivity() {
             Toast.makeText(this, "Permission required to change profile picture", Toast.LENGTH_SHORT).show()
         }
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
-
-        // Set up toolbar with back button
         toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -109,32 +102,19 @@ class ProfileActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
             title = "Profile"
         }
-
-        // Initialize Firebase
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         storage = FirebaseStorage.getInstance()
-
-        // Initialize views
         initializeViews()
-
-        // Set up back button handling
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 finish()
             }
         })
-
-        // Set up button click listeners
         setupClickListeners()
-
-        // Setup dropdown menus
         setupDropdowns()
-
-        // Load user data
         loadUserData()
     }
-
     private fun initializeViews() {
         nameInput = findViewById(R.id.nameInput)
         surnameInput = findViewById(R.id.surnameInput)
@@ -157,15 +137,11 @@ class ProfileActivity : AppCompatActivity() {
         referencesContainer = findViewById(R.id.referencesContainer)
         addReferenceButton = findViewById(R.id.addReferenceButton)
         getSuggestionsButton = findViewById(R.id.getSuggestionsButton)
-
-        // Initialize dropdown fields
         provinceInput = findViewById(R.id.provinceInput)
         yearsOfExperienceInput = findViewById(R.id.yearsOfExperienceInput)
         expectedSalaryInput = findViewById(R.id.expectedSalaryInput)
         fieldInput = findViewById(R.id.fieldInput)
         subFieldInput = findViewById(R.id.subFieldInput)
-
-        // Set up RecyclerViews
         experienceRecyclerView.layoutManager = LinearLayoutManager(this)
         educationRecyclerView.layoutManager = LinearLayoutManager(this)
         experienceAdapter = ExperienceAdapter()
@@ -173,32 +149,25 @@ class ProfileActivity : AppCompatActivity() {
         experienceRecyclerView.adapter = experienceAdapter
         educationRecyclerView.adapter = educationAdapter
     }
-
     private fun setupClickListeners() {
         changePhotoButton.setOnClickListener {
             checkPermissionAndPickImage()
         }
-
         saveButton.setOnClickListener {
             saveProfile()
         }
-
         addExperienceButton.setOnClickListener {
             experienceAdapter.addNewExperience()
         }
-
         addEducationButton.setOnClickListener {
             educationAdapter.addNewEducation()
         }
-
         addReferenceButton.setOnClickListener {
             addReferenceField()
         }
-
         getSuggestionsButton.setOnClickListener {
             showSummarySuggestions()
         }
-
         skillsInput.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE || (event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 val skill = skillsInput.text.toString().trim()
@@ -212,18 +181,13 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun addReferenceField() {
         val referenceLayout = layoutInflater.inflate(R.layout.item_reference, referencesContainer, false)
-
-        // Set up remove button
         referenceLayout.findViewById<MaterialButton>(R.id.btnRemoveReference)?.setOnClickListener {
             referencesContainer.removeView(referenceLayout)
         }
-
         referencesContainer.addView(referenceLayout)
     }
-
     private fun getReferencesList(): List<Map<String, String>> {
         val references = mutableListOf<Map<String, String>>()
         for (i in 0 until referencesContainer.childCount) {
@@ -233,7 +197,6 @@ class ProfileActivity : AppCompatActivity() {
             val company = referenceView.findViewById<TextInputEditText>(R.id.etReferenceCompany).text.toString()
             val email = referenceView.findViewById<TextInputEditText>(R.id.etReferenceEmail).text.toString()
             val phone = referenceView.findViewById<TextInputEditText>(R.id.etReferencePhone).text.toString()
-
             if (name.isNotEmpty() || position.isNotEmpty() || company.isNotEmpty() || email.isNotEmpty() || phone.isNotEmpty()) {
                 references.add(mapOf(
                     "name" to name,
@@ -246,12 +209,8 @@ class ProfileActivity : AppCompatActivity() {
         }
         return references
     }
-
     private fun setupDropdowns() {
-        // Years of Experience options - match signup values exactly
         val yearsOptions = arrayOf("0-1 years", "1-3 years", "3-5 years", "5-10 years", "10+ years")
-
-        // Create custom adapter for years of experience
         val yearsAdapter = object : ArrayAdapter<String>(
             this,
             android.R.layout.simple_dropdown_item_1line,
@@ -265,26 +224,20 @@ class ProfileActivity : AppCompatActivity() {
                         results.count = yearsOptions.size
                         return results
                     }
-
                     override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
                         notifyDataSetChanged()
                     }
                 }
             }
         }
-
         yearsOfExperienceInput.setAdapter(yearsAdapter)
         yearsOfExperienceInput.setOnClickListener {
             yearsOfExperienceInput.showDropDown()
         }
-
-        // Province options
         val provinces = arrayOf(
             "Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal",
             "Limpopo", "Mpumalanga", "Northern Cape", "North West", "Western Cape"
         )
-
-        // Create custom adapter for province
         val provinceAdapter = object : ArrayAdapter<String>(
             this,
             android.R.layout.simple_dropdown_item_1line,
@@ -298,20 +251,16 @@ class ProfileActivity : AppCompatActivity() {
                         results.count = provinces.size
                         return results
                     }
-
                     override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
                         notifyDataSetChanged()
                     }
                 }
             }
         }
-
         provinceInput.setAdapter(provinceAdapter)
         provinceInput.setOnClickListener {
             provinceInput.showDropDown()
         }
-
-        // Expected Salary options
         val salaryOptions = arrayOf(
             "R0 - R10,000",
             "R10,000 - R20,000",
@@ -320,8 +269,6 @@ class ProfileActivity : AppCompatActivity() {
             "R40,000 - R50,000",
             "R50,000+"
         )
-
-        // Create custom adapter for salary
         val salaryAdapter = object : ArrayAdapter<String>(
             this,
             android.R.layout.simple_dropdown_item_1line,
@@ -335,23 +282,17 @@ class ProfileActivity : AppCompatActivity() {
                         results.count = salaryOptions.size
                         return results
                     }
-
                     override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
                         notifyDataSetChanged()
                     }
                 }
             }
         }
-
         expectedSalaryInput.setAdapter(salaryAdapter)
         expectedSalaryInput.setOnClickListener {
             expectedSalaryInput.showDropDown()
         }
-
-        // Field options - get directly from FieldCategories to ensure consistency
         val fieldOptions = FieldCategories.fields.keys.toTypedArray()
-
-        // Create custom adapter for field
         val fieldAdapter = object : ArrayAdapter<String>(
             this,
             android.R.layout.simple_dropdown_item_1line,
@@ -365,29 +306,22 @@ class ProfileActivity : AppCompatActivity() {
                         results.count = fieldOptions.size
                         return results
                     }
-
                     override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
                         notifyDataSetChanged()
                     }
                 }
             }
         }
-
         fieldInput.setAdapter(fieldAdapter)
         fieldInput.setOnClickListener {
             fieldInput.showDropDown()
         }
-
-        // Setup field selection listener to update subfields
         fieldInput.setOnItemClickListener { _, _, _, _ ->
             val selectedField = fieldInput.text.toString()
             updateSubFieldDropdown(selectedField)
         }
-
-        // Initially disable subfield dropdown
         subFieldInput.isEnabled = false
     }
-
     private fun loadUserData() {
         val userId = auth.currentUser?.uid
         if (userId != null) {
@@ -397,40 +331,28 @@ class ProfileActivity : AppCompatActivity() {
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
                         Log.d(TAG, "Document exists: ${document.exists()}")
-
-                        // Load basic information
                         nameInput.setText(document.getString("name"))
                         surnameInput.setText(document.getString("surname"))
                         emailInput.setText(document.getString("email"))
                         phoneNumberInput.setText(document.getString("phoneNumber"))
                         addressInput.setText(document.getString("address"))
                         summaryInput.setText(document.getString("summary"))
-
-                        // Load dropdown values
                         provinceInput.setText(document.getString("province") ?: "")
                         yearsOfExperienceInput.setText(document.getString("yearsOfExperience") ?: "")
                         expectedSalaryInput.setText(document.getString("expectedSalary") ?: "")
-
-                        // Load field and update subfield dropdown
                         val field = document.getString("field") ?: ""
                         fieldInput.setText(field)
                         if (field.isNotEmpty()) {
                             updateSubFieldDropdown(field)
                             subFieldInput.setText(document.getString("subField") ?: "")
                         }
-
-                        // Load social links
                         linkedinInput.setText(document.getString("linkedin"))
                         githubInput.setText(document.getString("github"))
                         portfolioInput.setText(document.getString("portfolio"))
-
-                        // Load skills
                         val skills = document.get("skills") as? List<String>
                         skills?.forEach { skill ->
                             addSkillChip(skill)
                         }
-
-                        // Load experience
                         val experienceList = document.get("experience") as? List<Map<String, Any>>
                         experienceList?.forEach { experience ->
                             experienceAdapter.addExperience(
@@ -443,8 +365,6 @@ class ProfileActivity : AppCompatActivity() {
                                 )
                             )
                         }
-
-                        // Load education
                         val educationList = document.get("education") as? List<Map<String, Any>>
                         educationList?.forEach { education ->
                             educationAdapter.addEducation(
@@ -457,10 +377,6 @@ class ProfileActivity : AppCompatActivity() {
                                 )
                             )
                         }
-
-
-
-                        // Load references
                         val referencesList = document.get("references") as? List<Map<String, String>>
                         referencesList?.forEach { reference ->
                             val referenceLayout = layoutInflater.inflate(R.layout.item_reference, referencesContainer, false)
@@ -469,16 +385,11 @@ class ProfileActivity : AppCompatActivity() {
                             referenceLayout.findViewById<TextInputEditText>(R.id.etReferenceCompany).setText(reference["company"])
                             referenceLayout.findViewById<TextInputEditText>(R.id.etReferenceEmail).setText(reference["email"])
                             referenceLayout.findViewById<TextInputEditText>(R.id.etReferencePhone).setText(reference["phone"])
-
-                            // Set up remove button
                             referenceLayout.findViewById<MaterialButton>(R.id.btnRemoveReference).setOnClickListener {
                                 referencesContainer.removeView(referenceLayout)
                             }
-
                             referencesContainer.addView(referenceLayout)
                         }
-
-                        // Load profile image
                         val imageUrl = document.getString("profileImageUrl")
                         if (!imageUrl.isNullOrEmpty()) {
                             Glide.with(this)
@@ -488,7 +399,6 @@ class ProfileActivity : AppCompatActivity() {
                                 .error(R.drawable.ic_person)
                                 .into(profileImage)
                         } else {
-                            // Set default image if no profile image is available
                             profileImage.setImageResource(R.drawable.ic_person)
                         }
                     } else {
@@ -501,7 +411,6 @@ class ProfileActivity : AppCompatActivity() {
                 }
         }
     }
-
     private fun saveProfile() {
         val userId = auth.currentUser?.uid
         if (userId != null) {
@@ -525,7 +434,6 @@ class ProfileActivity : AppCompatActivity() {
                 "field" to fieldInput.text.toString().trim(),
                 "subField" to subFieldInput.text.toString().trim()
             )
-
             db.collection("users").document(userId)
                 .set(userData)
                 .addOnSuccessListener {
@@ -538,7 +446,6 @@ class ProfileActivity : AppCompatActivity() {
                 }
         }
     }
-
     private fun getSkillsList(): List<String> {
         val skills = mutableListOf<String>()
         for (i in 0 until skillsChipGroup.childCount) {
@@ -547,7 +454,6 @@ class ProfileActivity : AppCompatActivity() {
         }
         return skills
     }
-
     private fun addSkillChip(skill: String) {
         val chip = Chip(this).apply {
             text = skill
@@ -558,10 +464,8 @@ class ProfileActivity : AppCompatActivity() {
         }
         skillsChipGroup.addView(chip)
     }
-
     private fun checkPermissionAndPickImage() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // For Android 13+ (API 33+), we need to request READ_MEDIA_IMAGES permission
             when {
                 ContextCompat.checkSelfPermission(
                     this,
@@ -570,7 +474,6 @@ class ProfileActivity : AppCompatActivity() {
                     openImagePicker()
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES) -> {
-                    // Show an explanation to the user
                     showPermissionExplanationDialog(Manifest.permission.READ_MEDIA_IMAGES)
                 }
                 else -> {
@@ -578,7 +481,6 @@ class ProfileActivity : AppCompatActivity() {
                 }
             }
         } else {
-            // For Android 12 and below, use READ_EXTERNAL_STORAGE
             when {
                 ContextCompat.checkSelfPermission(
                     this,
@@ -587,7 +489,6 @@ class ProfileActivity : AppCompatActivity() {
                     openImagePicker()
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE) -> {
-                    // Show an explanation to the user
                     showPermissionExplanationDialog(Manifest.permission.READ_EXTERNAL_STORAGE)
                 }
                 else -> {
@@ -596,7 +497,6 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun showPermissionExplanationDialog(permission: String) {
         MaterialAlertDialogBuilder(this)
             .setTitle("Permission Required")
@@ -610,27 +510,20 @@ class ProfileActivity : AppCompatActivity() {
             }
             .show()
     }
-
     private fun openImagePicker() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         getContent.launch(intent)
     }
-
     private fun uploadImage(imageUri: Uri) {
         val userId = auth.currentUser?.uid ?: return
         val storageRef = storage.reference.child("profile_images/$userId.jpg")
-
-        // Show loading toast
         Toast.makeText(this, "Uploading profile picture...", Toast.LENGTH_SHORT).show()
-
         storageRef.putFile(imageUri)
             .addOnSuccessListener {
                 storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                    // Update profile image in Firestore
                     db.collection("users").document(userId)
                         .update("profileImageUrl", downloadUri.toString())
                         .addOnSuccessListener {
-                            // Update image in ImageView
                             Glide.with(this)
                                 .load(downloadUri)
                                 .transform(CircleCrop())
@@ -650,17 +543,14 @@ class ProfileActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error uploading image", Toast.LENGTH_SHORT).show()
             }
     }
-
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
     }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.profile_menu, menu)
         return true
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
@@ -678,7 +568,6 @@ class ProfileActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-
     private fun showLogoutConfirmationDialog() {
         MaterialAlertDialogBuilder(this)
             .setTitle("Logout")
@@ -689,7 +578,6 @@ class ProfileActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
-
     private fun logout() {
         auth.signOut()
         val intent = Intent(this, LoginActivity::class.java)
@@ -697,13 +585,9 @@ class ProfileActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-
     private fun updateSubFieldDropdown(field: String) {
-        // Get subcategories for the selected field from FieldCategories
         val subFields = FieldCategories.fields[field] ?: listOf()
-
         if (subFields.isNotEmpty()) {
-            // Create custom adapter for subfield
             val subFieldAdapter = object : ArrayAdapter<String>(
                 this,
                 android.R.layout.simple_dropdown_item_1line,
@@ -717,43 +601,33 @@ class ProfileActivity : AppCompatActivity() {
                             results.count = subFields.size
                             return results
                         }
-
                         override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
                             notifyDataSetChanged()
                         }
                     }
                 }
             }
-
-            // Enable the subfield input
             subFieldInput.isEnabled = true
-            subFieldInput.setText("", false) // Clear previous selection
+            subFieldInput.setText("", false) 
             subFieldInput.setAdapter(subFieldAdapter)
-
-            // Set up click listener for subfield dropdown
             subFieldInput.setOnClickListener {
                 subFieldInput.showDropDown()
             }
         } else {
-            // If no subcategories exist for this field
             subFieldInput.setText("")
             subFieldInput.isEnabled = false
         }
     }
-
     private fun showSummarySuggestions() {
         val field = fieldInput.text.toString()
         val subField = subFieldInput.text.toString()
         val experience = yearsOfExperienceInput.text.toString()
         val skills = getSkillsList()
-
         val suggestions = generateSummarySuggestions(field, subField, experience, skills)
-
         if (suggestions.isEmpty()) {
             Toast.makeText(this, "Please fill in more profile details to get suggestions", Toast.LENGTH_SHORT).show()
             return
         }
-
         val builder = MaterialAlertDialogBuilder(this)
         builder.setTitle("Professional Summary Suggestions")
         builder.setItems(suggestions.toTypedArray()) { _, which ->
@@ -762,15 +636,11 @@ class ProfileActivity : AppCompatActivity() {
         builder.setNegativeButton("Cancel", null)
         builder.show()
     }
-
     private fun generateSummarySuggestions(field: String, subField: String, experience: String, skills: List<String>): List<String> {
         val suggestions = mutableListOf<String>()
-
         if (field.isEmpty()) {
             return suggestions
         }
-
-        // Extract years from experience string
         val years = when {
             experience.contains("0-1") -> "entry-level"
             experience.contains("1-3") -> "junior"
@@ -779,24 +649,16 @@ class ProfileActivity : AppCompatActivity() {
             experience.contains("10+") -> "expert"
             else -> ""
         }
-
-        // Create skill string
         val skillsText = if (skills.isNotEmpty()) {
             "with expertise in ${skills.take(3).joinToString(", ")}" +
             if (skills.size > 3) " and other areas" else ""
         } else ""
-
-        // Generate suggestions based on field and experience
         if (field.isNotEmpty() && years.isNotEmpty()) {
             val fieldSpecific = if (subField.isNotEmpty()) "$field specializing in $subField" else field
-
             suggestions.add("$years $fieldSpecific professional $skillsText. Passionate about delivering high-quality work and continuously improving my skills to stay at the forefront of the industry.")
-
             suggestions.add("Results-driven $years professional in the $fieldSpecific field $skillsText. Committed to excellence and innovation in every project I undertake.")
-
             suggestions.add("Dedicated $fieldSpecific professional with ${experience.lowercase()} experience $skillsText. Seeking opportunities to apply my skills and knowledge to make a meaningful impact.")
         }
-
         return suggestions
     }
 }

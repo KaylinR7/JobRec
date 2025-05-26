@@ -52,7 +52,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Job Header Card -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -262,7 +262,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Job Description Card -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -296,7 +296,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Job Requirements Card -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -332,7 +332,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Action Bar -->
+    
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

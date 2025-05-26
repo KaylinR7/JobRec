@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -11,19 +10,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-
 class EmployerJobsActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: EmployerJobsAdapter
     private lateinit var companyId: String
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_employer_jobs)
-
-        // Setup toolbar with black back button
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -31,22 +26,14 @@ class EmployerJobsActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
             title = "Manage Jobs"
         }
-
-        // Set white navigation icon for red toolbar
         toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
-
-        // Initialize Firebase
         db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
-
-        // Get company ID from intent
         companyId = intent.getStringExtra("companyId") ?: run {
             Toast.makeText(this, "Error: Company ID not found", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
-
-        // Setup RecyclerView
         recyclerView = findViewById(R.id.employerJobsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = EmployerJobsAdapter(
@@ -55,28 +42,21 @@ class EmployerJobsActivity : AppCompatActivity() {
             onDeleteClick = { job -> showDeleteConfirmation(job) }
         )
         recyclerView.adapter = adapter
-
-        // Setup FAB
         findViewById<FloatingActionButton>(R.id.addJobFab)?.setOnClickListener {
             val intent = Intent(this, PostJobActivity::class.java)
             intent.putExtra("companyId", companyId)
             startActivity(intent)
         }
-
-        // Load jobs
         loadJobs()
     }
-
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
     }
-
     override fun onResume() {
         super.onResume()
-        loadJobs() // Refresh jobs when returning to this activity
+        loadJobs() 
     }
-
     private fun loadJobs() {
         db.collection("jobs")
             .whereEqualTo("companyId", companyId)
@@ -91,14 +71,12 @@ class EmployerJobsActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error loading jobs: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
     private fun editJob(job: Job) {
         val intent = Intent(this, EditJobActivity::class.java)
         intent.putExtra("jobId", job.id)
         intent.putExtra("companyId", companyId)
         startActivity(intent)
     }
-
     private fun showDeleteConfirmation(job: Job) {
         AlertDialog.Builder(this)
             .setTitle("Delete Job")
@@ -109,7 +87,6 @@ class EmployerJobsActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
-
     private fun deleteJob(job: Job) {
         db.collection("jobs")
             .document(job.id)

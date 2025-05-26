@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
@@ -8,15 +7,11 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import android.graphics.Typeface
-
 class ViewCvActivity : AppCompatActivity() {
     private lateinit var cvContentText: TextView
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_cv)
-
-        // Set up toolbar with back button
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -24,10 +19,7 @@ class ViewCvActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
             title = "Resume"
         }
-
         cvContentText = findViewById(R.id.cvContentText)
-
-        // Get CV content from intent
         val cvContent = intent.getStringExtra("cvContent")
         if (cvContent != null) {
             cvContentText.text = formatCvContent(cvContent)
@@ -35,35 +27,28 @@ class ViewCvActivity : AppCompatActivity() {
             cvContentText.text = "No resume content available"
         }
     }
-
     private fun formatCvContent(content: String): SpannableStringBuilder {
         val builder = SpannableStringBuilder()
         val lines = content.split("\n")
-        
         for (line in lines) {
             when {
                 line.endsWith(":") -> {
-                    // Section headers
                     val spannable = SpannableString(line + "\n")
                     spannable.setSpan(StyleSpan(Typeface.BOLD), 0, line.length, 0)
                     builder.append(spannable)
                 }
                 line.contains(" at ") || line.contains(" - ") -> {
-                    // Job titles and education
                     val spannable = SpannableString(line + "\n")
                     spannable.setSpan(StyleSpan(Typeface.BOLD), 0, line.length, 0)
                     builder.append(spannable)
                 }
                 else -> {
-                    // Regular text
                     builder.append(line + "\n")
                 }
             }
         }
-        
         return builder
     }
-
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true

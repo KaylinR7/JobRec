@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -7,12 +6,10 @@ import androidx.appcompat.widget.Toolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
-
 class EditJobActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private lateinit var jobId: String
     private lateinit var companyId: String
-
     private lateinit var titleInput: TextInputEditText
     private lateinit var descriptionInput: TextInputEditText
     private lateinit var requirementsInput: TextInputEditText
@@ -20,12 +17,9 @@ class EditJobActivity : AppCompatActivity() {
     private lateinit var typeInput: TextInputEditText
     private lateinit var salaryInput: TextInputEditText
     private lateinit var saveButton: MaterialButton
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_job)
-
-        // Setup toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -33,11 +27,7 @@ class EditJobActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
             title = "Edit Job"
         }
-
-        // Initialize Firebase
         db = FirebaseFirestore.getInstance()
-
-        // Get job ID and company ID from intent
         jobId = intent.getStringExtra("jobId") ?: run {
             Toast.makeText(this, "Error: Job ID not found", Toast.LENGTH_SHORT).show()
             finish()
@@ -48,8 +38,6 @@ class EditJobActivity : AppCompatActivity() {
             finish()
             return
         }
-
-        // Initialize views
         titleInput = findViewById(R.id.titleInput)
         descriptionInput = findViewById(R.id.descriptionInput)
         requirementsInput = findViewById(R.id.requirementsInput)
@@ -57,21 +45,15 @@ class EditJobActivity : AppCompatActivity() {
         typeInput = findViewById(R.id.typeInput)
         salaryInput = findViewById(R.id.salaryInput)
         saveButton = findViewById(R.id.saveButton)
-
-        // Load job data
         loadJobData()
-
-        // Setup save button
         saveButton.setOnClickListener {
             saveJob()
         }
     }
-
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
     }
-
     private fun loadJobData() {
         db.collection("jobs")
             .document(jobId)
@@ -97,7 +79,6 @@ class EditJobActivity : AppCompatActivity() {
                 finish()
             }
     }
-
     private fun saveJob() {
         val title = titleInput.text.toString().trim()
         val description = descriptionInput.text.toString().trim()
@@ -105,23 +86,17 @@ class EditJobActivity : AppCompatActivity() {
         val location = locationInput.text.toString().trim()
         val type = typeInput.text.toString().trim()
         val salary = salaryInput.text.toString().trim()
-
         if (title.isEmpty() || description.isEmpty() || requirements.isEmpty() ||
             location.isEmpty() || type.isEmpty() || salary.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
             return
         }
-
-        // First get the current job data to preserve fields we're not updating
         db.collection("jobs")
             .document(jobId)
             .get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
-                    // Get existing job data
                     val existingJob = document.toObject(Job::class.java)
-
-                    // Create updated job object with all fields
                     val updatedJob = existingJob?.copy(
                         title = title,
                         description = description,
@@ -143,8 +118,6 @@ class EditJobActivity : AppCompatActivity() {
                         companyId = companyId,
                         status = "active"
                     )
-
-                    // Convert to map for Firestore (excluding id field which is handled separately)
                     val jobData = mapOf(
                         "title" to updatedJob.title,
                         "description" to updatedJob.description,
@@ -163,8 +136,6 @@ class EditJobActivity : AppCompatActivity() {
                         "province" to (existingJob?.province ?: ""),
                         "experienceLevel" to (existingJob?.experienceLevel ?: "")
                     )
-
-                    // Use set with merge option to update the document
                     db.collection("jobs")
                         .document(jobId)
                         .set(jobData)
@@ -176,7 +147,6 @@ class EditJobActivity : AppCompatActivity() {
                             Toast.makeText(this, "Error updating job: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                 } else {
-                    // If document doesn't exist, create a new one
                     val newJob = Job(
                         id = jobId,
                         title = title,
@@ -188,8 +158,6 @@ class EditJobActivity : AppCompatActivity() {
                         companyId = companyId,
                         status = "active"
                     )
-
-                    // Convert to map for Firestore
                     val jobData = mapOf(
                         "title" to newJob.title,
                         "description" to newJob.description,
@@ -208,8 +176,6 @@ class EditJobActivity : AppCompatActivity() {
                         "province" to newJob.province,
                         "experienceLevel" to newJob.experienceLevel
                     )
-
-                    // Create a new document
                     db.collection("jobs")
                         .document(jobId)
                         .set(jobData)

@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.ArrayAdapter
@@ -16,13 +15,10 @@ import com.example.jobrec.models.FieldCategories
 import com.example.jobrec.models.Job
 import com.example.jobrec.services.NotificationManager
 import kotlinx.coroutines.launch
-
 class PostJobActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private lateinit var companyId: String
     private lateinit var binding: ActivityPostJobBinding
-
-    // UI elements
     private lateinit var jobTitleInput: TextInputEditText
     private lateinit var jobFieldInput: AutoCompleteTextView
     private lateinit var jobSpecializationInput: AutoCompleteTextView
@@ -34,37 +30,27 @@ class PostJobActivity : AppCompatActivity() {
     private lateinit var descriptionInput: TextInputEditText
     private lateinit var requirementsInput: TextInputEditText
     private lateinit var postButton: MaterialButton
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPostJobBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Setup toolbar with back button
         setSupportActionBar(binding.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
             title = "Post New Job"
         }
-
-        // Initialize Firestore
         db = FirebaseFirestore.getInstance()
-
-        // Get company ID from intent
         companyId = intent.getStringExtra("companyId") ?: ""
         if (companyId.isEmpty()) {
             Toast.makeText(this, "Error: Company ID not found", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
-
-        // Initialize UI elements
         initializeViews()
         setupJobTypeDropdown()
         setupPostButton()
     }
-
     private fun initializeViews() {
         jobTitleInput = binding.jobTitleInput
         jobFieldInput = binding.jobFieldInput
@@ -78,36 +64,24 @@ class PostJobActivity : AppCompatActivity() {
         requirementsInput = binding.requirementsInput
         postButton = binding.postButton
     }
-
     private fun setupJobTypeDropdown() {
-        // Job Field options - get directly from FieldCategories to ensure consistency
         val fieldOptions = FieldCategories.fields.keys.toTypedArray()
         val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, fieldOptions)
         jobFieldInput.setAdapter(fieldAdapter)
-
-        // Initially disable specialization dropdown
         jobSpecializationInput.isEnabled = false
-
-        // Setup field selection listener to update specializations
         jobFieldInput.setOnItemClickListener { _, _, position, _ ->
             val selectedField = fieldOptions[position]
             updateSpecializationDropdown(selectedField)
         }
-
-        // Job Type options
         val jobTypes = arrayOf("Full-time", "Part-time", "Contract", "Internship", "Remote")
         val typeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, jobTypes)
         jobTypeInput.setAdapter(typeAdapter)
-
-        // Province options - same as in signup
         val provinces = arrayOf(
             "Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal",
             "Limpopo", "Mpumalanga", "Northern Cape", "North West", "Western Cape"
         )
         val provinceAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, provinces)
         provinceInput.setAdapter(provinceAdapter)
-
-        // Salary Range options - same as in signup
         val salaryOptions = arrayOf(
             "R0 - R10,000",
             "R10,000 - R20,000",
@@ -118,33 +92,25 @@ class PostJobActivity : AppCompatActivity() {
         )
         val salaryAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, salaryOptions)
         salaryRangeInput.setAdapter(salaryAdapter)
-
-        // Experience Level options - same as in signup
         val yearsOptions = arrayOf("0-1 years", "1-3 years", "3-5 years", "5-10 years", "10+ years")
         val experienceAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, yearsOptions)
         experienceInput.setAdapter(experienceAdapter)
     }
-
     private fun updateSpecializationDropdown(field: String) {
-        // Get subcategories for the selected field from FieldCategories
         val subFields = FieldCategories.fields[field] ?: listOf()
-
         if (subFields.isNotEmpty()) {
             val subFieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, subFields)
             jobSpecializationInput.setAdapter(subFieldAdapter)
             jobSpecializationInput.isEnabled = true
-            jobSpecializationInput.setText("", false) // Clear previous selection
+            jobSpecializationInput.setText("", false) 
         } else {
-            // If no subcategories exist for this field
             jobSpecializationInput.setText("")
             jobSpecializationInput.isEnabled = false
         }
     }
-
     private fun setupPostButton() {
         postButton.setOnClickListener {
             if (validateInputs()) {
-                // First get the company's profile information
                 db.collection("companies")
                     .document(companyId)
                     .get()
@@ -162,65 +128,51 @@ class PostJobActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun validateInputs(): Boolean {
         var isValid = true
-
         if (jobTitleInput.text.isNullOrBlank()) {
             jobTitleInput.error = "Job title is required"
             isValid = false
         }
-
         if (jobFieldInput.text.isNullOrBlank()) {
             jobFieldInput.error = "Job field is required"
             isValid = false
         }
-
         if (jobSpecializationInput.isEnabled && jobSpecializationInput.text.isNullOrBlank()) {
             jobSpecializationInput.error = "Specialization is required"
             isValid = false
         }
-
         if (jobTypeInput.text.isNullOrBlank()) {
             jobTypeInput.error = "Job type is required"
             isValid = false
         }
-
         if (provinceInput.text.isNullOrBlank()) {
             provinceInput.error = "Province is required"
             isValid = false
         }
-
         if (locationInput.text.isNullOrBlank()) {
             locationInput.error = "Specific location is required"
             isValid = false
         }
-
         if (salaryRangeInput.text.isNullOrBlank()) {
             salaryRangeInput.error = "Salary range is required"
             isValid = false
         }
-
         if (experienceInput.text.isNullOrBlank()) {
             experienceInput.error = "Experience level is required"
             isValid = false
         }
-
         if (descriptionInput.text.isNullOrBlank()) {
             descriptionInput.error = "Job description is required"
             isValid = false
         }
-
         if (requirementsInput.text.isNullOrBlank()) {
             requirementsInput.error = "Requirements are required"
             isValid = false
         }
-
         return isValid
     }
-
     private fun postJob(company: Company) {
-        // Create job data
         val jobData = hashMapOf(
             "title" to jobTitleInput.text.toString(),
             "companyId" to companyId,
@@ -237,23 +189,15 @@ class PostJobActivity : AppCompatActivity() {
             "postedDate" to com.google.firebase.Timestamp.now(),
             "status" to "active"
         )
-
-        // Show loading state
         postButton.isEnabled = false
         postButton.text = "Posting..."
-
-        // Add job to Firestore
         db.collection("jobs")
             .add(jobData)
             .addOnSuccessListener { documentReference ->
-                // Create a Job object for notification
                 val jobId = documentReference.id
-
-                // Update the document with its ID
                 db.collection("jobs").document(jobId)
                     .update("id", jobId)
                     .addOnSuccessListener {
-                        // Create a Job object for notification
                         val job = Job(
                             id = jobId,
                             title = jobTitleInput.text.toString(),
@@ -272,18 +216,14 @@ class PostJobActivity : AppCompatActivity() {
                             postedDate = com.google.firebase.Timestamp.now(),
                             status = "active"
                         )
-
-                        // Send notification in a coroutine
                         lifecycleScope.launch {
                             try {
                                 val notificationManager = NotificationManager()
                                 notificationManager.sendNewJobNotification(job)
                             } catch (e: Exception) {
-                                // Log error but don't block job posting
                                 android.util.Log.e("PostJobActivity", "Error sending notification", e)
                             }
                         }
-
                         Toast.makeText(this, "Job posted successfully", Toast.LENGTH_SHORT).show()
                         finish()
                     }
@@ -299,7 +239,6 @@ class PostJobActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error posting job: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             onBackPressed()

@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
@@ -15,32 +14,24 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Locale
-
 class AdminEditCompanyDialog : DialogFragment() {
     private lateinit var company: Company
     private val db = FirebaseFirestore.getInstance()
     private val TAG = "AdminEditCompanyDialog"
-
-    // Callbacks for when a company is updated or deleted
     var onCompanyUpdated: (() -> Unit)? = null
     var onCompanyDeleted: (() -> Unit)? = null
     private var companyId: String = ""
     private var isNewCompany: Boolean = false
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-        // Set dialog width to match parent with margins
         dialog.setOnShowListener {
             val width = resources.displayMetrics.widthPixels
             val height = ViewGroup.LayoutParams.WRAP_CONTENT
             dialog.window?.setLayout((width * 0.9).toInt(), height)
         }
-
         return dialog
     }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,95 +39,65 @@ class AdminEditCompanyDialog : DialogFragment() {
     ): View? {
         return inflater.inflate(R.layout.dialog_admin_edit_company, container, false)
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Get company from arguments
         company = arguments?.getParcelable(ARG_COMPANY) ?: Company()
         companyId = arguments?.getString(ARG_COMPANY_ID) ?: ""
         isNewCompany = companyId.isEmpty()
-
-        // Set up UI with company data
         setupUI(view)
-
-        // Set up buttons
         view.findViewById<MaterialButton>(R.id.cancelButton).setOnClickListener {
             dismiss()
         }
-
         view.findViewById<MaterialButton>(R.id.saveButton).setOnClickListener {
             saveChanges(view)
         }
-
         view.findViewById<MaterialButton>(R.id.deleteButton).setOnClickListener {
             confirmDelete(view)
         }
-
-        // Hide delete button for new companies
         if (isNewCompany) {
             view.findViewById<MaterialButton>(R.id.deleteButton).visibility = View.GONE
         }
     }
-
     private fun setupUI(view: View) {
-        // Set dialog title
         val dialogTitle = if (isNewCompany) "Add New Company" else "Edit Company: ${company.companyName}"
         view.findViewById<TextView>(R.id.dialogTitleTextView).text = dialogTitle
-
-        // Set company details
         view.findViewById<TextInputEditText>(R.id.companyNameEditText).setText(company.companyName)
         view.findViewById<TextInputEditText>(R.id.industryEditText).setText(company.industry)
         view.findViewById<TextInputEditText>(R.id.locationEditText).setText(company.location)
         view.findViewById<TextInputEditText>(R.id.websiteEditText).setText(company.website)
         view.findViewById<TextInputEditText>(R.id.emailEditText).setText(company.email)
         view.findViewById<TextInputEditText>(R.id.descriptionEditText).setText(company.description)
-
-        // Disable email field for existing companies
         if (!isNewCompany) {
             view.findViewById<TextInputEditText>(R.id.emailEditText).isEnabled = false
         }
-
-        // Set up status dropdown
         val statusDropdown = view.findViewById<AutoCompleteTextView>(R.id.statusDropdown)
         val statusOptions = arrayOf("Active", "Inactive", "Pending", "Suspended")
         val statusAdapter = ArrayAdapter(requireContext(), R.layout.item_dropdown, statusOptions)
         statusDropdown.setAdapter(statusAdapter)
-
-        // Set current status (capitalize first letter)
         val currentStatus = if (company.status.isNotEmpty()) {
             company.status.replaceFirstChar {
                 if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
             }
         } else {
-            "Active" // Default for new companies
+            "Active" 
         }
         statusDropdown.setText(currentStatus, false)
     }
-
     private fun saveChanges(view: View) {
-        // Get updated values
         val newCompanyName = view.findViewById<TextInputEditText>(R.id.companyNameEditText).text.toString().trim()
         val newIndustry = view.findViewById<TextInputEditText>(R.id.industryEditText).text.toString().trim()
         val newLocation = view.findViewById<TextInputEditText>(R.id.locationEditText).text.toString().trim()
         val newWebsite = view.findViewById<TextInputEditText>(R.id.websiteEditText).text.toString().trim()
         val newEmail = view.findViewById<TextInputEditText>(R.id.emailEditText).text.toString().trim()
         val newDescription = view.findViewById<TextInputEditText>(R.id.descriptionEditText).text.toString().trim()
-
         val newStatusCapitalized = view.findViewById<AutoCompleteTextView>(R.id.statusDropdown).text.toString()
         val newStatus = newStatusCapitalized.lowercase()
-
-        // Validate input
         if (newCompanyName.isBlank() || newEmail.isBlank()) {
             Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
             return
         }
-
-        // Show loading state
         view.findViewById<MaterialButton>(R.id.saveButton).isEnabled = false
         view.findViewById<MaterialButton>(R.id.saveButton).text = "Saving..."
-
-        // Create updated company object
         val updatedCompany = Company(
             companyName = newCompanyName,
             industry = newIndustry,
@@ -146,31 +107,22 @@ class AdminEditCompanyDialog : DialogFragment() {
             description = newDescription,
             status = newStatus
         )
-
         if (isNewCompany) {
-            // Create new company in Firestore
             db.collection("companies")
                 .add(updatedCompany)
                 .addOnSuccessListener { documentReference ->
                     Log.d(TAG, "Company created successfully with ID: ${documentReference.id}")
                     Toast.makeText(context, "Company created successfully", Toast.LENGTH_SHORT).show()
-
-                    // Notify callback
                     onCompanyUpdated?.invoke()
-
-                    // Close dialog
                     dismiss()
                 }
                 .addOnFailureListener { e ->
                     Log.e(TAG, "Error creating company", e)
                     Toast.makeText(context, "Error creating company: ${e.message}", Toast.LENGTH_SHORT).show()
-
-                    // Reset button state
                     view.findViewById<MaterialButton>(R.id.saveButton).isEnabled = true
                     view.findViewById<MaterialButton>(R.id.saveButton).text = "Save Changes"
                 }
         } else {
-            // Update existing company in Firestore
             db.collection("companies").document(companyId)
                 .update(
                     mapOf(
@@ -186,26 +138,18 @@ class AdminEditCompanyDialog : DialogFragment() {
                 .addOnSuccessListener {
                     Log.d(TAG, "Company updated successfully")
                     Toast.makeText(context, "Company updated successfully", Toast.LENGTH_SHORT).show()
-
-                    // Notify callback
                     onCompanyUpdated?.invoke()
-
-                    // Close dialog
                     dismiss()
                 }
                 .addOnFailureListener { e ->
                     Log.e(TAG, "Error updating company", e)
                     Toast.makeText(context, "Error updating company: ${e.message}", Toast.LENGTH_SHORT).show()
-
-                    // Reset button state
                     view.findViewById<MaterialButton>(R.id.saveButton).isEnabled = true
                     view.findViewById<MaterialButton>(R.id.saveButton).text = "Save Changes"
                 }
         }
     }
-
     private fun confirmDelete(view: View) {
-        // Create confirmation dialog
         val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
             .setTitle("Delete Company")
             .setMessage("Are you sure you want to delete the company '${company.companyName}'? This will also delete all associated jobs.")
@@ -214,27 +158,18 @@ class AdminEditCompanyDialog : DialogFragment() {
             }
             .setNegativeButton("Cancel", null)
             .create()
-
         alertDialog.show()
-
-        // Style the dialog buttons
         alertDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)?.setTextColor(
             resources.getColor(R.color.status_rejected, requireContext().theme)
         )
     }
-
     private fun deleteCompany(view: View) {
-        // Show loading state
         view.findViewById<MaterialButton>(R.id.deleteButton).isEnabled = false
         view.findViewById<MaterialButton>(R.id.deleteButton).text = "Deleting..."
-
-        // Delete company from Firestore
         db.collection("companies").document(companyId)
             .delete()
             .addOnSuccessListener {
                 Log.d(TAG, "Company deleted successfully")
-
-                // Also delete all jobs associated with this company
                 db.collection("jobs")
                     .whereEqualTo("companyId", companyId)
                     .get()
@@ -243,14 +178,11 @@ class AdminEditCompanyDialog : DialogFragment() {
                         for (document in documents) {
                             batch.delete(db.collection("jobs").document(document.id))
                         }
-
                         if (documents.isEmpty) {
-                            // No jobs to delete
                             Toast.makeText(context, "Company deleted successfully", Toast.LENGTH_SHORT).show()
                             onCompanyDeleted?.invoke()
                             dismiss()
                         } else {
-                            // Delete all jobs in batch
                             batch.commit()
                                 .addOnSuccessListener {
                                     Log.d(TAG, "All associated jobs deleted successfully")
@@ -276,17 +208,13 @@ class AdminEditCompanyDialog : DialogFragment() {
             .addOnFailureListener { e ->
                 Log.e(TAG, "Error deleting company", e)
                 Toast.makeText(context, "Error deleting company: ${e.message}", Toast.LENGTH_SHORT).show()
-
-                // Reset button state
                 view.findViewById<MaterialButton>(R.id.deleteButton).isEnabled = true
                 view.findViewById<MaterialButton>(R.id.deleteButton).text = "Delete"
             }
     }
-
     companion object {
         private const val ARG_COMPANY = "company"
         private const val ARG_COMPANY_ID = "company_id"
-
         fun newInstance(company: Company, companyId: String = ""): AdminEditCompanyDialog {
             val fragment = AdminEditCompanyDialog()
             val args = Bundle()

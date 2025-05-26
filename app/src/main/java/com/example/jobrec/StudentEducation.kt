@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 data class StudentEducation(
     val institution: String = "",
     val degree: String = "",

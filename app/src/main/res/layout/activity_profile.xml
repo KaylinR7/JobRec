@@ -32,7 +32,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Profile Picture Section -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Personal Information Section -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -190,7 +190,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Professional Summary Section -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -312,7 +312,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Skills Section -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -360,7 +360,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Experience Section -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -405,7 +405,7 @@
 
 
 
-            <!-- Education Section -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -448,7 +448,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Social Links Section -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -521,7 +521,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- References Section -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -565,7 +565,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Save Button -->
+            
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/saveButton"
                 android:layout_width="match_parent"

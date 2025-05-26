@@ -38,7 +38,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Welcome Section -->
+                
                 <TextView
                     android:id="@+id/welcomeText"
                     android:layout_width="match_parent"
@@ -49,7 +49,7 @@
                     android:textColor="?android:textColorPrimary"
                     android:layout_marginBottom="24dp"/>
 
-                <!-- Stats Cards Row -->
+                
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -127,7 +127,7 @@
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
-                <!-- Recent Activity Section -->
+                
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -172,7 +172,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Quick Actions Section -->
+                
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -182,7 +182,7 @@
                     android:textColor="?android:textColorPrimary"
                     android:layout_marginBottom="16dp"/>
 
-                <!-- First row of buttons -->
+                
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -212,7 +212,7 @@
                         app:cornerRadius="8dp"/>
                 </LinearLayout>
 
-                <!-- Second row of buttons -->
+                
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

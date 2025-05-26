@@ -1,5 +1,4 @@
 package com.example.jobrec.models
-
 object FieldCategories {
     val fields = mapOf(
         "Information Technology" to listOf(
@@ -183,7 +182,6 @@ object FieldCategories {
             "Miscellaneous"
         )
     )
-
     val certifications = mapOf(
         "Information Technology" to listOf(
             "AWS Certified Solutions Architect",
@@ -258,7 +256,6 @@ object FieldCategories {
             "National Board Certification"
         )
     )
-
     val experienceRanges = listOf(
         "No Experience",
         "Less than 1 year",
@@ -269,12 +266,10 @@ object FieldCategories {
         "7-10 years",
         "10+ years"
     )
-
     fun getGraduationYears(): List<String> {
         val currentYear = java.time.Year.now().value
         return (currentYear downTo currentYear - 50).map { it.toString() }
     }
-
     val languages = listOf(
         "English",
         "Afrikaans",

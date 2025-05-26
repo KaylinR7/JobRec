@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,14 +13,11 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
-
 class EditApplicationDialog : DialogFragment() {
     private lateinit var application: Application
     private val db = FirebaseFirestore.getInstance()
-
     companion object {
         private const val ARG_APPLICATION_ID = "application_id"
-
         fun newInstance(application: Application): EditApplicationDialog {
             val args = Bundle()
             args.putString(ARG_APPLICATION_ID, application.id)
@@ -30,13 +26,11 @@ class EditApplicationDialog : DialogFragment() {
             return fragment
         }
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val applicationId = arguments?.getString(ARG_APPLICATION_ID) ?: return
         loadApplication(applicationId)
     }
-
     private fun loadApplication(applicationId: String) {
         db.collection("applications").document(applicationId)
             .get()
@@ -46,7 +40,6 @@ class EditApplicationDialog : DialogFragment() {
                 updateUI()
             }
     }
-
     private fun updateUI() {
         view?.let { view ->
             val jobTitleTextView = view.findViewById<TextView>(R.id.jobTitleTextView)
@@ -57,27 +50,19 @@ class EditApplicationDialog : DialogFragment() {
             val notesEditText = view.findViewById<TextInputEditText>(R.id.notesEditText)
             val saveButton = view.findViewById<MaterialButton>(R.id.saveButton)
             val deleteButton = view.findViewById<MaterialButton>(R.id.deleteButton)
-
-            // Set initial values
             jobTitleTextView.text = application.jobTitle
             companyNameTextView.text = application.companyName
             applicantNameTextView.text = application.applicantName
-
             val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
             dateTextView.text = dateFormat.format(application.appliedDate.toDate())
-
             notesEditText.setText(application.notes)
-
-            // Setup status dropdown
             val statuses = arrayOf("Pending", "Reviewed", "Shortlisted", "Rejected", "Hired")
             val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, statuses)
             statusDropdown.setAdapter(adapter)
             statusDropdown.setText(application.status, false)
-
             saveButton.setOnClickListener {
                 val updatedStatus = statusDropdown.text.toString()
                 val updatedNotes = notesEditText.text.toString()
-
                 db.collection("applications").document(application.id)
                     .update(
                         mapOf(
@@ -89,7 +74,6 @@ class EditApplicationDialog : DialogFragment() {
                         dismiss()
                     }
             }
-
             deleteButton.setOnClickListener {
                 db.collection("applications").document(application.id)
                     .delete()
@@ -99,7 +83,6 @@ class EditApplicationDialog : DialogFragment() {
             }
         }
     }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -107,7 +90,6 @@ class EditApplicationDialog : DialogFragment() {
     ): View? {
         return inflater.inflate(R.layout.dialog_edit_application, container, false)
     }
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return super.onCreateDialog(savedInstanceState).apply {
             window?.setLayout(

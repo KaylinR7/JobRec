@@ -29,7 +29,7 @@
             android:textColor="?android:attr/textColorSecondary"
             android:layout_marginBottom="24dp"/>
 
-        <!-- Personal Information Section -->
+        
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
             style="@style/Widget.CareerWorx.TextInputEditText"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Name field -->
+        
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
                 style="@style/Widget.CareerWorx.TextInputEditText"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Surname field -->
+        
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -71,7 +71,7 @@
                 style="@style/Widget.CareerWorx.TextInputEditText"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Email field -->
+        
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -87,7 +87,7 @@
                 style="@style/Widget.CareerWorx.TextInputEditText"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Password field -->
+        
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -104,7 +104,7 @@
                 style="@style/Widget.CareerWorx.TextInputEditText"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Register Button -->
+        
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRegister"
             android:layout_width="match_parent"

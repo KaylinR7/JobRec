@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.ArrayAdapter
@@ -19,48 +18,35 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
-
 class JobAlertsActivity : AppCompatActivity() {
     private lateinit var jobAlertRepository: JobAlertRepository
     private lateinit var notificationService: NotificationService
     private lateinit var jobAlertsAdapter: JobAlertsAdapter
-
     private lateinit var emailNotificationsSwitch: SwitchMaterial
     private lateinit var pushNotificationsSwitch: SwitchMaterial
     private lateinit var notificationFrequencyLayout: TextInputLayout
     private lateinit var notificationFrequencyDropdown: AutoCompleteTextView
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_job_alerts)
-
-        // Initialize repositories and services
         jobAlertRepository = JobAlertRepository()
         notificationService = NotificationService(this)
-
-        // Set up toolbar
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        // Initialize views
         initializeViews()
         setupNotificationPreferences()
         setupJobAlertsList()
         setupAddJobAlertButton()
     }
-
     private fun initializeViews() {
         emailNotificationsSwitch = findViewById(R.id.emailNotificationsSwitch)
         pushNotificationsSwitch = findViewById(R.id.pushNotificationsSwitch)
         notificationFrequencyLayout = findViewById(R.id.notificationFrequencyLayout)
         notificationFrequencyDropdown = findViewById(R.id.notificationFrequencyDropdown)
-
-        // Set up notification frequency dropdown
         val frequencies = arrayOf("Immediate", "Daily", "Weekly")
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, frequencies)
         notificationFrequencyDropdown.setAdapter(adapter)
     }
-
     private fun setupNotificationPreferences() {
         lifecycleScope.launch {
             try {
@@ -70,16 +56,12 @@ class JobAlertsActivity : AppCompatActivity() {
                     pushNotificationsSwitch.isChecked = it.pushNotifications
                     notificationFrequencyDropdown.setText(it.notificationFrequency, false)
                 }
-
-                // Set up listeners
                 emailNotificationsSwitch.setOnCheckedChangeListener { _, isChecked ->
                     updateNotificationPreference()
                 }
-
                 pushNotificationsSwitch.setOnCheckedChangeListener { _, isChecked ->
                     updateNotificationPreference()
                 }
-
                 notificationFrequencyDropdown.setOnItemClickListener { _, _, _, _ ->
                     updateNotificationPreference()
                 }
@@ -88,7 +70,6 @@ class JobAlertsActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun setupJobAlertsList() {
         val recyclerView = findViewById<RecyclerView>(R.id.jobAlertsRecyclerView)
         jobAlertsAdapter = JobAlertsAdapter(
@@ -99,16 +80,13 @@ class JobAlertsActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@JobAlertsActivity)
             adapter = jobAlertsAdapter
         }
-
         loadJobAlerts()
     }
-
     private fun setupAddJobAlertButton() {
         findViewById<FloatingActionButton>(R.id.addJobAlertFab).setOnClickListener {
             showAddJobAlertDialog()
         }
     }
-
     private fun loadJobAlerts() {
         lifecycleScope.launch {
             try {
@@ -119,7 +97,6 @@ class JobAlertsActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun updateNotificationPreference() {
         lifecycleScope.launch {
             try {
@@ -135,12 +112,8 @@ class JobAlertsActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun showAddJobAlertDialog() {
-        // TODO: Implement dialog for creating new job alert
-        // This will be implemented in the next step
     }
-
     private fun deleteJobAlert(alert: JobAlert) {
         MaterialAlertDialogBuilder(this)
             .setTitle("Delete Job Alert")
@@ -159,7 +132,6 @@ class JobAlertsActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
-
     private fun toggleJobAlert(alert: JobAlert) {
         lifecycleScope.launch {
             try {
@@ -176,7 +148,6 @@ class JobAlertsActivity : AppCompatActivity() {
             }
         }
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             onBackPressed()

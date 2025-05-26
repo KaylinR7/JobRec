@@ -1,5 +1,4 @@
 package com.example.jobrec.adapters
-
 import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
@@ -15,39 +14,31 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import java.util.Locale
-
 class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateViewHolder>() {
     private val certificates = mutableListOf<Certificate>()
-    
     data class Certificate(
         var name: String = "",
         var issuer: String = "",
         var year: String = "",
         var description: String = ""
     )
-    
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CertificateViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_certificate, parent, false)
         return CertificateViewHolder(view)
     }
-    
     override fun onBindViewHolder(holder: CertificateViewHolder, position: Int) {
         holder.bind(certificates[position])
     }
-    
     override fun getItemCount(): Int = certificates.size
-    
     fun addNewCertificate() {
         certificates.add(Certificate())
         notifyItemInserted(certificates.size - 1)
     }
-    
     fun addCertificate(certificate: Certificate) {
         certificates.add(certificate)
         notifyItemInserted(certificates.size - 1)
     }
-    
     fun getCertificatesList(): List<Map<String, String>> {
         return certificates.map { certificate ->
             mapOf(
@@ -58,7 +49,6 @@ class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateVi
             )
         }
     }
-    
     inner class CertificateViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val certificateNameLayout: TextInputLayout = itemView.findViewById(R.id.certificateNameLayout)
         private val certificateName: AutoCompleteTextView = itemView.findViewById(R.id.certificateName)
@@ -66,7 +56,6 @@ class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateVi
         private val certificateYear: TextInputEditText = itemView.findViewById(R.id.certificateYear)
         private val certificateDescription: TextInputEditText = itemView.findViewById(R.id.certificateDescription)
         private val removeButton: MaterialButton = itemView.findViewById(R.id.btnRemoveCertificate)
-        
         private val certificateOptions = arrayOf(
             "AWS Certified Solutions Architect",
             "AWS Certified Developer",
@@ -110,18 +99,12 @@ class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateVi
             "Certified Business Analysis Professional (CBAP)",
             "Other"
         )
-        
         fun bind(certificate: Certificate) {
-            // Setup certificate name dropdown with search
             setupCertificateNameDropdown()
-            
-            // Set values
             certificateName.setText(certificate.name)
             certificateIssuer.setText(certificate.issuer)
             certificateYear.setText(certificate.year)
             certificateDescription.setText(certificate.description)
-            
-            // Setup text change listeners
             certificateName.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -129,7 +112,6 @@ class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateVi
                     certificate.name = s.toString()
                 }
             })
-            
             certificateIssuer.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -137,7 +119,6 @@ class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateVi
                     certificate.issuer = s.toString()
                 }
             })
-            
             certificateYear.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -145,7 +126,6 @@ class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateVi
                     certificate.year = s.toString()
                 }
             })
-            
             certificateDescription.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -153,8 +133,6 @@ class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateVi
                     certificate.description = s.toString()
                 }
             })
-            
-            // Setup remove button
             removeButton.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
@@ -164,33 +142,25 @@ class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateVi
                 }
             }
         }
-        
         private fun setupCertificateNameDropdown() {
             val adapter = SearchableAdapter(itemView.context, android.R.layout.simple_dropdown_item_1line, certificateOptions)
             certificateName.setAdapter(adapter)
-            
-            // Show dropdown when focused
             certificateName.setOnFocusChangeListener { _, hasFocus ->
                 if (hasFocus) {
                     certificateName.showDropDown()
                 }
             }
-            
-            // Show dropdown when clicked
             certificateName.setOnClickListener {
                 certificateName.showDropDown()
             }
         }
     }
-    
-    // Custom adapter that allows searching in the dropdown
     class SearchableAdapter(
         context: Context,
         resource: Int,
         private val items: Array<String>
     ) : ArrayAdapter<String>(context, resource, items) {
         private val allItems: List<String> = items.toList()
-        
         override fun getFilter(): Filter {
             return object : Filter() {
                 override fun performFiltering(constraint: CharSequence?): FilterResults {
@@ -207,7 +177,6 @@ class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateVi
                     }
                     return filterResults
                 }
-                
                 @Suppress("UNCHECKED_CAST")
                 override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
                     clear()

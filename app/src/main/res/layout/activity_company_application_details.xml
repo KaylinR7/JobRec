@@ -33,7 +33,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Status Card -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -64,7 +64,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Applicant Details Card -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -134,7 +134,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Job Details Card -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -187,7 +187,7 @@
 
     </ScrollView>
 
-    <!-- Action Buttons -->
+    
     <LinearLayout
         android:id="@+id/actionButtonsLayout"
         android:layout_width="match_parent"
@@ -196,7 +196,7 @@
         android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Chat Button (always visible to allow messaging at any stage) -->
+        
         <Button
             android:id="@+id/chatButton"
             android:layout_width="match_parent"
@@ -206,7 +206,7 @@
             android:backgroundTint="@color/primary"
             android:textColor="@android:color/white" />
 
-        <!-- Review CV Button -->
+        
         <Button
             android:id="@+id/reviewCvButton"
             android:layout_width="match_parent"

@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -12,7 +11,6 @@ import android.widget.Button
 import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-
 class LoginActivity : AppCompatActivity() {
     private lateinit var emailInput: TextInputEditText
     private lateinit var passwordInput: TextInputEditText
@@ -21,63 +19,45 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var userTypeRadioGroup: android.widget.RadioGroup
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
-
     private val TAG = "LoginActivity"
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
-
         emailInput = findViewById(R.id.emailInput)
         passwordInput = findViewById(R.id.passwordInput)
         loginButton = findViewById(R.id.loginButton)
         signupButton = findViewById(R.id.signupButton)
-
         userTypeRadioGroup = findViewById(R.id.userTypeRadioGroup)
-
-        // Apply animations
         val slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up)
         val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in)
-
-        // Animate elements with delay
         findViewById<View>(R.id.emailInput).startAnimation(slideUp)
         findViewById<View>(R.id.passwordInput).startAnimation(slideUp)
         findViewById<View>(R.id.loginButton).startAnimation(slideUp)
         findViewById<View>(R.id.userTypeRadioGroup).startAnimation(fadeIn)
         findViewById<View>(R.id.signupButton).startAnimation(fadeIn)
-
-        // Check if user is already logged in
         val currentUser = auth.currentUser
         if (currentUser != null) {
             checkUserTypeAndRedirect(currentUser.email ?: "")
         }
-
         loginButton.setOnClickListener {
             loginUser()
         }
-
         signupButton.setOnClickListener {
             startActivity(Intent(this, UnifiedSignupActivity::class.java))
             overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
         }
     }
-
     private fun loginUser() {
         val email = emailInput.text.toString().trim()
         val password = passwordInput.text.toString().trim()
-
-        // Get the selected user type
         val selectedUserType = when (userTypeRadioGroup.checkedRadioButtonId) {
             R.id.studentRadioButton -> "student"
             R.id.companyRadioButton -> "company"
             R.id.adminRadioButton -> "admin"
-            else -> "student" // Default to student
+            else -> "student" 
         }
-
-        // Handle admin login separately
         if (selectedUserType == "admin") {
             if (email == "admin@jobrec.com" && password == "admin123") {
                 startActivity(Intent(this, AdminDashboardActivity::class.java))
@@ -89,19 +69,12 @@ class LoginActivity : AppCompatActivity() {
                 return
             }
         }
-
         if (validateInput(email, password)) {
-            // Show loading indicator
             Toast.makeText(this, "Logging in...", Toast.LENGTH_SHORT).show()
-
-            // Use FirebaseHelper to check user credentials
             FirebaseHelper.getInstance().checkUser(email, password) { success, userType, error ->
                 if (success) {
-                    // Login successful, check if user type matches selected type
                     val actualUserType = userType ?: "unknown"
-
                     when {
-                        // Student login
                         selectedUserType == "student" && (actualUserType == "user" || actualUserType == "unknown") -> {
                             runOnUiThread {
                                 val intent = Intent(this, HomeActivity::class.java)
@@ -109,7 +82,6 @@ class LoginActivity : AppCompatActivity() {
                                 finish()
                             }
                         }
-                        // Company login
                         selectedUserType == "company" && (actualUserType == "company" || actualUserType == "unknown") -> {
                             runOnUiThread {
                                 val intent = Intent(this, CompanyDashboardActivityNew::class.java)
@@ -117,7 +89,6 @@ class LoginActivity : AppCompatActivity() {
                                 finish()
                             }
                         }
-                        // User type mismatch
                         else -> {
                             runOnUiThread {
                                 Toast.makeText(this, "This account is not registered as a ${selectedUserType}. Please select the correct user type.", Toast.LENGTH_LONG).show()
@@ -125,9 +96,7 @@ class LoginActivity : AppCompatActivity() {
                         }
                     }
                 } else {
-                    // Login failed
                     runOnUiThread {
-                        // Provide a more specific error message
                         val errorMessage = when {
                             error?.contains("password is invalid", ignoreCase = true) == true ->
                                 "Incorrect password. Please try again."
@@ -137,9 +106,7 @@ class LoginActivity : AppCompatActivity() {
                                 "This account has been temporarily blocked due to too many failed login attempts. Please try again later."
                             else -> "Login failed: $error"
                         }
-
                         Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
-
                         if (errorMessage.contains("password", ignoreCase = true)) {
                             passwordInput.error = "Incorrect password"
                         } else if (errorMessage.contains("email", ignoreCase = true)) {
@@ -150,37 +117,28 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun checkEmailExistsInAuth(email: String, callback: (Boolean) -> Unit) {
         Log.d(TAG, "Checking if email exists in Firebase Authentication: $email")
-
-
         auth.fetchSignInMethodsForEmail(email)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val signInMethods = task.result?.signInMethods
                     val exists = !signInMethods.isNullOrEmpty()
-
                     if (exists) {
                         Log.d(TAG, "Email exists in Firebase Authentication: $email")
                         Log.d(TAG, "Sign-in methods: ${signInMethods?.joinToString()}")
                     } else {
                         Log.d(TAG, "Email does not exist in Firebase Authentication: $email")
                     }
-
                     callback(exists)
                 } else {
                     Log.e(TAG, "Error checking email in Firebase Authentication", task.exception)
-
                     callback(false)
                 }
             }
     }
-
     private fun checkUserExistsInFirestore(email: String) {
         Log.d(TAG, "Checking if user exists in Firestore with email: $email")
-
-
         db.collection("users")
             .whereEqualTo("email", email)
             .get()
@@ -193,8 +151,6 @@ class LoginActivity : AppCompatActivity() {
                     }
                 } else {
                     Log.d(TAG, "User NOT found in 'users' collection with email: $email")
-
-
                     db.collection("companies")
                         .whereEqualTo("email", email)
                         .get()
@@ -219,11 +175,8 @@ class LoginActivity : AppCompatActivity() {
                 Log.e(TAG, "Error checking users collection", e)
             }
     }
-
     private fun logAllUsersAndCompanies() {
         Log.d(TAG, "======= LOGGING ALL DATABASE USERS AND COMPANIES =======")
-
-
         db.collection("users")
             .get()
             .addOnSuccessListener { userDocuments ->
@@ -233,14 +186,10 @@ class LoginActivity : AppCompatActivity() {
                     val name = doc.getString("name") ?: "no-name"
                     val id = doc.id
                     Log.d(TAG, "User: ID=$id, Email=$email, Name=$name")
-
-
                     doc.data?.forEach { (key, value) ->
                         Log.d(TAG, "  - $key: $value")
                     }
                 }
-
-
                 db.collection("companies")
                     .get()
                     .addOnSuccessListener { companyDocuments ->
@@ -251,8 +200,6 @@ class LoginActivity : AppCompatActivity() {
                             val id = doc.id
                             val userId = doc.getString("userId") ?: "no-userId"
                             Log.d(TAG, "Company: ID=$id, Email=$email, Name=$name, UserId=$userId")
-
-                            // Log all fields for debugging
                             doc.data?.forEach { (key, value) ->
                                 Log.d(TAG, "  - $key: $value")
                             }
@@ -267,47 +214,37 @@ class LoginActivity : AppCompatActivity() {
                 Log.e(TAG, "Error fetching users", e)
             }
     }
-
     private fun logAllConversations() {
         Log.d(TAG, "======= LOGGING ALL CONVERSATIONS =======")
-
         db.collection("conversations")
             .get()
             .addOnSuccessListener { conversationDocuments ->
                 Log.d(TAG, "Total conversations in database: ${conversationDocuments.size()}")
-
                 conversationDocuments.documents.forEach { doc ->
                     val id = doc.id
                     val companyId = doc.getString("companyId") ?: "no-companyId"
                     val candidateId = doc.getString("candidateId") ?: "no-candidateId"
                     val companyName = doc.getString("companyName") ?: "no-companyName"
                     val candidateName = doc.getString("candidateName") ?: "no-candidateName"
-
                     Log.d(TAG, "Conversation: ID=$id")
                     Log.d(TAG, "  - Company: ID=$companyId, Name=$companyName")
                     Log.d(TAG, "  - Candidate: ID=$candidateId, Name=$candidateName")
-
-                    // Log all fields for debugging
                     doc.data?.forEach { (key, value) ->
                         if (key !in listOf("companyId", "candidateId", "companyName", "candidateName")) {
                             Log.d(TAG, "  - $key: $value")
                         }
                     }
-
-                    // Log messages for this conversation
                     db.collection("messages")
                         .whereEqualTo("conversationId", id)
                         .get()
                         .addOnSuccessListener { messageDocuments ->
                             Log.d(TAG, "  - Total messages: ${messageDocuments.size()}")
-
                             if (messageDocuments.size() > 0) {
                                 messageDocuments.documents.forEach { messageDoc ->
                                     val messageId = messageDoc.id
                                     val senderId = messageDoc.getString("senderId") ?: "no-senderId"
                                     val receiverId = messageDoc.getString("receiverId") ?: "no-receiverId"
                                     val content = messageDoc.getString("content") ?: "no-content"
-
                                     Log.d(TAG, "    Message: ID=$messageId")
                                     Log.d(TAG, "      - Sender: $senderId")
                                     Log.d(TAG, "      - Receiver: $receiverId")
@@ -319,44 +256,31 @@ class LoginActivity : AppCompatActivity() {
                             Log.e(TAG, "Error fetching messages for conversation $id", e)
                         }
                 }
-
                 Log.d(TAG, "======= END OF CONVERSATIONS LOGGING =======")
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Error fetching conversations", e)
             }
     }
-
     private fun checkUserTypeAndRedirect(email: String) {
         Log.d(TAG, "Checking user type for email: $email")
         Log.d(TAG, "Current Firebase Auth user ID: ${auth.currentUser?.uid}")
-
-
         val userEmail = email.lowercase()
         Log.d(TAG, "Looking for company with email (lowercase): $userEmail")
-
-
         db.collection("companies")
             .get()
             .addOnSuccessListener { documents ->
                 Log.d(TAG, "Total companies in database: ${documents.size()}")
-
-
                 val companyDoc = documents.find { doc ->
                     doc.getString("email")?.lowercase() == userEmail
                 }
-
                 if (companyDoc != null) {
-
                     val registrationNumber = companyDoc.getString("registrationNumber")
                     val companyName = companyDoc.getString("companyName") ?: "unknown"
                     val userId = companyDoc.getString("userId")
-
                     if (registrationNumber != null) {
                         Log.d(TAG, "User is a company, redirecting to CompanyDashboardActivity")
                         Log.d(TAG, "Company details - Registration Number: $registrationNumber, Name: $companyName, UserId: $userId")
-
-
                         if (userId == null) {
                             val currentUserId = auth.currentUser?.uid
                             if (currentUserId != null) {
@@ -371,7 +295,6 @@ class LoginActivity : AppCompatActivity() {
                                     }
                             }
                         }
-
                         val intent = Intent(this, CompanyDashboardActivityNew::class.java)
                         intent.putExtra("companyId", registrationNumber)
                         startActivity(intent)
@@ -382,37 +305,28 @@ class LoginActivity : AppCompatActivity() {
                         auth.signOut()
                     }
                 } else {
-
                     Log.d(TAG, "Not a company, checking if it's a regular user")
                     db.collection("users")
                         .whereEqualTo("email", email)
                         .get()
                         .addOnSuccessListener { userDocuments ->
                             Log.d(TAG, "User query result size: ${userDocuments.size()}")
-
                             if (!userDocuments.isEmpty) {
-
                                 val userDoc = userDocuments.documents[0]
                                 val userId = auth.currentUser?.uid
                                 val userName = userDoc.getString("name") ?: "unknown"
-
                                 Log.d(TAG, "User is a job seeker, redirecting to HomeActivity")
                                 Log.d(TAG, "User details - ID: $userId, Name: $userName, DocID: ${userDoc.id}")
-
                                 val intent = Intent(this, HomeActivity::class.java)
                                 intent.putExtra("userId", userId)
                                 startActivity(intent)
                                 finish()
                             } else {
-
                                 Log.e(TAG, "User not found in any collection")
                                 Log.e(TAG, "Firebase Auth user exists but no matching Firestore document")
                                 Log.e(TAG, "Firebase Auth user ID: ${auth.currentUser?.uid}")
                                 Log.e(TAG, "Firebase Auth user email: ${auth.currentUser?.email}")
-
-                                
                                 logAllUsersAndCompanies()
-
                                 Toast.makeText(this, "User not found in database. Please try again or contact support.", Toast.LENGTH_LONG).show()
                                 auth.signOut()
                             }
@@ -430,7 +344,6 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
-
     private fun validateInput(email: String, password: String): Boolean {
         if (email.isEmpty()) {
             emailInput.error = "Email is required"
@@ -440,12 +353,10 @@ class LoginActivity : AppCompatActivity() {
             emailInput.error = "Invalid email format"
             return false
         }
-
         if (password.isEmpty()) {
             passwordInput.error = "Password is required"
             return false
         }
-
         return true
     }
 }

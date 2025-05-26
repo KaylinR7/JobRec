@@ -1,9 +1,7 @@
 package com.example.jobrec
-
 import android.os.Parcel
 import android.os.Parcelable
 import com.google.firebase.Timestamp
-
 data class Company(
     var id: String = "",
     val companyName: String = "",
@@ -20,7 +18,7 @@ data class Company(
     val profileImageUrl: String = "",
     val status: String = "active",
     val createdDate: Timestamp = Timestamp.now(),
-    val userId: String = ""  // Firebase Auth user ID
+    val userId: String = ""  
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",
@@ -40,7 +38,6 @@ data class Company(
         Timestamp(parcel.readLong(), parcel.readInt()),
         parcel.readString() ?: ""
     )
-
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(id)
         parcel.writeString(companyName)
@@ -60,16 +57,13 @@ data class Company(
         parcel.writeInt(createdDate.nanoseconds)
         parcel.writeString(userId)
     }
-
     override fun describeContents(): Int {
         return 0
     }
-
     companion object CREATOR : Parcelable.Creator<Company> {
         override fun createFromParcel(parcel: Parcel): Company {
             return Company(parcel)
         }
-
         override fun newArray(size: Int): Array<Company?> {
             return arrayOfNulls(size)
         }

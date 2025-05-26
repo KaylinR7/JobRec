@@ -25,7 +25,7 @@
         android:textColor="@color/text_secondary"
         android:layout_marginBottom="16dp"/>
 
-    <!-- User Type Selector -->
+    
     <RadioGroup
         android:id="@+id/userTypeRadioGroup"
         android:layout_width="match_parent"
@@ -121,7 +121,7 @@
             app:strokeWidth="1dp"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Debug button - hidden by default -->
+        
     </LinearLayout>
 
 </LinearLayout>

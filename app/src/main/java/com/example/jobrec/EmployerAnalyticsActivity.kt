@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.TextView
@@ -20,7 +19,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
-
 class EmployerAnalyticsActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -29,12 +27,9 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
     private lateinit var demographicsChart: PieChart
     private lateinit var totalViewsText: TextView
     private lateinit var totalApplicationsText: TextView
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_employer_analytics)
-
-        // Setup toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -42,42 +37,29 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
             title = "Analytics"
         }
-
-        // Initialize Firebase
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
-
-        // Initialize views
         totalViewsText = findViewById(R.id.totalViewsText)
         totalApplicationsText = findViewById(R.id.totalApplicationsText)
         viewsChart = findViewById(R.id.viewsChart)
         applicationsChart = findViewById(R.id.applicationsChart)
         demographicsChart = findViewById(R.id.demographicsChart)
-
-        // Load analytics data
         loadAnalyticsData()
     }
-
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
     }
-
     private fun loadAnalyticsData() {
         val companyId = auth.currentUser?.uid ?: return
-
-        // Load total views and applications
         db.collection("companies").document(companyId)
             .get()
             .addOnSuccessListener { document ->
                 val totalViews = document.getLong("totalViews") ?: 0L
                 val totalApplications = document.getLong("totalApplications") ?: 0L
-
                 totalViewsText.text = totalViews.toString()
                 totalApplicationsText.text = totalApplications.toString()
             }
-
-        // Load views over time
         db.collection("companies").document(companyId)
             .collection("views")
             .get()
@@ -86,22 +68,17 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
                 val xAxisLabels = mutableListOf<String>()
                 val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
                 var index = 0f
-
                 documents.documents.sortedBy { it.id }.forEach { document ->
                     val timestamp = document.getTimestamp("timestamp")?.toDate()
                     val count = document.getLong("count") ?: 0L
-                    
                     if (timestamp != null) {
                         entries.add(Entry(index, count.toFloat()))
                         xAxisLabels.add(dateFormat.format(timestamp))
                         index++
                     }
                 }
-
                 setupViewsChart(entries, xAxisLabels)
             }
-
-        // Load applications over time
         db.collection("companies").document(companyId)
             .collection("applications")
             .get()
@@ -110,22 +87,17 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
                 val xAxisLabels = mutableListOf<String>()
                 val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
                 var index = 0f
-
                 documents.documents.sortedBy { it.id }.forEach { document ->
                     val timestamp = document.getTimestamp("timestamp")?.toDate()
                     val count = document.getLong("count") ?: 0L
-                    
                     if (timestamp != null) {
                         entries.add(Entry(index, count.toFloat()))
                         xAxisLabels.add(dateFormat.format(timestamp))
                         index++
                     }
                 }
-
                 setupApplicationsChart(entries, xAxisLabels)
             }
-
-        // Load demographics data
         db.collection("companies").document(companyId)
             .collection("applications")
             .get()
@@ -133,13 +105,10 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
                 val ageGroups = mutableMapOf<String, Int>()
                 val educationLevels = mutableMapOf<String, Int>()
                 val experienceRanges = mutableMapOf<String, Int>()
-
                 documents.documents.forEach { document ->
                     val age = document.getLong("age")?.toInt() ?: 0
                     val education = document.getString("education") ?: "Unknown"
                     val experience = document.getLong("experience")?.toInt() ?: 0
-
-                    // Categorize age
                     val ageGroup = when {
                         age < 25 -> "18-24"
                         age < 35 -> "25-34"
@@ -147,11 +116,7 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
                         else -> "45+"
                     }
                     ageGroups[ageGroup] = (ageGroups[ageGroup] ?: 0) + 1
-
-                    // Categorize education
                     educationLevels[education] = (educationLevels[education] ?: 0) + 1
-
-                    // Categorize experience
                     val experienceRange = when {
                         experience < 2 -> "0-2 years"
                         experience < 5 -> "2-5 years"
@@ -160,11 +125,9 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
                     }
                     experienceRanges[experienceRange] = (experienceRanges[experienceRange] ?: 0) + 1
                 }
-
                 setupDemographicsChart(ageGroups, educationLevels, experienceRanges)
             }
     }
-
     private fun setupViewsChart(entries: List<Entry>, xAxisLabels: List<String>) {
         val dataSet = LineDataSet(entries, "Views")
         dataSet.color = ColorTemplate.MATERIAL_COLORS[0]
@@ -172,7 +135,6 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
         dataSet.lineWidth = 2f
         dataSet.setDrawCircles(true)
         dataSet.setDrawValues(true)
-
         val lineData = LineData(dataSet)
         viewsChart.data = lineData
         viewsChart.description.isEnabled = false
@@ -182,7 +144,6 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
         viewsChart.animateY(1000)
         viewsChart.invalidate()
     }
-
     private fun setupApplicationsChart(entries: List<Entry>, xAxisLabels: List<String>) {
         val dataSet = LineDataSet(entries, "Applications")
         dataSet.color = ColorTemplate.MATERIAL_COLORS[1]
@@ -190,7 +151,6 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
         dataSet.lineWidth = 2f
         dataSet.setDrawCircles(true)
         dataSet.setDrawValues(true)
-
         val lineData = LineData(dataSet)
         applicationsChart.data = lineData
         applicationsChart.description.isEnabled = false
@@ -200,24 +160,19 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
         applicationsChart.animateY(1000)
         applicationsChart.invalidate()
     }
-
     private fun setupDemographicsChart(
         ageGroups: Map<String, Int>,
         educationLevels: Map<String, Int>,
         experienceRanges: Map<String, Int>
     ) {
         val entries = mutableListOf<PieEntry>()
-        
-        // Add age group data
         ageGroups.forEach { (label, value) ->
             entries.add(PieEntry(value.toFloat(), "Age: $label"))
         }
-
         val dataSet = PieDataSet(entries, "Candidate Demographics")
         dataSet.colors = ColorTemplate.MATERIAL_COLORS.toList()
         dataSet.valueTextSize = 12f
         dataSet.valueTextColor = android.graphics.Color.WHITE
-
         val pieData = PieData(dataSet)
         demographicsChart.data = pieData
         demographicsChart.description.isEnabled = false
@@ -226,7 +181,6 @@ class EmployerAnalyticsActivity : AppCompatActivity() {
         demographicsChart.animateY(1000)
         demographicsChart.invalidate()
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {

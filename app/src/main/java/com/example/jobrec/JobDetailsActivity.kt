@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -24,7 +23,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
 import com.example.jobrec.databinding.ActivityJobDetailsBinding
-
 class JobDetailsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityJobDetailsBinding
     private lateinit var jobTitle: TextView
@@ -41,14 +39,12 @@ class JobDetailsActivity : AppCompatActivity() {
     private lateinit var applyButton: MaterialButton
     private lateinit var saveJobButton: MaterialButton
     private var isJobSaved = false
-
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private val storage = FirebaseStorage.getInstance()
     private var jobId: String? = null
     private var companyId: String? = null
     private var currentCvUrl: String? = null
-
     private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
@@ -56,34 +52,23 @@ class JobDetailsActivity : AppCompatActivity() {
             }
         }
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityJobDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Setup toolbar with back button
         setSupportActionBar(binding.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
             title = "Job Details"
         }
-
-        // Explicitly set white navigation icon
         binding.toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
-
-        // Initialize views
         initializeViews()
-
-        // Set up back button handling
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 finish()
             }
         })
-
-        // Get job ID from intent
         jobId = intent.getStringExtra("jobId")
         if (jobId != null) {
             loadJobDetails(jobId!!)
@@ -91,18 +76,14 @@ class JobDetailsActivity : AppCompatActivity() {
             Toast.makeText(this, "Error: Job not found", Toast.LENGTH_SHORT).show()
             finish()
         }
-
-        // Setup apply button
         applyButton.setOnClickListener {
             if (auth.currentUser != null) {
                 checkIfAlreadyApplied()
             } else {
                 Toast.makeText(this, "Please sign in to apply", Toast.LENGTH_SHORT).show()
-                // TODO: Navigate to login screen
             }
         }
     }
-
     private fun initializeViews() {
         jobTitle = binding.jobTitle
         companyName = binding.companyName
@@ -117,17 +98,13 @@ class JobDetailsActivity : AppCompatActivity() {
         jobPostedDate = binding.jobPostedDate
         applyButton = binding.applyButton
         saveJobButton = binding.saveJobButton
-
-        // Setup save job button
         saveJobButton.setOnClickListener {
             toggleSaveJob()
         }
     }
-
     private fun checkIfAlreadyApplied(showDialog: Boolean = true) {
         val userId = auth.currentUser?.uid ?: return
         val jobId = jobId ?: return
-
         db.collection("applications")
             .whereEqualTo("userId", userId)
             .whereEqualTo("jobId", jobId)
@@ -153,32 +130,24 @@ class JobDetailsActivity : AppCompatActivity() {
                 applyButton.isEnabled = true
             }
     }
-
     private fun showApplicationDialog() {
         val bottomSheetView = layoutInflater.inflate(R.layout.bottom_sheet_apply, null)
         val bottomSheetDialog = BottomSheetDialog(this)
         bottomSheetDialog.setContentView(bottomSheetView)
-
         bottomSheetView.findViewById<MaterialCardView>(R.id.profileCard).setOnClickListener {
             bottomSheetDialog.dismiss()
             useProfileAsCv()
         }
-
         bottomSheetView.findViewById<MaterialCardView>(R.id.uploadCard).setOnClickListener {
             bottomSheetDialog.dismiss()
             selectCv()
         }
-
         bottomSheetDialog.show()
     }
-
     private fun useProfileAsCv() {
         val userId = auth.currentUser?.uid ?: return
         val userEmail = auth.currentUser?.email ?: return
-
         Log.d("JobDetailsActivity", "Creating CV from profile for user: $userEmail (ID: $userId)")
-
-        // Simplified query
         db.collection("users")
             .whereEqualTo("email", userEmail)
             .get()
@@ -189,20 +158,15 @@ class JobDetailsActivity : AppCompatActivity() {
                         val user = userDoc.toObject(User::class.java)
                         if (user != null) {
                             Log.d("JobDetailsActivity", "Successfully retrieved user profile for CV creation")
-
-                            // Create a CV-like document from the user's profile
                             val cvContent = buildString {
                                 append("${user.name} ${user.surname}\n")
                                 append("${user.email}\n")
                                 append("${user.phoneNumber}\n")
                                 append("${user.address}\n\n")
-
                                 append("SUMMARY\n")
                                 append("${user.summary}\n\n")
-
                                 append("SKILLS\n")
                                 append(user.skills.joinToString(", ").plus("\n\n"))
-
                                 append("EDUCATION\n")
                                 if (user.education.isNotEmpty()) {
                                     user.education.forEach { education ->
@@ -212,7 +176,6 @@ class JobDetailsActivity : AppCompatActivity() {
                                 } else {
                                     append("No education information provided\n\n")
                                 }
-
                                 append("EXPERIENCE\n")
                                 if (user.experience.isNotEmpty()) {
                                     user.experience.forEach { experience ->
@@ -224,11 +187,8 @@ class JobDetailsActivity : AppCompatActivity() {
                                     append("No experience information provided\n\n")
                                 }
                             }
-
-                            // Store the CV content in Firestore
                             val cvRef = db.collection("cvs").document()
                             Log.d("JobDetailsActivity", "Creating CV document with ID: ${cvRef.id}")
-
                             cvRef.set(hashMapOf(
                                 "userId" to userId,
                                 "content" to cvContent,
@@ -269,7 +229,6 @@ class JobDetailsActivity : AppCompatActivity() {
                 applyButton.text = "Apply Now"
             }
     }
-
     private fun selectCv() {
         val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
             type = "application/pdf"
@@ -278,7 +237,6 @@ class JobDetailsActivity : AppCompatActivity() {
         }
         getContent.launch(intent)
     }
-
     private fun uploadCv(uri: Uri) {
         val userId = auth.currentUser?.uid
         if (userId == null) {
@@ -286,40 +244,14 @@ class JobDetailsActivity : AppCompatActivity() {
             Toast.makeText(this, "Error: User not authenticated", Toast.LENGTH_SHORT).show()
             return
         }
-
         Log.d("JobDetailsActivity", "Starting CV upload for user: $userId")
-
         try {
-            // Verify the URI is valid and accessible
-            try {
-                val inputStream = contentResolver.openInputStream(uri)
-                inputStream?.close()
-            } catch (e: Exception) {
-                Log.e("JobDetailsActivity", "Cannot access file at URI: $uri", e)
-                Toast.makeText(this, "Cannot access the selected file. Please try again with a different file.", Toast.LENGTH_LONG).show()
-                return
-            }
-
-            // Create a unique filename with timestamp to avoid collisions
-            val timestamp = System.currentTimeMillis()
-            val cvFileName = "CV_${userId}_${timestamp}_${UUID.randomUUID()}.pdf"
+            val cvFileName = "CV_${userId}_${UUID.randomUUID()}.pdf"
             val cvRef = storage.reference.child("cvs/$cvFileName")
-
             applyButton.isEnabled = false
             applyButton.text = "Uploading CV..."
-
-            // Log the URI for debugging
-            Log.d("JobDetailsActivity", "Uploading CV from URI: $uri to path: cvs/$cvFileName")
-
-            // Create metadata for the file
-            val metadata = storageMetadata {
-                contentType = "application/pdf"
-                setCustomMetadata("userId", userId)
-                setCustomMetadata("uploadTime", timestamp.toString())
-            }
-
-            // Upload the file with metadata
-            cvRef.putFile(uri, metadata)
+            Log.d("JobDetailsActivity", "Uploading CV from URI: $uri")
+            cvRef.putFile(uri)
                 .addOnProgressListener { taskSnapshot ->
                     val progress = (100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount)
                     Log.d("JobDetailsActivity", "Upload progress: ${progress.toInt()}%")
@@ -327,16 +259,10 @@ class JobDetailsActivity : AppCompatActivity() {
                 }
                 .addOnSuccessListener {
                     Log.d("JobDetailsActivity", "CV file uploaded successfully, getting download URL")
-
-                    // Get the download URL
                     cvRef.downloadUrl
                         .addOnSuccessListener { downloadUri ->
                             Log.d("JobDetailsActivity", "Got download URL: $downloadUri")
-
-                            // Store the URL as a string
                             currentCvUrl = downloadUri.toString()
-
-                            // Verify the URL is valid
                             if (currentCvUrl.isNullOrEmpty() || !currentCvUrl!!.startsWith("http")) {
                                 Log.e("JobDetailsActivity", "Invalid download URL: $currentCvUrl")
                                 Toast.makeText(this, "Error: Could not get valid CV URL", Toast.LENGTH_SHORT).show()
@@ -344,30 +270,7 @@ class JobDetailsActivity : AppCompatActivity() {
                                 applyButton.text = "Apply Now"
                                 return@addOnSuccessListener
                             }
-
-                            // Create a record in Firestore to track the CV
-                            val cvData = hashMapOf(
-                                "userId" to userId,
-                                "fileName" to cvFileName,
-                                "fileUrl" to currentCvUrl,
-                                "uploadTime" to com.google.firebase.Timestamp.now(),
-                                "fileType" to "application/pdf"
-                            )
-
-                            // Store CV metadata in Firestore for better tracking
-                            db.collection("cv_files")
-                                .add(cvData)
-                                .addOnSuccessListener { docRef ->
-                                    Log.d("JobDetailsActivity", "CV metadata stored in Firestore with ID: ${docRef.id}")
-                                    // Proceed to cover letter dialog
-                                    showCoverLetterDialog()
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e("JobDetailsActivity", "Failed to store CV metadata in Firestore", e)
-                                    // Still proceed to cover letter dialog even if metadata storage fails
-                                    // The CV is already uploaded to Storage
-                                    showCoverLetterDialog()
-                                }
+                            showCoverLetterDialog()
                         }
                         .addOnFailureListener { e ->
                             Log.e("JobDetailsActivity", "Failed to get download URL", e)
@@ -389,15 +292,12 @@ class JobDetailsActivity : AppCompatActivity() {
             applyButton.text = "Apply Now"
         }
     }
-
     private fun showCoverLetterDialog() {
         val bottomSheetView = layoutInflater.inflate(R.layout.bottom_sheet_cover_letter, null)
         val bottomSheetDialog = BottomSheetDialog(this)
         bottomSheetDialog.setContentView(bottomSheetView)
-
         val coverLetterText = bottomSheetView.findViewById<TextInputEditText>(R.id.coverLetterText)
         val submitButton = bottomSheetView.findViewById<MaterialButton>(R.id.submitButton)
-
         submitButton.setOnClickListener {
             val coverLetter = coverLetterText.text?.toString() ?: ""
             if (coverLetter.isNotEmpty()) {
@@ -407,10 +307,8 @@ class JobDetailsActivity : AppCompatActivity() {
                 coverLetterText.error = "Please provide a cover letter"
             }
         }
-
         bottomSheetDialog.show()
     }
-
     private fun submitApplication(coverLetter: String) {
         val userId = auth.currentUser?.uid
         if (userId == null) {
@@ -420,7 +318,6 @@ class JobDetailsActivity : AppCompatActivity() {
             applyButton.text = "Apply Now"
             return
         }
-
         val jobId = jobId
         if (jobId == null) {
             Log.e("JobDetailsActivity", "Cannot submit application: Job ID is null")
@@ -429,7 +326,6 @@ class JobDetailsActivity : AppCompatActivity() {
             applyButton.text = "Apply Now"
             return
         }
-
         val companyId = companyId
         if (companyId == null) {
             Log.e("JobDetailsActivity", "Cannot submit application: Company ID is null")
@@ -438,7 +334,6 @@ class JobDetailsActivity : AppCompatActivity() {
             applyButton.text = "Apply Now"
             return
         }
-
         val cvUrl = currentCvUrl
         if (cvUrl == null) {
             Log.e("JobDetailsActivity", "Cannot submit application: CV URL is null")
@@ -447,10 +342,7 @@ class JobDetailsActivity : AppCompatActivity() {
             applyButton.text = "Apply Now"
             return
         }
-
         Log.d("JobDetailsActivity", "Submitting application - userId: $userId, jobId: $jobId, companyId: $companyId, cvUrl: $cvUrl")
-
-        // First get the user's profile information
         db.collection("users")
             .whereEqualTo("email", auth.currentUser?.email)
             .get()
@@ -461,7 +353,6 @@ class JobDetailsActivity : AppCompatActivity() {
                         val user = userDoc.toObject(User::class.java)
                         if (user != null) {
                             Log.d("JobDetailsActivity", "Successfully retrieved user profile for application")
-
                             val application = hashMapOf(
                                 "jobId" to jobId,
                                 "jobTitle" to jobTitle.text.toString(),
@@ -475,14 +366,13 @@ class JobDetailsActivity : AppCompatActivity() {
                                 "applicantEducation" to user.education,
                                 "applicantExperience" to user.experience,
                                 "companyId" to companyId,
-                                "companyName" to companyName.text.toString(), // Add company name for easier reference
+                                "companyName" to companyName.text.toString(), 
                                 "timestamp" to com.google.firebase.Timestamp.now(),
-                                "applieddate" to com.google.firebase.Timestamp.now(), // Use lowercase field name as in Firestore
+                                "applieddate" to com.google.firebase.Timestamp.now(), 
                                 "status" to "pending",
                                 "resumeUrl" to cvUrl,
                                 "coverLetter" to coverLetter
                             )
-
                             Log.d("JobDetailsActivity", "Adding application to Firestore")
                             db.collection("applications")
                                 .add(application)
@@ -523,7 +413,6 @@ class JobDetailsActivity : AppCompatActivity() {
                 applyButton.text = "Apply Now"
             }
     }
-
     private fun loadJobDetails(jobId: String) {
         Log.d("JobDetailsActivity", "Loading job details for ID: $jobId")
         if (jobId.isBlank()) {
@@ -532,7 +421,6 @@ class JobDetailsActivity : AppCompatActivity() {
             finish()
             return
         }
-
         db.collection("jobs")
             .document(jobId)
             .get()
@@ -556,7 +444,6 @@ class JobDetailsActivity : AppCompatActivity() {
                 finish()
             }
     }
-
     private fun displayJobDetails(job: Job) {
         jobTitle.text = job.title
         companyName.text = job.companyName
@@ -565,25 +452,15 @@ class JobDetailsActivity : AppCompatActivity() {
         jobSalary.text = job.salary
         jobDescription.text = job.description
         jobRequirements.text = job.getRequirementsList().joinToString("\n• ", "• ")
-
-        // Set the new fields
         jobField.text = job.jobField.ifEmpty { "Not specified" }
         jobProvince.text = job.province.ifEmpty { "Not specified" }
         jobExperience.text = job.experienceLevel.ifEmpty { "Not specified" }
-
-        // Format and display the posted date
         val dateFormat = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
         jobPostedDate.text = dateFormat.format(job.postedDate.toDate())
-
-        // Check if this job is saved
         checkIfJobIsSaved()
-
-        // Check if user has already applied for this job
         if (auth.currentUser != null) {
             checkIfAlreadyApplied(false)
         }
-
-        // Check if current user is a company
         val currentUser = auth.currentUser
         if (currentUser != null) {
             db.collection("companies")
@@ -591,22 +468,16 @@ class JobDetailsActivity : AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { documents ->
                     if (!documents.isEmpty) {
-                        // Show management options for company users
                         applyButton.visibility = View.GONE
                         val managementLayout = findViewById<View>(R.id.jobManagementLayout)
                         managementLayout.visibility = View.VISIBLE
-
-                        // Setup edit button
                         findViewById<MaterialButton>(R.id.editJobButton).setOnClickListener {
                             showEditJobDialog(job)
                         }
-
-                        // Setup delete button
                         findViewById<MaterialButton>(R.id.deleteJobButton).setOnClickListener {
                             showDeleteConfirmationDialog(job)
                         }
                     } else {
-                        // Show apply button for regular users
                         applyButton.visibility = View.VISIBLE
                         findViewById<View>(R.id.jobManagementLayout).visibility = View.GONE
                         applyButton.setOnClickListener {
@@ -620,22 +491,18 @@ class JobDetailsActivity : AppCompatActivity() {
                 }
         }
     }
-
     private fun showEditJobDialog(job: Job) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_job, null)
         val dialog = MaterialAlertDialogBuilder(this)
             .setTitle("Edit Job")
             .setView(dialogView)
             .setPositiveButton("Save") { dialog, _ ->
-                // Get updated values
                 val updatedTitle = dialogView.findViewById<TextInputEditText>(R.id.editJobTitle).text.toString()
                 val updatedDescription = dialogView.findViewById<TextInputEditText>(R.id.editJobDescription).text.toString()
                 val updatedRequirements = dialogView.findViewById<TextInputEditText>(R.id.editJobRequirements).text.toString()
                 val updatedSalary = dialogView.findViewById<TextInputEditText>(R.id.editJobSalary).text.toString()
                 val updatedLocation = dialogView.findViewById<TextInputEditText>(R.id.editJobLocation).text.toString()
                 val updatedType = dialogView.findViewById<TextInputEditText>(R.id.editJobType).text.toString()
-
-                // Update job in Firestore
                 val jobRef = db.collection("jobs").document(job.id)
                 val updates = mapOf(
                     "title" to updatedTitle,
@@ -646,7 +513,6 @@ class JobDetailsActivity : AppCompatActivity() {
                     "type" to updatedType,
                     "lastUpdated" to System.currentTimeMillis()
                 )
-
                 jobRef.update(updates)
                     .addOnSuccessListener {
                         Toast.makeText(this, "Job updated successfully", Toast.LENGTH_SHORT).show()
@@ -658,18 +524,14 @@ class JobDetailsActivity : AppCompatActivity() {
             }
             .setNegativeButton("Cancel", null)
             .create()
-
-        // Set current values
         dialogView.findViewById<TextInputEditText>(R.id.editJobTitle).setText(job.title)
         dialogView.findViewById<TextInputEditText>(R.id.editJobDescription).setText(job.description)
         dialogView.findViewById<TextInputEditText>(R.id.editJobRequirements).setText(job.getRequirementsList().joinToString("\n"))
         dialogView.findViewById<TextInputEditText>(R.id.editJobSalary).setText(job.salary)
         dialogView.findViewById<TextInputEditText>(R.id.editJobLocation).setText(job.location)
         dialogView.findViewById<TextInputEditText>(R.id.editJobType).setText(job.type)
-
         dialog.show()
     }
-
     private fun showDeleteConfirmationDialog(job: Job) {
         MaterialAlertDialogBuilder(this)
             .setTitle("Delete Job")
@@ -680,7 +542,6 @@ class JobDetailsActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
-
     private fun deleteJob(job: Job) {
         db.collection("jobs").document(job.id)
             .delete()
@@ -692,7 +553,6 @@ class JobDetailsActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error deleting job: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             onBackPressed()
@@ -700,11 +560,9 @@ class JobDetailsActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-
     private fun checkIfJobIsSaved() {
         val userId = auth.currentUser?.uid ?: return
         val jobId = jobId ?: return
-
         db.collection("savedJobs")
             .whereEqualTo("userId", userId)
             .whereEqualTo("jobId", jobId)
@@ -719,7 +577,6 @@ class JobDetailsActivity : AppCompatActivity() {
                 updateSaveButtonIcon()
             }
     }
-
     private fun updateSaveButtonIcon() {
         if (isJobSaved) {
             saveJobButton.setIconResource(R.drawable.ic_bookmark)
@@ -727,18 +584,14 @@ class JobDetailsActivity : AppCompatActivity() {
             saveJobButton.setIconResource(R.drawable.ic_bookmark_border)
         }
     }
-
     private fun toggleSaveJob() {
         val userId = auth.currentUser?.uid
         val jobId = jobId
-
         if (userId == null || jobId == null) {
             Toast.makeText(this, "Please sign in to save jobs", Toast.LENGTH_SHORT).show()
             return
         }
-
         if (isJobSaved) {
-            // Unsave the job
             db.collection("savedJobs")
                 .whereEqualTo("userId", userId)
                 .whereEqualTo("jobId", jobId)
@@ -764,13 +617,11 @@ class JobDetailsActivity : AppCompatActivity() {
                     Toast.makeText(this, "Error removing job from saved jobs", Toast.LENGTH_SHORT).show()
                 }
         } else {
-            // Save the job
             val savedJob = hashMapOf(
                 "userId" to userId,
                 "jobId" to jobId,
                 "savedAt" to com.google.firebase.Timestamp.now()
             )
-
             db.collection("savedJobs")
                 .add(savedJob)
                 .addOnSuccessListener {

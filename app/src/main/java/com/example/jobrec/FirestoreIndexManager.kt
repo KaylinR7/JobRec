@@ -1,19 +1,13 @@
 package com.example.jobrec
-
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-
 class FirestoreIndexManager {
     companion object {
         private const val TAG = "FirestoreIndexManager"
-
         fun createIndexes() {
             val db = FirebaseFirestore.getInstance()
-
-            // Jobs Collection Indexes
             val jobsIndexes = listOf(
-                // For company jobs listing
                 hashMapOf(
                     "collectionGroup" to "jobs",
                     "queryScope" to "COLLECTION",
@@ -28,8 +22,6 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-
-                // For recent jobs listing
                 hashMapOf(
                     "collectionGroup" to "jobs",
                     "queryScope" to "COLLECTION",
@@ -40,8 +32,6 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-
-                // For job search
                 hashMapOf(
                     "collectionGroup" to "jobs",
                     "queryScope" to "COLLECTION",
@@ -56,8 +46,6 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-
-                // For job type filtering
                 hashMapOf(
                     "collectionGroup" to "jobs",
                     "queryScope" to "COLLECTION",
@@ -72,8 +60,6 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-
-                // For active jobs filtering with sorting
                 hashMapOf(
                     "collectionGroup" to "jobs",
                     "queryScope" to "COLLECTION",
@@ -93,10 +79,7 @@ class FirestoreIndexManager {
                     )
                 )
             )
-
-            // Applications Collection Indexes
             val applicationsIndexes = listOf(
-                // For user's applications
                 hashMapOf(
                     "collectionGroup" to "applications",
                     "queryScope" to "COLLECTION",
@@ -111,8 +94,6 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-
-                // For company's applications
                 hashMapOf(
                     "collectionGroup" to "applications",
                     "queryScope" to "COLLECTION",
@@ -127,8 +108,6 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-
-                // For application status filtering
                 hashMapOf(
                     "collectionGroup" to "applications",
                     "queryScope" to "COLLECTION",
@@ -144,10 +123,7 @@ class FirestoreIndexManager {
                     )
                 )
             )
-
-            // Users Collection Indexes
             val usersIndexes = listOf(
-                // For email lookup
                 hashMapOf(
                     "collectionGroup" to "Users",
                     "queryScope" to "COLLECTION",
@@ -158,8 +134,6 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-
-                // For user type filtering
                 hashMapOf(
                     "collectionGroup" to "Users",
                     "queryScope" to "COLLECTION",
@@ -171,10 +145,7 @@ class FirestoreIndexManager {
                     )
                 )
             )
-
-            // Companies Collection Indexes
             val companiesIndexes = listOf(
-                // For company search
                 hashMapOf(
                     "collectionGroup" to "Companies",
                     "queryScope" to "COLLECTION",
@@ -185,8 +156,6 @@ class FirestoreIndexManager {
                         )
                     )
                 ),
-
-                // For company location filtering
                 hashMapOf(
                     "collectionGroup" to "Companies",
                     "queryScope" to "COLLECTION",
@@ -198,10 +167,7 @@ class FirestoreIndexManager {
                     )
                 )
             )
-
-            // Create all indexes
             try {
-                // Create jobs indexes
                 jobsIndexes.forEachIndexed { index, jobsIndex ->
                     db.collection("indexes")
                         .document("jobs_index_$index")
@@ -213,8 +179,6 @@ class FirestoreIndexManager {
                             Log.e(TAG, "Error creating jobs index $index", e)
                         }
                 }
-
-                // Create applications indexes
                 applicationsIndexes.forEachIndexed { index, applicationsIndex ->
                     db.collection("indexes")
                         .document("applications_index_$index")
@@ -226,8 +190,6 @@ class FirestoreIndexManager {
                             Log.e(TAG, "Error creating applications index $index", e)
                         }
                 }
-
-                // Create users indexes
                 usersIndexes.forEachIndexed { index, usersIndex ->
                     db.collection("indexes")
                         .document("users_index_$index")
@@ -239,8 +201,6 @@ class FirestoreIndexManager {
                             Log.e(TAG, "Error creating users index $index", e)
                         }
                 }
-
-                // Create companies indexes
                 companiesIndexes.forEachIndexed { index, companiesIndex ->
                     db.collection("indexes")
                         .document("companies_index_$index")

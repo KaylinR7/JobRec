@@ -1,5 +1,4 @@
 package com.example.jobrec.chatbot
-
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -17,36 +16,25 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
 class ChatbotActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
     private lateinit var messagesRecyclerView: RecyclerView
     private lateinit var emptyView: TextView
     private lateinit var messageInput: TextInputEditText
     private lateinit var sendButton: FloatingActionButton
-
     private lateinit var chatAdapter: ChatAdapter
     private lateinit var chatbotRepository: ChatbotRepository
-
     private val messages = mutableListOf<ChatMessage>()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chatbot)
-
-        // Initialize repository
         chatbotRepository = ChatbotRepository(this)
-
-        // Initialize views
         initializeViews()
         setupToolbar()
         setupRecyclerView()
         setupClickListeners()
-
-        // Add welcome message
         addBotMessage("Hi there! I'm your CareerWorx assistant. How can I help you today?")
     }
-
     private fun initializeViews() {
         toolbar = findViewById(R.id.toolbar)
         messagesRecyclerView = findViewById(R.id.messagesRecyclerView)
@@ -54,7 +42,6 @@ class ChatbotActivity : AppCompatActivity() {
         messageInput = findViewById(R.id.messageInput)
         sendButton = findViewById(R.id.sendButton)
     }
-
     private fun setupToolbar() {
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -63,7 +50,6 @@ class ChatbotActivity : AppCompatActivity() {
             title = "CareerWorx Assistant"
         }
     }
-
     private fun setupRecyclerView() {
         chatAdapter = ChatAdapter(messages)
         messagesRecyclerView.apply {
@@ -74,7 +60,6 @@ class ChatbotActivity : AppCompatActivity() {
         }
         updateEmptyView()
     }
-
     private fun setupClickListeners() {
         sendButton.setOnClickListener {
             val message = messageInput.text.toString().trim()
@@ -83,36 +68,22 @@ class ChatbotActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun sendMessage(message: String) {
-        // Add user message to the list
         addUserMessage(message)
-
-        // Clear input
         messageInput.text?.clear()
-
-        // Show typing indicator
         addTypingIndicator()
-
-        // Get response from chatbot
         lifecycleScope.launch {
             try {
-                // Slight delay to make it feel more natural
                 kotlinx.coroutines.delay(800)
-
                 val response = chatbotRepository.getChatbotResponse(message)
-
-                // Remove typing indicator and add response
                 removeTypingIndicator()
                 addBotMessage(response)
             } catch (e: Exception) {
-                // Remove typing indicator and add error message
                 removeTypingIndicator()
                 addBotMessage("I'm sorry, I'm having trouble right now. Please try again later.")
             }
         }
     }
-
     private fun addTypingIndicator() {
         val typingMessage = ChatMessage(
             id = "typing_indicator",
@@ -123,7 +94,6 @@ class ChatbotActivity : AppCompatActivity() {
         messages.add(typingMessage)
         updateRecyclerView()
     }
-
     private fun removeTypingIndicator() {
         val typingIndex = messages.indexOfFirst { it.id == "typing_indicator" }
         if (typingIndex != -1) {
@@ -131,7 +101,6 @@ class ChatbotActivity : AppCompatActivity() {
             chatAdapter.notifyItemRemoved(typingIndex)
         }
     }
-
     private fun addUserMessage(message: String) {
         val chatMessage = ChatMessage(
             message = message,
@@ -141,7 +110,6 @@ class ChatbotActivity : AppCompatActivity() {
         messages.add(chatMessage)
         updateRecyclerView()
     }
-
     private fun addBotMessage(message: String) {
         val chatMessage = ChatMessage(
             message = message,
@@ -151,13 +119,11 @@ class ChatbotActivity : AppCompatActivity() {
         messages.add(chatMessage)
         updateRecyclerView()
     }
-
     private fun updateRecyclerView() {
         chatAdapter.notifyItemInserted(messages.size - 1)
         messagesRecyclerView.scrollToPosition(messages.size - 1)
         updateEmptyView()
     }
-
     private fun updateEmptyView() {
         if (messages.isEmpty()) {
             emptyView.visibility = View.VISIBLE
@@ -167,7 +133,6 @@ class ChatbotActivity : AppCompatActivity() {
             messagesRecyclerView.visibility = View.VISIBLE
         }
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {

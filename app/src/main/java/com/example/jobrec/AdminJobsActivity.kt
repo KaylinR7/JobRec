@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -20,7 +19,6 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-
 class AdminJobsActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: AdminJobsAdapter
@@ -29,19 +27,14 @@ class AdminJobsActivity : AppCompatActivity() {
     private lateinit var progressIndicator: CircularProgressIndicator
     private lateinit var emptyStateView: LinearLayout
     private lateinit var pagination: AdminPagination
-
     private val db = FirebaseFirestore.getInstance()
     private val TAG = "AdminJobsActivity"
-
     private var allJobs: MutableList<Job> = mutableListOf()
     private var filteredJobs: MutableList<Job> = mutableListOf()
     private var searchQuery: String = ""
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin_jobs)
-
-        // Setup toolbar
         val toolbar = findViewById<Toolbar>(R.id.adminToolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -49,18 +42,12 @@ class AdminJobsActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
             title = ""
         }
-
-        // Set toolbar title
         findViewById<TextView>(R.id.adminToolbarTitle).text = "Manage Jobs"
-
-        // Initialize views
         recyclerView = findViewById(R.id.recyclerView)
         searchEditText = findViewById(R.id.searchEditText)
         searchButton = findViewById(R.id.searchButton)
         progressIndicator = findViewById(R.id.progressIndicator)
         emptyStateView = findViewById(R.id.emptyStateView)
-
-        // Setup RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = AdminJobsAdapter(
             emptyList(),
@@ -69,24 +56,16 @@ class AdminJobsActivity : AppCompatActivity() {
             onDeleteClick = { job -> deleteJob(job.id) }
         )
         recyclerView.adapter = adapter
-
-        // Setup pagination
         pagination = AdminPagination(
             findViewById(R.id.pagination_layout),
             pageSize = 5
         ) { page ->
             updateJobsList()
         }
-
-        // Setup FAB
         findViewById<FloatingActionButton>(R.id.addJobFab).setOnClickListener {
             addJob()
         }
-
-        // Setup search
         setupSearch()
-
-        // Check for search query from intent
         intent.getStringExtra("SEARCH_QUERY")?.let { query ->
             if (query.isNotEmpty()) {
                 searchEditText.setText(query)
@@ -96,18 +75,13 @@ class AdminJobsActivity : AppCompatActivity() {
             }
         } ?: loadJobs()
     }
-
     private fun setupSearch() {
-        // Setup search text change listener
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                // We'll handle search on button click
             }
         })
-
-        // Setup search button click listener
         searchButton.setOnClickListener {
             val query = searchEditText.text.toString().trim()
             if (query.isEmpty()) {
@@ -117,22 +91,17 @@ class AdminJobsActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun loadJobs() {
         Log.d(TAG, "Loading jobs from Firestore")
         showLoading(true)
         searchQuery = ""
-
-        // Clear existing data
         allJobs.clear()
         filteredJobs.clear()
-
         db.collection("jobs")
             .orderBy("postedDate", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
                 Log.d(TAG, "Found ${documents.size()} jobs")
-
                 allJobs = documents.mapNotNull { document ->
                     try {
                         document.toObject(Job::class.java).copy(id = document.id)
@@ -141,8 +110,6 @@ class AdminJobsActivity : AppCompatActivity() {
                         null
                     }
                 }.toMutableList()
-
-                // Update UI
                 filteredJobs.addAll(allJobs)
                 updateJobsList()
                 showLoading(false)
@@ -154,13 +121,10 @@ class AdminJobsActivity : AppCompatActivity() {
                 showEmptyState(true)
             }
     }
-
     private fun searchJobs(query: String) {
         Log.d(TAG, "Searching jobs with query: $query")
         showLoading(true)
         searchQuery = query.lowercase()
-
-        // Filter jobs based on search query
         filteredJobs.clear()
         filteredJobs.addAll(allJobs.filter { job ->
             job.title.lowercase().contains(searchQuery) ||
@@ -169,42 +133,26 @@ class AdminJobsActivity : AppCompatActivity() {
             job.location.lowercase().contains(searchQuery) ||
             job.jobField.lowercase().contains(searchQuery)
         })
-
-        // Reset pagination to first page
         pagination.resetToFirstPage()
-
-        // Update UI
         updateJobsList()
         showLoading(false)
     }
-
     private fun updateJobsList() {
         val pageItems = pagination.getPageItems(filteredJobs)
-
-        // Update adapter with current page items
         adapter.updateJobs(pageItems)
-
-        // Update pagination info
         pagination.updateItemCount(filteredJobs.size)
-
-        // Show empty state if no jobs found
         showEmptyState(filteredJobs.isEmpty())
     }
-
     private fun showLoading(show: Boolean) {
         progressIndicator.visibility = if (show) View.VISIBLE else View.GONE
         recyclerView.visibility = if (show) View.GONE else View.VISIBLE
     }
-
     private fun showEmptyState(show: Boolean) {
         emptyStateView.visibility = if (show) View.VISIBLE else View.GONE
         recyclerView.visibility = if (show) View.GONE else View.VISIBLE
     }
-
     private fun deleteJob(jobId: String) {
         Log.d(TAG, "Attempting to delete job with ID: $jobId")
-
-        // Show confirmation dialog
         android.app.AlertDialog.Builder(this)
             .setTitle("Delete Job")
             .setMessage("Are you sure you want to delete this job? This action cannot be undone.")
@@ -214,10 +162,8 @@ class AdminJobsActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
-
     private fun performDeleteJob(jobId: String) {
         showLoading(true)
-
         db.collection("jobs").document(jobId)
             .delete()
             .addOnSuccessListener {
@@ -231,7 +177,6 @@ class AdminJobsActivity : AppCompatActivity() {
                 showLoading(false)
             }
     }
-
     private fun addJob() {
         val dialog = AdminEditJobDialog.newInstance(Job())
         dialog.onJobUpdated = {
@@ -239,12 +184,10 @@ class AdminJobsActivity : AppCompatActivity() {
         }
         dialog.show(supportFragmentManager, "AdminEditJobDialog")
     }
-
     private fun viewJob(job: Job) {
         val dialog = AdminJobDetailsDialog.newInstance(job)
         dialog.show(supportFragmentManager, "JobDetails")
     }
-
     private fun editJob(job: Job) {
         val dialog = AdminEditJobDialog.newInstance(job)
         dialog.onJobUpdated = {
@@ -255,7 +198,6 @@ class AdminJobsActivity : AppCompatActivity() {
         }
         dialog.show(supportFragmentManager, "AdminEditJobDialog")
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             onBackPressed()

@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Search and Filter Section -->
+        
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -74,7 +74,7 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Jobs List -->
+        
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/jobsRecyclerView"
             android:layout_width="match_parent"
@@ -82,7 +82,7 @@
             android:clipToPadding="false"
             android:paddingBottom="16dp"/>
 
-        <!-- Empty State -->
+        
         <TextView
             android:id="@+id/emptyView"
             android:layout_width="wrap_content"
@@ -95,7 +95,7 @@
 
     </LinearLayout>
 
-    <!-- Add Job FAB -->
+    
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addJobFab"
         android:layout_width="wrap_content"

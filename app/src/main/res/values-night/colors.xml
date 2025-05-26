@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base colors -->
+    
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Dark theme colors -->
-    <color name="primary">#EF5350</color>           <!-- Red 400 -->
-    <color name="primary_dark">#D32F2F</color>      <!-- Red 700 -->
-    <color name="primary_light">#EF9A9A</color>     <!-- Red 200 -->
-    <color name="accent">#EF5350</color>            <!-- Red 400 -->
-    <color name="accent_dark">#D32F2F</color>       <!-- Red 700 -->
-    <color name="accent_light">#EF9A9A</color>      <!-- Red 200 -->
+    
+    <color name="primary">#EF5350</color>           
+    <color name="primary_dark">#D32F2F</color>      
+    <color name="primary_light">#EF9A9A</color>     
+    <color name="accent">#EF5350</color>            
+    <color name="accent_dark">#D32F2F</color>       
+    <color name="accent_light">#EF9A9A</color>      
 
-    <!-- Background colors -->
+    
     <color name="background">#121212</color>
     <color name="background_dark">#121212</color>
     <color name="surface">#1E1E1E</color>
@@ -22,35 +22,35 @@
     <color name="on_surface">#FFFFFF</color>
     <color name="on_surface_dark">#FFFFFF</color>
 
-    <!-- Text colors -->
+    
     <color name="text_primary">#FFFFFF</color>
     <color name="text_primary_dark">#FFFFFF</color>
     <color name="text_secondary">#DDDDDD</color>
     <color name="text_secondary_dark">#DDDDDD</color>
 
-    <!-- Error colors -->
+    
     <color name="error">#CF6679</color>
     <color name="error_dark">#CF6679</color>
 
-    <!-- Status Colors -->
-    <color name="status_pending">#FFD54F</color>     <!-- Amber 300 -->
-    <color name="status_reviewing">#64B5F6</color>   <!-- Blue 300 -->
-    <color name="status_shortlisted">#81C784</color> <!-- Green 300 -->
-    <color name="status_interviewing">#BA68C8</color><!-- Purple 300 -->
-    <color name="status_offered">#FFB74D</color>     <!-- Orange 300 -->
-    <color name="status_rejected">#E57373</color>    <!-- Red 300 -->
+    
+    <color name="status_pending">#FFD54F</color>     
+    <color name="status_reviewing">#64B5F6</color>   
+    <color name="status_shortlisted">#81C784</color> 
+    <color name="status_interviewing">#BA68C8</color>
+    <color name="status_offered">#FFB74D</color>     
+    <color name="status_rejected">#E57373</color>    
 
-    <!-- Chip Colors -->
-    <color name="custom_chip_background">#D32F2F</color> <!-- Red 700 -->
-    <color name="custom_chip_text">#FFFFFF</color>       <!-- White -->
+    
+    <color name="custom_chip_background">#D32F2F</color> 
+    <color name="custom_chip_text">#FFFFFF</color>       
 
-    <!-- Card Colors -->
+    
     <color name="card_border">#424242</color>
     <color name="card_background">#1E1E1E</color>
     <color name="colorOutline">#424242</color>
 
-    <!-- Button Colors -->
-    <color name="button_primary">#EF5350</color>    <!-- Red 400 -->
-    <color name="button_secondary">#EF5350</color>  <!-- Red 400 -->
-    <color name="button_disabled">#757575</color>   <!-- Gray 600 -->
+    
+    <color name="button_primary">#EF5350</color>    
+    <color name="button_secondary">#EF5350</color>  
+    <color name="button_disabled">#757575</color>   
 </resources>

@@ -40,7 +40,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Welcome Section -->
+                
                 <TextView
                     android:id="@+id/welcomeText"
                     android:layout_width="match_parent"
@@ -51,14 +51,14 @@
                     android:textColor="@color/primary"
                     android:layout_marginBottom="24dp"/>
 
-                <!-- Stats Cards Row -->
+                
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginBottom="24dp">
 
-                    <!-- Active Jobs Card -->
+                    
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -94,7 +94,7 @@
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Applications Card -->
+                    
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -131,7 +131,7 @@
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
-                <!-- Quick Actions -->
+                
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -147,7 +147,7 @@
                     android:orientation="horizontal"
                     android:layout_marginBottom="24dp">
 
-                    <!-- Post Job Card -->
+                    
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/btnPostJob"
                         android:layout_width="0dp"
@@ -183,7 +183,7 @@
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- View Applications Card -->
+                    
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/btnViewApplications"
                         android:layout_width="0dp"
@@ -226,7 +226,7 @@
                     android:orientation="horizontal"
                     android:layout_marginBottom="24dp">
 
-                    <!-- Search Candidates Card -->
+                    
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/btnSearchCandidates"
                         android:layout_width="0dp"
@@ -262,7 +262,7 @@
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Messages Card -->
+                    
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/btnMessages"
                         android:layout_width="0dp"
@@ -299,7 +299,7 @@
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
-                <!-- Recent Activity Section -->
+                
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -330,7 +330,7 @@
                     android:visibility="gone"
                     android:layout_marginBottom="24dp"/>
 
-                <!-- Recent Applications Section -->
+                
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -360,7 +360,7 @@
                     android:visibility="gone"
                     android:layout_marginBottom="24dp"/>
 
-                <!-- Hidden Buttons -->
+                
                 <LinearLayout
                     android:id="@+id/buttonsLayout"
                     android:layout_width="match_parent"

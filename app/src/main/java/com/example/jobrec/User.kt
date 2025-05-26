@@ -1,8 +1,6 @@
 package com.example.jobrec
-
 import android.os.Parcel
 import android.os.Parcelable
-
 data class User(
     val id: String = "",
     val idNumber: String = "",
@@ -59,7 +57,6 @@ data class User(
         parcel.readString() ?: "",
         parcel.readString() ?: ""
     )
-
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(id)
         parcel.writeString(idNumber)
@@ -88,22 +85,18 @@ data class User(
         parcel.writeString(field)
         parcel.writeString(subField)
     }
-
     override fun describeContents(): Int {
         return 0
     }
-
     companion object CREATOR : Parcelable.Creator<User> {
         override fun createFromParcel(parcel: Parcel): User {
             return User(parcel)
         }
-
         override fun newArray(size: Int): Array<User?> {
             return arrayOfNulls(size)
         }
     }
 }
-
 data class Education(
     val institution: String = "",
     val degree: String = "",
@@ -120,7 +113,6 @@ data class Education(
         parcel.readString() ?: "",
         parcel.readString() ?: ""
     )
-
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(institution)
         parcel.writeString(degree)
@@ -129,22 +121,18 @@ data class Education(
         parcel.writeString(endDate)
         parcel.writeString(description)
     }
-
     override fun describeContents(): Int {
         return 0
     }
-
     companion object CREATOR : Parcelable.Creator<Education> {
         override fun createFromParcel(parcel: Parcel): Education {
             return Education(parcel)
         }
-
         override fun newArray(size: Int): Array<Education?> {
             return arrayOfNulls(size)
         }
     }
 }
-
 data class Experience(
     val company: String = "",
     val position: String = "",
@@ -159,7 +147,6 @@ data class Experience(
         parcel.readString() ?: "",
         parcel.readString() ?: ""
     )
-
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(company)
         parcel.writeString(position)
@@ -167,51 +154,42 @@ data class Experience(
         parcel.writeString(endDate)
         parcel.writeString(description)
     }
-
     override fun describeContents(): Int {
         return 0
     }
-
     companion object CREATOR : Parcelable.Creator<Experience> {
         override fun createFromParcel(parcel: Parcel): Experience {
             return Experience(parcel)
         }
-
         override fun newArray(size: Int): Array<Experience?> {
             return arrayOfNulls(size)
         }
     }
 }
-
 data class Language(
     val name: String = "",
-    val proficiency: String = "" // Basic, Intermediate, Advanced, Native
+    val proficiency: String = "" 
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",
         parcel.readString() ?: ""
     )
-
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(name)
         parcel.writeString(proficiency)
     }
-
     override fun describeContents(): Int {
         return 0
     }
-
     companion object CREATOR : Parcelable.Creator<Language> {
         override fun createFromParcel(parcel: Parcel): Language {
             return Language(parcel)
         }
-
         override fun newArray(size: Int): Array<Language?> {
             return arrayOfNulls(size)
         }
     }
 }
-
 data class Reference(
     val name: String = "",
     val position: String = "",
@@ -226,7 +204,6 @@ data class Reference(
         parcel.readString() ?: "",
         parcel.readString() ?: ""
     )
-
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(name)
         parcel.writeString(position)
@@ -234,16 +211,13 @@ data class Reference(
         parcel.writeString(email)
         parcel.writeString(phone)
     }
-
     override fun describeContents(): Int {
         return 0
     }
-
     companion object CREATOR : Parcelable.Creator<Reference> {
         override fun createFromParcel(parcel: Parcel): Reference {
             return Reference(parcel)
         }
-
         override fun newArray(size: Int): Array<Reference?> {
             return arrayOfNulls(size)
         }

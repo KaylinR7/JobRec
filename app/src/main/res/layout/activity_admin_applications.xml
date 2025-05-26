@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="?android:colorBackground">
 
-    <!-- Include the admin toolbar -->
+    
     <include
         android:id="@+id/toolbar_layout"
         layout="@layout/layout_admin_toolbar" />
@@ -16,12 +16,12 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Include search layout -->
+        
         <include
             android:id="@+id/search_layout"
             layout="@layout/layout_admin_search" />
 
-        <!-- Main content -->
+        
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -75,13 +75,13 @@
                 android:visibility="gone" />
         </FrameLayout>
 
-        <!-- Include pagination layout -->
+        
         <include
             android:id="@+id/pagination_layout"
             layout="@layout/layout_admin_pagination" />
     </LinearLayout>
 
-    <!-- FAB for adding new application -->
+    
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addApplicationFab"
         android:layout_width="wrap_content"

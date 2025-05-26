@@ -21,7 +21,7 @@
             android:textColor="@color/text_primary"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Skills Filter -->
+        
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/skillsFilterLayout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -37,14 +37,14 @@
                 android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Selected Skills Chips -->
+        
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/selectedSkillsChipGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp" />
 
-        <!-- Education Level Filter -->
+        
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/educationFilterLayout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -60,7 +60,7 @@
                 android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Experience Level Filter -->
+        
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/experienceFilterLayout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -76,7 +76,7 @@
                 android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Location Filter -->
+        
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/locationFilterLayout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -92,7 +92,7 @@
                 android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Field/Industry Filter -->
+        
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fieldFilterLayout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -108,7 +108,7 @@
                 android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Specialization Filter -->
+        
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/subFieldFilterLayout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -124,14 +124,14 @@
                 android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Button Row -->
+        
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="8dp">
 
-            <!-- Clear Filters Button -->
+            
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/clearFiltersButton"
                 style="@style/Widget.JobRec.Button.Outlined"
@@ -141,7 +141,7 @@
                 android:layout_marginEnd="8dp"
                 android:text="Clear" />
 
-            <!-- Search Button -->
+            
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/applyFiltersButton"
                 style="@style/Widget.JobRec.Button"

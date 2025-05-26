@@ -7,7 +7,7 @@
     android:background="?attr/selectableItemBackground"
     android:padding="16dp">
 
-    <!-- Profile Image -->
+    
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/profileImageView"
         android:layout_width="50dp"
@@ -19,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Participant Name -->
+    
     <TextView
         android:id="@+id/participantNameText"
         android:layout_width="0dp"
@@ -36,7 +36,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Samsung Electronics" />
 
-    <!-- Job Title -->
+    
     <TextView
         android:id="@+id/jobTitleText"
         android:layout_width="0dp"
@@ -53,7 +53,7 @@
         app:layout_constraintTop_toBottomOf="@+id/participantNameText"
         tools:text="Senior Software Engineer" />
 
-    <!-- Last Message -->
+    
     <TextView
         android:id="@+id/lastMessageText"
         android:layout_width="0dp"
@@ -70,7 +70,7 @@
         app:layout_constraintTop_toBottomOf="@+id/jobTitleText"
         tools:text="Hello, we would like to schedule an interview..." />
 
-    <!-- Time -->
+    
     <TextView
         android:id="@+id/timeText"
         android:layout_width="wrap_content"
@@ -81,7 +81,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="10:30 AM" />
 
-    <!-- Unread Count -->
+    
     <TextView
         android:id="@+id/unreadCountText"
         android:layout_width="20dp"
@@ -97,7 +97,7 @@
         tools:text="3"
         tools:visibility="visible" />
 
-    <!-- Divider -->
+    
     <View
         android:layout_width="0dp"
         android:layout_height="0.5dp"

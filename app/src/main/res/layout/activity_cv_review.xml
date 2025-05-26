@@ -28,7 +28,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Profile Section -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -83,7 +83,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Education Section -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/educationCard"
                 android:layout_width="match_parent"
@@ -115,7 +115,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Experience Section -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/experienceCard"
                 android:layout_width="match_parent"
@@ -147,7 +147,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Skills Section -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/skillsCard"
                 android:layout_width="match_parent"
@@ -179,7 +179,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Languages Section -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/languagesCard"
                 android:layout_width="match_parent"
@@ -211,7 +211,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Contact Button -->
+            
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/contactButton"
                 android:layout_width="match_parent"

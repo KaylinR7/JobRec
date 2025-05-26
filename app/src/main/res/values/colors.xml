@@ -1,52 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base colors -->
+    
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Primary Theme Colors -->
-    <color name="primary">#D32F2F</color>           <!-- Red 700 -->
-    <color name="primary_dark">#B71C1C</color>      <!-- Red 900 -->
-    <color name="primary_light">#FFCDD2</color>     <!-- Red 100 -->
-    <color name="accent">#D32F2F</color>            <!-- Red 700 -->
-    <color name="accent_dark">#B71C1C</color>       <!-- Red 900 -->
-    <color name="accent_light">#EF9A9A</color>      <!-- Red 200 -->
+    
+    <color name="primary">#D32F2F</color>           
+    <color name="primary_dark">#B71C1C</color>      
+    <color name="primary_light">#FFCDD2</color>     
+    <color name="accent">#D32F2F</color>            
+    <color name="accent_dark">#B71C1C</color>       
+    <color name="accent_light">#EF9A9A</color>      
 
-    <!-- Background colors -->
-    <color name="background">#F5F7FA</color>        <!-- Light gray with blue tint -->
+    
+    <color name="background">#F5F7FA</color>        
     <color name="surface">#FFFFFF</color>
-    <color name="on_background">#263238</color>     <!-- Blue Gray 900 -->
-    <color name="on_surface">#263238</color>        <!-- Blue Gray 900 -->
+    <color name="on_background">#263238</color>     
+    <color name="on_surface">#263238</color>        
 
-    <!-- Text colors -->
-    <color name="text_primary">#263238</color>      <!-- Blue Gray 900 -->
-    <color name="text_secondary">#607D8B</color>    <!-- Blue Gray 500 -->
+    
+    <color name="text_primary">#263238</color>      
+    <color name="text_secondary">#607D8B</color>    
 
-    <!-- Error colors -->
-    <color name="error">#F44336</color>             <!-- Red 500 -->
+    
+    <color name="error">#F44336</color>             
 
-    <!-- Application Status Colors -->
-    <color name="status_pending">#FFC107</color>    <!-- Amber 500 -->
-    <color name="status_reviewed">#2196F3</color>   <!-- Blue 500 -->
-    <color name="status_accepted">#4CAF50</color>   <!-- Green 500 -->
-    <color name="status_rejected">#F44336</color>   <!-- Red 500 -->
-    <color name="status_shortlisted">#9C27B0</color><!-- Purple 500 -->
-    <color name="status_interviewing">#009688</color><!-- Teal 500 -->
-    <color name="status_offered">#FF9800</color>    <!-- Orange 500 -->
-    <color name="status_applied">#FFC107</color>    <!-- Amber 500 -->
-    <color name="status_interviewed">#009688</color><!-- Teal 500 -->
+    
+    <color name="status_pending">#FFC107</color>    
+    <color name="status_reviewed">#2196F3</color>   
+    <color name="status_accepted">#4CAF50</color>   
+    <color name="status_rejected">#F44336</color>   
+    <color name="status_shortlisted">#9C27B0</color>
+    <color name="status_interviewing">#009688</color>
+    <color name="status_offered">#FF9800</color>    
+    <color name="status_applied">#FFC107</color>    
+    <color name="status_interviewed">#009688</color>
 
-    <!-- Chip Colors -->
-    <color name="custom_chip_background">#FFEBEE</color> <!-- Red 50 -->
-    <color name="custom_chip_text">#D32F2F</color>       <!-- Red 700 -->
+    
+    <color name="custom_chip_background">#FFEBEE</color> 
+    <color name="custom_chip_text">#D32F2F</color>       
 
-    <!-- Card Colors -->
+    
     <color name="card_border">#E0E0E0</color>
     <color name="card_background">#FFFFFF</color>
     <color name="colorOutline">#E0E0E0</color>
 
-    <!-- Button Colors -->
-    <color name="button_primary">#D32F2F</color>    <!-- Red 700 -->
-    <color name="button_secondary">#D32F2F</color>  <!-- Red 700 -->
-    <color name="button_disabled">#BDBDBD</color>   <!-- Gray 400 -->
+    
+    <color name="button_primary">#D32F2F</color>    
+    <color name="button_secondary">#D32F2F</color>  
+    <color name="button_disabled">#BDBDBD</color>   
 </resources>

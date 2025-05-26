@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,7 +17,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
-
 class AdminCompaniesActivity : AppCompatActivity() {
     private val db = FirebaseFirestore.getInstance()
     private lateinit var recyclerView: RecyclerView
@@ -28,19 +26,14 @@ class AdminCompaniesActivity : AppCompatActivity() {
     private lateinit var searchEditText: TextInputEditText
     private lateinit var searchButton: MaterialButton
     private lateinit var pagination: AdminPagination
-
     private var companyIds: MutableList<String> = mutableListOf()
     private var allCompanies: MutableList<Company> = mutableListOf()
     private var filteredCompanies: MutableList<Company> = mutableListOf()
     private val TAG = "AdminCompaniesActivity"
-
     private var searchQuery: String = ""
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin_companies)
-
-        // Setup toolbar
         val toolbar = findViewById<Toolbar>(R.id.adminToolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -48,18 +41,12 @@ class AdminCompaniesActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
             title = ""
         }
-
-        // Set toolbar title
         findViewById<TextView>(R.id.adminToolbarTitle).text = "Manage Companies"
-
-        // Initialize views
         recyclerView = findViewById(R.id.adminCompaniesRecyclerView)
         progressIndicator = findViewById(R.id.progressIndicator)
         emptyStateView = findViewById(R.id.emptyStateView)
         searchEditText = findViewById(R.id.searchEditText)
         searchButton = findViewById(R.id.searchButton)
-
-        // Setup RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = AdminCompaniesAdapter(
             emptyList(),
@@ -74,24 +61,16 @@ class AdminCompaniesActivity : AppCompatActivity() {
             }
         )
         recyclerView.adapter = adapter
-
-        // Setup pagination
         pagination = AdminPagination(
             findViewById(R.id.pagination_layout),
             pageSize = 5
         ) { page ->
             updateCompaniesList()
         }
-
-        // Setup search
         setupSearch()
-
-        // Setup FAB
         findViewById<FloatingActionButton>(R.id.addCompanyFab).setOnClickListener {
             addCompany()
         }
-
-        // Check for search query from intent
         intent.getStringExtra("SEARCH_QUERY")?.let { query ->
             if (query.isNotEmpty()) {
                 searchEditText.setText(query)
@@ -101,18 +80,13 @@ class AdminCompaniesActivity : AppCompatActivity() {
             }
         } ?: loadCompanies()
     }
-
     private fun setupSearch() {
-        // Setup search text change listener
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                // We'll handle search on button click
             }
         })
-
-        // Setup search button click listener
         searchButton.setOnClickListener {
             val query = searchEditText.text.toString().trim()
             if (query.isEmpty()) {
@@ -122,27 +96,21 @@ class AdminCompaniesActivity : AppCompatActivity() {
             }
         }
     }
-
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
     }
-
     private fun loadCompanies() {
         Log.d(TAG, "Loading companies from Firestore")
         showLoading(true)
         searchQuery = ""
-
-        // Clear existing data
         allCompanies.clear()
         filteredCompanies.clear()
         companyIds.clear()
-
         db.collection("companies")
             .get()
             .addOnSuccessListener { result ->
                 Log.d(TAG, "Found ${result.size()} companies")
-
                 for (document in result) {
                     try {
                         val company = document.toObject(Company::class.java)
@@ -153,8 +121,6 @@ class AdminCompaniesActivity : AppCompatActivity() {
                         Log.e(TAG, "Error converting document to Company: ${e.message}")
                     }
                 }
-
-                // Update UI
                 filteredCompanies.addAll(allCompanies)
                 updateCompaniesList()
                 showLoading(false)
@@ -166,55 +132,36 @@ class AdminCompaniesActivity : AppCompatActivity() {
                 showEmptyState(true)
             }
     }
-
     private fun searchCompanies(query: String) {
         Log.d(TAG, "Searching companies with query: $query")
         showLoading(true)
         searchQuery = query.lowercase()
-
-        // Filter companies based on search query
         filteredCompanies.clear()
         filteredCompanies.addAll(allCompanies.filter { company ->
             company.companyName.lowercase().contains(searchQuery) ||
             company.email.lowercase().contains(searchQuery) ||
             company.industry?.lowercase()?.contains(searchQuery) ?: false
         })
-
-        // Reset pagination to first page
         pagination.resetToFirstPage()
-
-        // Update UI
         updateCompaniesList()
         showLoading(false)
     }
-
     private fun updateCompaniesList() {
         val pageItems = pagination.getPageItems(filteredCompanies)
-
-        // Update adapter with current page items
         adapter.updateCompanies(pageItems)
-
-        // Update pagination info
         pagination.updateItemCount(filteredCompanies.size)
-
-        // Show empty state if no companies found
         showEmptyState(filteredCompanies.isEmpty())
     }
-
     private fun showLoading(show: Boolean) {
         progressIndicator.visibility = if (show) View.VISIBLE else View.GONE
         recyclerView.visibility = if (show) View.GONE else View.VISIBLE
     }
-
     private fun showEmptyState(show: Boolean) {
         emptyStateView.visibility = if (show) View.VISIBLE else View.GONE
         recyclerView.visibility = if (show) View.GONE else View.VISIBLE
     }
-
     private fun deleteCompany(companyId: String) {
         Log.d(TAG, "Attempting to delete company with ID: $companyId")
-
-        // Show confirmation dialog
         android.app.AlertDialog.Builder(this)
             .setTitle("Delete Company")
             .setMessage("Are you sure you want to delete this company? This action cannot be undone.")
@@ -224,10 +171,8 @@ class AdminCompaniesActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
-
     private fun performDeleteCompany(companyId: String) {
         showLoading(true)
-
         db.collection("companies").document(companyId)
             .delete()
             .addOnSuccessListener {
@@ -241,7 +186,6 @@ class AdminCompaniesActivity : AppCompatActivity() {
                 showLoading(false)
             }
     }
-
     private fun addCompany() {
         val dialog = AdminEditCompanyDialog.newInstance(Company())
         dialog.onCompanyUpdated = {
@@ -249,26 +193,18 @@ class AdminCompaniesActivity : AppCompatActivity() {
         }
         dialog.show(supportFragmentManager, "AdminEditCompanyDialog")
     }
-
     private fun viewCompany(company: Company) {
-        // Find the company ID
         val index = allCompanies.indexOfFirst { c -> c.email == company.email }
         if (index != -1) {
             val companyId = companyIds[index]
-
-            // Show company details in read-only mode
             val dialog = AdminEditCompanyDialog.newInstance(company, companyId)
             dialog.show(supportFragmentManager, "AdminViewCompanyDialog")
         }
     }
-
     private fun editCompany(company: Company) {
-        // Find the company ID
         val index = allCompanies.indexOfFirst { c -> c.email == company.email }
         if (index != -1) {
             val companyId = companyIds[index]
-
-            // Show edit dialog
             val dialog = AdminEditCompanyDialog.newInstance(company, companyId)
             dialog.onCompanyUpdated = {
                 loadCompanies()

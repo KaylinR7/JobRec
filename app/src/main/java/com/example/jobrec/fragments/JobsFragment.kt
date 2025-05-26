@@ -1,5 +1,4 @@
 package com.example.jobrec.fragments
-
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,17 +14,14 @@ import com.example.jobrec.JobsAdapter
 import com.example.jobrec.R
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-
 class JobsFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var jobsAdapter: JobsAdapter
     private lateinit var db: FirebaseFirestore
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         db = FirebaseFirestore.getInstance()
     }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -33,25 +29,19 @@ class JobsFragment : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_jobs, container, false)
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         recyclerView = view.findViewById(R.id.jobsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
-
         jobsAdapter = JobsAdapter { job ->
             val intent = Intent(requireContext(), JobDetailsActivity::class.java)
             intent.putExtra("jobId", job.id)
             startActivity(intent)
         }
-
         recyclerView.adapter = jobsAdapter
         loadJobs()
     }
-
     private fun loadJobs() {
-        // Simple query without complex ordering
         db.collection("jobs")
             .get()
             .addOnSuccessListener { documents ->
@@ -64,11 +54,9 @@ class JobsFragment : Fragment() {
                         null
                     }
                 }.sortedByDescending {
-                    // Sort in memory by posted date
                     try {
                         it.postedDate.toDate()
                     } catch (e: Exception) {
-                        // Fallback if postedDate is not available
                         java.util.Date()
                     }
                 }
@@ -78,6 +66,4 @@ class JobsFragment : Fragment() {
                 Toast.makeText(context, "Error loading jobs: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
-
 }

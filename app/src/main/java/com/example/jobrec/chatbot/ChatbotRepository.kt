@@ -1,5 +1,4 @@
 package com.example.jobrec.chatbot
-
 import android.content.Context
 import android.util.Log
 import com.example.jobrec.BuildConfig
@@ -8,30 +7,19 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
-
-/**
- * Repository for chatbot interactions
- */
 class ChatbotRepository(private val context: Context) {
     private val huggingFaceService = HuggingFaceService()
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private val TAG = "ChatbotRepository"
-
-    // Hugging Face API token - loaded from secure storage
     private val huggingFaceToken: String
         get() = retrieveHuggingFaceToken()
-
-    // Common help topics and responses
     private val helpTopics = mapOf(
-        // App information
         "what is jobrec" to "JobRec is a job recruitment app that connects job seekers with employers. It allows students to search for jobs, submit applications, and communicate with potential employers. Companies can post job openings, review applications, and connect with qualified candidates.",
         "what is careerworx" to "Careerworx is a job recruitment app that connects job seekers with employers. It allows students to search for jobs, submit applications, and communicate with potential employers. Companies can post job openings, review applications, and connect with qualified candidates.",
         "about jobrec" to "CareerWorx is a comprehensive job recruitment platform designed to streamline the job search and hiring process. It offers features for both job seekers and employers, including job listings, application management, messaging, and profile customization.",
         "how does jobrec work" to "CareerWorx works by connecting job seekers with employers. As a student, you can create a profile, search for jobs, and submit applications. Employers can post job openings, review applications, and communicate with candidates. The app facilitates the entire recruitment process from job posting to hiring.",
         "app features" to "JobRec offers many features including job search with filters, application tracking, saved jobs, messaging with employers, profile management, CV/resume uploads, and notifications for job matches. Companies can post jobs, search for candidates, review applications, and communicate with applicants.",
-
-        // Student features
         "job search" to "To search for jobs, go to the Search tab and use the filters to narrow down results. You can filter by job type, location, experience level, and more to find positions that match your qualifications and preferences.",
         "profile" to "To update your profile, go to the Profile tab and tap on the fields you want to edit. Your profile showcases your skills, experience, and education to potential employers, so keep it up-to-date!",
         "applications" to "You can view your job applications in the Applications tab. You'll see the status of each application (pending, reviewed, accepted, or rejected) and can track your progress throughout the hiring process.",
@@ -48,89 +36,54 @@ class ChatbotRepository(private val context: Context) {
         "filter jobs" to "To filter jobs, go to the Search tab and use the filter options at the top of the screen to narrow down results by location, job type, experience level, and more.",
         "job recommendations" to "JobRec provides personalized job recommendations based on your profile, skills, and previous applications. These appear on your home screen to help you discover relevant opportunities.",
         "job alerts" to "Job alerts notify you when new positions matching your interests are posted. You can manage your alert preferences in the Profile section.",
-
-        // Company features
         "company profile" to "If you're a company user, you can edit your company profile by going to the Profile tab in the bottom navigation bar. A complete profile helps attract qualified candidates.",
         "post job" to "To post a new job, go to the Company Dashboard and tap the 'Post Job' button. Fill in all the required details about the position including title, description, requirements, and compensation.",
         "review applications" to "As a company, you can review applications by going to the Applications section. You can filter applications by status and view candidate details including their CV and cover letter.",
         "candidate search" to "Companies can search for candidates by going to the Search Candidates section. You can filter by skills, experience, education, and other criteria to find qualified applicants.",
         "company dashboard" to "The Company Dashboard provides an overview of your job postings, applications received, and recent activity. It's your central hub for managing recruitment activities.",
-
-        // Account management
         "delete account" to "To delete your account, please contact our support team at support@jobrec.com. Note that this action is permanent and will remove all your data from our system.",
         "change password" to "To change your password, go to the Profile section and tap on the 'Change Password' option. You'll need to enter your current password and then create a new one.",
         "notifications" to "You can manage your notification settings in the Profile section under 'Notification Preferences'. You can choose which alerts you want to receive and how you receive them.",
         "privacy" to "JobRec takes your privacy seriously. Your personal information is only shared with employers when you apply for a job. You can review our full privacy policy in the app settings.",
         "data security" to "JobRec uses encryption and secure servers to protect your data. We never share your information with third parties without your consent.",
-
-        // Communication
         "contact employer" to "You can contact employers through the chat feature after your application has been accepted. This allows for direct communication about job details, interviews, or any questions.",
         "messaging" to "The messaging feature allows direct communication between candidates and employers. You can access your conversations from the Messages section of the app.",
         "schedule interview" to "Employers can schedule interviews through the chat feature. You'll receive a notification when an interview is proposed, and you can accept or suggest an alternative time.",
-
-        // Troubleshooting
         "app not working" to "If you're experiencing issues with the app, try these steps: 1) Restart the app, 2) Check your internet connection, 3) Update to the latest version, 4) Restart your device. If problems persist, contact support.",
         "bug report" to "To report a bug, please email support@jobrec.com with details about the issue, including what you were doing when it occurred and any error messages you received.",
         "slow app" to "If the app is running slowly, try clearing your cache, ensuring you have a stable internet connection, and closing other apps running in the background.",
-
-        // Getting help
         "contact support" to "For support, email support@careerworx.com or use the Contact section in the app. Our team is available Monday-Friday, 9am-5pm to assist with any issues or questions.",
         "feedback" to "We value your feedback! You can submit suggestions or comments through the Feedback option in the app settings or by emailing feedback@careerworx.com.",
         "help center" to "The Help Center contains articles and guides on using Careerworx. Access it from the menu to find answers to common questions and learn about app features.",
-
-        // Profile setup assistance
         "profile setup" to "To set up your profile effectively, make sure to include a professional photo, detailed education history, work experience with accomplishments, relevant skills, and certifications. A complete profile increases your chances of being noticed by employers.",
         "profile tips" to "Here are some profile tips: 1) Use a professional photo, 2) List all relevant skills and certifications, 3) Provide detailed work experience with measurable achievements, 4) Include education details with GPA if it's strong, 5) Keep your profile updated regularly.",
         "improve profile" to "To improve your profile, add specific achievements in your work experience, list relevant skills that match job descriptions, include certifications, ensure your education section is complete, and add a professional photo.",
-
-        // Resume/CV proofreading tips
         "proofread resume" to "When proofreading your resume, check for: 1) Spelling and grammar errors, 2) Consistent formatting and font usage, 3) Proper verb tense (past tense for previous jobs), 4) Quantifiable achievements rather than just duties, 5) Tailored content that matches the jobs you're applying for.",
         "resume mistakes" to "Common resume mistakes to avoid: 1) Typos and grammatical errors, 2) Using generic descriptions instead of specific achievements, 3) Including irrelevant experience, 4) Having an unprofessional email address, 5) Using an outdated or unprofessional format.",
         "cv format" to "A good CV format includes: 1) Contact information at the top, 2) A brief professional summary, 3) Work experience in reverse chronological order with achievements, 4) Education details, 5) Skills section, 6) Certifications, and 7) References (or 'Available upon request').",
-
-        // Job application tips
         "application tips" to "When applying for jobs: 1) Tailor your resume to each position, 2) Write a customized cover letter addressing the company's needs, 3) Research the company before applying, 4) Follow all application instructions carefully, 5) Proofread everything before submitting.",
         "cover letter" to "A good cover letter should: 1) Address the hiring manager by name if possible, 2) Mention the specific job you're applying for, 3) Highlight relevant skills and experience, 4) Explain why you're interested in the company, 5) Include a call to action, and 6) Be concise (no more than one page).",
         "interview preparation" to "To prepare for an interview: 1) Research the company thoroughly, 2) Practice answers to common questions, 3) Prepare examples of your achievements, 4) Have questions ready to ask the interviewer, 5) Dress professionally, 6) Plan your route to arrive early, 7) Bring copies of your resume."
     )
-
-    /**
-     * Get a response from the chatbot
-     * @param query The user's query
-     * @return The chatbot's response
-     */
     suspend fun getChatbotResponse(query: String): String {
-        // First check if we have a predefined response for this query
         val localResponse = getLocalResponse(query)
         if (localResponse != null) {
-            // Save the interaction to Firestore for analysis
             saveInteraction(query, localResponse)
             return localResponse
         }
-
-        // Try to find a fuzzy match in our predefined responses
         val fuzzyMatch = getFuzzyMatchResponse(query)
         if (fuzzyMatch != null) {
-            // Save the interaction to Firestore for analysis
             saveInteraction(query, fuzzyMatch)
             return fuzzyMatch
         }
-
-        // If no local response, use Hugging Face API
         return try {
             val response = huggingFaceService.generateResponse(query, huggingFaceToken)
-
-            // Check if the response is empty or contains an error
             if (response.contains("Error:") || response.isBlank() || response.contains("404")) {
-                // Fallback to a generic response
                 val fallbackResponse = getFallbackResponse(query)
                 saveInteraction(query, fallbackResponse)
                 return fallbackResponse
             }
-
-            // Save the interaction to Firestore for analysis
             saveInteraction(query, response)
-
             response
         } catch (e: Exception) {
             Log.e(TAG, "Error getting chatbot response", e)
@@ -139,17 +92,9 @@ class ChatbotRepository(private val context: Context) {
             return fallbackResponse
         }
     }
-
-    /**
-     * Get a fallback response when the API fails
-     * @param query The user's query
-     * @return A generic helpful response
-     */
     private fun getFallbackResponse(query: String): String {
         val lowerQuery = query.lowercase()
-
         return when {
-            // App information queries
             lowerQuery.contains("what is") || lowerQuery.contains("about") || lowerQuery.contains("tell me about") -> {
                 if (lowerQuery.contains("jobrec") || lowerQuery.contains("app") || lowerQuery.contains("this app")) {
                     "JobRec is a job recruitment app that connects students with employers. It allows you to search for jobs, submit applications, save favorite positions, and communicate with potential employers. Companies can post job openings, review applications, and connect with qualified candidates."
@@ -157,31 +102,19 @@ class ChatbotRepository(private val context: Context) {
                     "I'm here to help you navigate the JobRec app. You can ask me about how the app works, job searching, applications, profile management, and more. What would you like to know?"
                 }
             }
-
             lowerQuery.contains("how") && (lowerQuery.contains("work") || lowerQuery.contains("use")) &&
                     (lowerQuery.contains("jobrec") || lowerQuery.contains("app")) ->
                 "JobRec works by connecting job seekers with employers. As a student, you can create a profile, search for jobs using filters, and submit applications. Employers can post job openings, review applications, and communicate with candidates. The app handles the entire recruitment process from job posting to hiring."
-
             lowerQuery.contains("feature") || lowerQuery.contains("what can") || lowerQuery.contains("functionality") ->
                 "JobRec offers many features including: job search with filters, application tracking, saved jobs, messaging with employers, profile management, CV/resume uploads, and notifications for job matches. Companies can post jobs, search for candidates, review applications, and communicate with applicants."
-
-            // CV/Resume queries
             lowerQuery.contains("cv") || lowerQuery.contains("resume") ->
                 "To update your CV or resume, go to the Profile tab and scroll down to the CV section. You can edit your details including education, experience, skills, and achievements. Keep your CV updated to improve your chances of getting hired!"
-
-            // Profile queries
             lowerQuery.contains("profile") || lowerQuery.contains("edit") || lowerQuery.contains("change") ->
                 "To edit your profile information, go to the Profile tab from the bottom navigation bar and tap on any field you want to update. Your profile showcases your skills and experience to employers, so keep it complete and up-to-date."
-
-            // Job search queries
             lowerQuery.contains("job") || lowerQuery.contains("search") || lowerQuery.contains("find") ->
                 "To search for jobs, use the Search tab at the bottom of the screen. You can filter results by job type, location, experience level, and more to find positions that match your qualifications and preferences."
-
-            // Application queries
             lowerQuery.contains("apply") || lowerQuery.contains("application") ->
                 "To apply for a job, open the job details and tap the 'Apply' button. You'll need to fill out the application form and may need to upload your resume. You can track the status of your applications in the Applications tab."
-
-            // Company/employer queries
             lowerQuery.contains("company") || lowerQuery.contains("employer") -> {
                 if (lowerQuery.contains("contact") || lowerQuery.contains("message") || lowerQuery.contains("chat")) {
                     "You can contact employers through the chat feature after your application has been accepted. This allows for direct communication about job details, interviews, or any questions you may have."
@@ -191,8 +124,6 @@ class ChatbotRepository(private val context: Context) {
                     "Companies use JobRec to post job openings, review applications, search for candidates, and communicate with applicants. If you're a company user, you can access these features from the Company Dashboard."
                 }
             }
-
-            // Account management
             lowerQuery.contains("account") || lowerQuery.contains("password") || lowerQuery.contains("login") -> {
                 if (lowerQuery.contains("delete") || lowerQuery.contains("remove")) {
                     "To delete your account, please contact our support team at support@jobrec.com. Note that this action is permanent and will remove all your data from our system."
@@ -202,28 +133,15 @@ class ChatbotRepository(private val context: Context) {
                     "You can manage your account settings in the Profile section. This includes updating your personal information, changing your password, and managing notification preferences."
                 }
             }
-
-            // Help and support
             lowerQuery.contains("help") || lowerQuery.contains("support") || lowerQuery.contains("contact") ->
                 "For support, email support@jobrec.com or use the Contact section in the app. Our team is available Monday-Friday, 9am-5pm to assist with any issues or questions you might have."
-
-            // Default response
             else -> "I'm here to help you navigate the JobRec app. You can ask me about how the app works, job searching, applications, profile management, and more. How can I assist you today?"
         }
     }
-
-    /**
-     * Try to find a fuzzy match in our predefined responses
-     * @param query The user's query
-     * @return A response if a fuzzy match is found, null otherwise
-     */
     private fun getFuzzyMatchResponse(query: String): String? {
         val lowerQuery = query.lowercase()
-
-        // Special handling for app information questions
         if (lowerQuery.contains("what") || lowerQuery.contains("how") || lowerQuery.contains("tell")) {
             if (lowerQuery.contains("jobrec") || lowerQuery.contains("app") || lowerQuery.contains("this app")) {
-                // Look for specific app information topics
                 for (topic in listOf("what is jobrec", "about jobrec", "how does jobrec work", "app features")) {
                     val response = helpTopics[topic]
                     if (response != null) {
@@ -232,8 +150,6 @@ class ChatbotRepository(private val context: Context) {
                 }
             }
         }
-
-        // Handle questions about specific features
         val featureKeywords = mapOf(
             "search" to listOf("job search", "filter jobs"),
             "profile" to listOf("profile", "edit profile"),
@@ -244,11 +160,8 @@ class ChatbotRepository(private val context: Context) {
             "company" to listOf("company profile", "post job", "review applications"),
             "account" to listOf("login", "signup", "change password", "delete account")
         )
-
-        // Check if query contains any feature keywords
         for ((keyword, topics) in featureKeywords) {
             if (lowerQuery.contains(keyword)) {
-                // Try to find a matching topic
                 for (topic in topics) {
                     val response = helpTopics[topic]
                     if (response != null) {
@@ -257,10 +170,7 @@ class ChatbotRepository(private val context: Context) {
                 }
             }
         }
-
-        // Check for partial matches in our help topics
         for ((topic, response) in helpTopics) {
-            // Split the topic into words and check if any word is in the query
             val topicWords = topic.split(" ")
             for (word in topicWords) {
                 if (word.length > 3 && lowerQuery.contains(word)) {
@@ -268,13 +178,9 @@ class ChatbotRepository(private val context: Context) {
                 }
             }
         }
-
-        // Check for question patterns
         if (lowerQuery.startsWith("how do i") || lowerQuery.startsWith("how can i") ||
             lowerQuery.startsWith("how to") || lowerQuery.startsWith("what is") ||
             lowerQuery.startsWith("where can i") || lowerQuery.startsWith("can i")) {
-
-            // Extract the key part of the question
             val questionPart = lowerQuery
                 .replace("how do i", "")
                 .replace("how can i", "")
@@ -283,8 +189,6 @@ class ChatbotRepository(private val context: Context) {
                 .replace("where can i", "")
                 .replace("can i", "")
                 .trim()
-
-            // Look for topics that contain words from the question part
             val questionWords = questionPart.split(" ").filter { it.length > 3 }
             for (word in questionWords) {
                 for ((topic, response) in helpTopics) {
@@ -294,66 +198,42 @@ class ChatbotRepository(private val context: Context) {
                 }
             }
         }
-
         return null
     }
-
-    /**
-     * Get a local response for common queries
-     * @param query The user's query
-     * @return A predefined response or null if none matches
-     */
     private fun getLocalResponse(query: String): String? {
         val lowerQuery = query.lowercase()
-
-        // Check for greetings
         if (lowerQuery.contains("hello") || lowerQuery.contains("hi ") || lowerQuery == "hi" ||
             lowerQuery == "hey" || lowerQuery.contains("greetings")) {
             return "Hello! How can I help you with JobRec today?"
         }
-
-        // Check for thanks/gratitude
         if (lowerQuery.contains("thank") || lowerQuery.contains("thanks") || lowerQuery.contains("appreciate")) {
             return "You're welcome! I'm happy to help. Is there anything else you'd like to know about JobRec?"
         }
-
-        // Check for goodbye
         if (lowerQuery.contains("bye") || lowerQuery.contains("goodbye") || lowerQuery.contains("see you") ||
             lowerQuery.contains("exit") || lowerQuery.contains("close")) {
             return "Goodbye! Feel free to come back if you have more questions. Have a great day!"
         }
-
-        // Check for app information questions
         if ((lowerQuery.contains("what") || lowerQuery.contains("tell me about")) &&
             (lowerQuery.contains("jobrec") || lowerQuery.contains("this app") || lowerQuery.contains("the app"))) {
             return helpTopics["what is jobrec"] ?: helpTopics["about jobrec"]
         }
-
         if (lowerQuery.contains("how") && lowerQuery.contains("work") &&
             (lowerQuery.contains("jobrec") || lowerQuery.contains("app") || lowerQuery.contains("it"))) {
             return helpTopics["how does jobrec work"]
         }
-
         if ((lowerQuery.contains("what") && lowerQuery.contains("feature")) ||
             (lowerQuery.contains("what") && lowerQuery.contains("do")) ||
             lowerQuery.contains("functionality")) {
             return helpTopics["app features"]
         }
-
-        // Check for help topics - exact matches first
         for ((topic, response) in helpTopics) {
-            // Check for exact match
             if (lowerQuery == topic || lowerQuery == "how to $topic" || lowerQuery == "how do i $topic") {
                 return response
             }
-
-            // Check for contains match with full topic
             if (lowerQuery.contains(topic)) {
                 return response
             }
         }
-
-        // Check for specific questions about CV/resume
         if (lowerQuery.contains("cv") || lowerQuery.contains("resume")) {
             if (lowerQuery.contains("change") || lowerQuery.contains("update") || lowerQuery.contains("edit")) {
                 return helpTopics["change cv"] ?: helpTopics["update cv"]
@@ -370,11 +250,8 @@ class ChatbotRepository(private val context: Context) {
             if (lowerQuery.contains("format") || lowerQuery.contains("structure") || lowerQuery.contains("layout")) {
                 return helpTopics["cv format"]
             }
-            // General CV question
             return helpTopics["cv"] ?: helpTopics["resume"]
         }
-
-        // Check for profile questions
         if (lowerQuery.contains("profile")) {
             if (lowerQuery.contains("edit") || lowerQuery.contains("update") || lowerQuery.contains("change")) {
                 return helpTopics["edit profile"]
@@ -393,16 +270,12 @@ class ChatbotRepository(private val context: Context) {
             }
             return helpTopics["profile"]
         }
-
-        // Check for job search questions
         if (lowerQuery.contains("job") && (lowerQuery.contains("search") || lowerQuery.contains("find") || lowerQuery.contains("look"))) {
             if (lowerQuery.contains("filter") || lowerQuery.contains("narrow")) {
                 return helpTopics["filter jobs"]
             }
             return helpTopics["job search"]
         }
-
-        // Check for application questions
         if (lowerQuery.contains("apply") || lowerQuery.contains("application")) {
             if (lowerQuery.contains("how")) {
                 return "To apply for a job, open the job details and click the 'Apply' button. You'll need to fill out the application form and may need to upload your resume."
@@ -420,8 +293,6 @@ class ChatbotRepository(private val context: Context) {
                 return helpTopics["interview preparation"]
             }
         }
-
-        // Check for specific questions
         when {
             lowerQuery.contains("forgot password") || lowerQuery.contains("reset password") -> {
                 return helpTopics["login"] ?: "You can reset your password on the login screen by clicking the 'Forgot Password' link and following the instructions sent to your email."
@@ -439,15 +310,8 @@ class ChatbotRepository(private val context: Context) {
                 return "The purpose of JobRec is to simplify the job search and recruitment process. We aim to help students find suitable employment opportunities while enabling companies to discover qualified candidates efficiently."
             }
         }
-
         return null
     }
-
-    /**
-     * Save the interaction to Firestore for analysis
-     * @param query The user's query
-     * @param response The chatbot's response
-     */
     private suspend fun saveInteraction(query: String, response: String) {
         try {
             val userId = auth.currentUser?.uid ?: "anonymous"
@@ -458,23 +322,15 @@ class ChatbotRepository(private val context: Context) {
                 "timestamp" to Timestamp.now(),
                 "id" to UUID.randomUUID().toString()
             )
-
             db.collection("chatbot_interactions")
                 .add(interaction)
                 .await()
-
             Log.d(TAG, "Saved chatbot interaction")
         } catch (e: Exception) {
             Log.e(TAG, "Error saving chatbot interaction", e)
         }
     }
-
-    /**
-     * Securely retrieve the Hugging Face API token
-     * @return The API token
-     */
     private fun retrieveHuggingFaceToken(): String {
-        // Using BuildConfig field defined in build.gradle.kts
         return BuildConfig.HUGGING_FACE_TOKEN
     }
 }

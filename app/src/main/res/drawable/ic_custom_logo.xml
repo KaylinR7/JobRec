@@ -5,12 +5,12 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     
-    <!-- Background Circle -->
+    
     <path
         android:fillColor="#000000"
         android:pathData="M54,54m-54,0a54,54 0,1 1,108 0a54,54 0,1 1,-108 0"/>
     
-    <!-- Briefcase Icon -->
+    
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M36,38h36v6h-36z"/>
@@ -21,7 +21,7 @@
         android:fillColor="#FFFFFF"
         android:pathData="M42,38v-6h24v6z"/>
     
-    <!-- JR Letters -->
+    
     <path
         android:fillColor="#000000"
         android:pathData="M45,54h6v12h-6z"/>

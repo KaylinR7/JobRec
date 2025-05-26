@@ -25,7 +25,7 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Chat Header -->
+        
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/chatHeader"
             android:layout_width="match_parent"
@@ -77,7 +77,7 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- Background Pattern with white background -->
+        
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -85,7 +85,7 @@
             app:layout_constraintBottom_toTopOf="@id/messageInputLayout"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Messages RecyclerView -->
+        
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/messagesRecyclerView"
             android:layout_width="match_parent"
@@ -95,7 +95,7 @@
             app:layout_constraintBottom_toTopOf="@id/messageInputLayout"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Empty State View -->
+        
         <TextView
             android:id="@+id/emptyView"
             android:layout_width="wrap_content"
@@ -109,7 +109,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Message Input Layout - WhatsApp style -->
+        
         <LinearLayout
             android:id="@+id/messageInputLayout"
             android:layout_width="match_parent"

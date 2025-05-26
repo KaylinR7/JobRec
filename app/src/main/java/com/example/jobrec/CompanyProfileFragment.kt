@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,13 +14,10 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.button.MaterialButton
 import android.widget.TextView
 import de.hdodenhof.circleimageview.CircleImageView
-
 class CompanyProfileFragment : Fragment() {
     private lateinit var db: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
     private lateinit var bottomNav: BottomNavigationView
-
-    // Profile views
     private lateinit var companyLogo: CircleImageView
     private lateinit var companyNameText: TextView
     private lateinit var industryText: TextView
@@ -33,13 +29,10 @@ class CompanyProfileFragment : Fragment() {
     private lateinit var contactPersonNameText: TextView
     private lateinit var contactPersonEmailText: TextView
     private lateinit var contactPersonPhoneText: TextView
-
-    // Analytics views
     private lateinit var totalApplicationsText: TextView
     private lateinit var activeJobsText: TextView
     private lateinit var viewDetailedAnalyticsButton: MaterialButton
     private lateinit var editProfileButton: MaterialButton
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -47,22 +40,15 @@ class CompanyProfileFragment : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_company_profile, container, false)
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Initialize Firebase
         db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
-
-        // Initialize views
         initializeViews(view)
         setupBottomNavigation()
         loadCompanyProfile()
     }
-
     private fun initializeViews(view: View) {
-        // Profile views
         companyLogo = view.findViewById(R.id.companyLogo)
         companyNameText = view.findViewById(R.id.companyNameText)
         industryText = view.findViewById(R.id.industryText)
@@ -74,18 +60,13 @@ class CompanyProfileFragment : Fragment() {
         contactPersonNameText = view.findViewById(R.id.contactPersonNameText)
         contactPersonEmailText = view.findViewById(R.id.contactPersonEmailText)
         contactPersonPhoneText = view.findViewById(R.id.contactPersonPhoneText)
-
-        // Analytics views
         totalApplicationsText = view.findViewById(R.id.totalApplicationsText)
         activeJobsText = view.findViewById(R.id.activeJobsText)
         viewDetailedAnalyticsButton = view.findViewById(R.id.viewDetailedAnalyticsButton)
         editProfileButton = view.findViewById(R.id.editProfileButton)
-
-        // Set up click listeners
         viewDetailedAnalyticsButton.setOnClickListener {
             startActivity(Intent(requireContext(), CompanyAnalyticsActivity::class.java))
         }
-
         editProfileButton.setOnClickListener {
             val userId = auth.currentUser?.uid ?: return@setOnClickListener
             val intent = Intent(requireContext(), EditCompanyProfileActivity::class.java)
@@ -93,13 +74,11 @@ class CompanyProfileFragment : Fragment() {
             startActivity(intent)
         }
     }
-
     private fun setupBottomNavigation() {
         bottomNav = requireView().findViewById(R.id.bottomNavigation)
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.navigation_profile -> {
-                    // Already on profile, do nothing
                     true
                 }
                 R.id.navigation_analytics -> {
@@ -110,15 +89,12 @@ class CompanyProfileFragment : Fragment() {
             }
         }
     }
-
     private fun loadCompanyProfile() {
         val userId = auth.currentUser?.uid ?: return
-
         db.collection("companies").document(userId)
             .get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
-                    // Load profile data
                     companyNameText.text = document.getString("companyName") ?: "Not set"
                     industryText.text = document.getString("industry") ?: "Not set"
                     registrationNumberText.text = document.getString("registrationNumber") ?: "Not set"
@@ -129,8 +105,6 @@ class CompanyProfileFragment : Fragment() {
                     contactPersonNameText.text = document.getString("contactPersonName") ?: "Not set"
                     contactPersonEmailText.text = document.getString("contactPersonEmail") ?: "Not set"
                     contactPersonPhoneText.text = document.getString("contactPersonPhone") ?: "Not set"
-
-                    // Load company logo
                     document.getString("logoUrl")?.let { logoUrl ->
                         Glide.with(this)
                             .load(logoUrl)
@@ -138,8 +112,6 @@ class CompanyProfileFragment : Fragment() {
                             .error(R.drawable.ic_company_placeholder)
                             .into(companyLogo)
                     }
-
-                    // Load analytics
                     loadAnalytics(userId)
                 } else {
                     Toast.makeText(context, "Company profile not found", Toast.LENGTH_SHORT).show()
@@ -149,17 +121,13 @@ class CompanyProfileFragment : Fragment() {
                 Toast.makeText(context, "Error loading profile: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
     private fun loadAnalytics(companyId: String) {
-        // Load total applications
         db.collection("applications")
             .whereEqualTo("companyId", companyId)
             .get()
             .addOnSuccessListener { documents ->
                 totalApplicationsText.text = documents.size().toString()
             }
-
-        // Load active jobs
         db.collection("jobs")
             .whereEqualTo("companyId", companyId)
             .whereEqualTo("status", "active")

@@ -1,0 +1,231 @@
+package com.example.jobrec
+
+import android.os.Bundle
+import android.util.Log
+import android.view.MenuItem
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.jobrec.databinding.ActivityNotificationPreferencesBinding
+import com.example.jobrec.models.FieldCategories
+import com.example.jobrec.services.NotificationManager
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+
+class NotificationPreferencesActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityNotificationPreferencesBinding
+    private lateinit var db: FirebaseFirestore
+    private lateinit var auth: FirebaseAuth
+    private lateinit var notificationManager: NotificationManager
+
+    private val TAG = "NotificationPrefs"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityNotificationPreferencesBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Setup toolbar
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setDisplayShowHomeEnabled(true)
+            title = "Notification Preferences"
+        }
+
+        // Set white navigation icon for red toolbar
+        binding.toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
+
+        // Initialize Firebase
+        db = FirebaseFirestore.getInstance()
+        auth = FirebaseAuth.getInstance()
+        notificationManager = NotificationManager()
+
+        // Load user preferences
+        loadUserPreferences()
+
+        // Setup save button
+        binding.saveButton.setOnClickListener {
+            saveUserPreferences()
+        }
+    }
+
+    private fun loadUserPreferences() {
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            Toast.makeText(this, "You must be logged in to manage notification preferences", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        val userId = currentUser.uid
+
+        // Show loading state
+        binding.progressBar.visibility = android.view.View.VISIBLE
+
+        lifecycleScope.launch {
+            try {
+                // First check if user is a student
+                val userDoc = db.collection("users").document(userId).get().await()
+
+                if (userDoc.exists()) {
+                    // User is a student
+                    val preferences = userDoc.get("notificationPreferences") as? Map<String, Boolean> ?: mapOf()
+
+                    // Set switches based on preferences
+                    binding.jobNotificationsSwitch.isChecked = preferences["allJobs"] ?: true
+                    binding.messageNotificationsSwitch.isChecked = preferences["messages"] ?: true
+                    binding.jobFieldNotificationsSwitch.isChecked = preferences["jobFieldNotifications"] ?: true
+
+                    // Load user's job field and specialization
+                    val jobField = userDoc.getString("field") ?: ""
+                    val jobSpecialization = userDoc.getString("subField") ?: ""
+
+                    // Show job field and specialization in the UI
+                    binding.jobFieldText.text = if (jobField.isNotEmpty()) jobField else "Not set"
+                    binding.jobSpecializationText.text = if (jobSpecialization.isNotEmpty()) jobSpecialization else "Not set"
+
+                    // Show student-specific UI
+                    binding.studentPreferencesLayout.visibility = android.view.View.VISIBLE
+                    binding.companyPreferencesLayout.visibility = android.view.View.GONE
+                } else {
+                    // Check if user is a company
+                    val companyQuery = db.collection("companies")
+                        .whereEqualTo("userId", userId)
+                        .get()
+                        .await()
+
+                    if (!companyQuery.isEmpty) {
+                        // User is a company
+                        val companyDoc = companyQuery.documents[0]
+                        val preferences = companyDoc.get("notificationPreferences") as? Map<String, Boolean> ?: mapOf()
+
+                        // Set switches based on preferences
+                        binding.messageNotificationsSwitch.isChecked = preferences["messages"] ?: true
+                        binding.applicationNotificationsSwitch.isChecked = preferences["applications"] ?: true
+
+                        // Show company-specific UI
+                        binding.studentPreferencesLayout.visibility = android.view.View.GONE
+                        binding.companyPreferencesLayout.visibility = android.view.View.VISIBLE
+                    } else {
+                        // User not found in either collection
+                        Toast.makeText(this@NotificationPreferencesActivity, "User profile not found", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading notification preferences", e)
+                Toast.makeText(this@NotificationPreferencesActivity, "Error loading preferences: ${e.message}", Toast.LENGTH_SHORT).show()
+            } finally {
+                binding.progressBar.visibility = android.view.View.GONE
+            }
+        }
+    }
+
+    private fun saveUserPreferences() {
+        val currentUser = auth.currentUser ?: return
+        val userId = currentUser.uid
+
+        // Show loading state
+        binding.progressBar.visibility = android.view.View.VISIBLE
+        binding.saveButton.isEnabled = false
+
+        lifecycleScope.launch {
+            try {
+                // First check if user is a student
+                val userDoc = db.collection("users").document(userId).get().await()
+
+                if (userDoc.exists()) {
+                    // User is a student
+                    val jobField = userDoc.getString("field") ?: ""
+                    val jobSpecialization = userDoc.getString("subField") ?: ""
+
+                    // Create preferences map
+                    val preferences = mapOf(
+                        "allJobs" to binding.jobNotificationsSwitch.isChecked,
+                        "messages" to binding.messageNotificationsSwitch.isChecked,
+                        "jobFieldNotifications" to binding.jobFieldNotificationsSwitch.isChecked
+                    )
+
+                    // Save preferences to Firestore
+                    db.collection("users").document(userId)
+                        .update("notificationPreferences", preferences)
+                        .await()
+
+                    // Subscribe or unsubscribe from topics based on preferences
+                    if (binding.jobNotificationsSwitch.isChecked) {
+                        notificationManager.subscribeToTopic(NotificationManager.TOPIC_ALL_JOBS)
+                    } else {
+                        notificationManager.unsubscribeFromTopic(NotificationManager.TOPIC_ALL_JOBS)
+                    }
+
+                    // Subscribe to job field topics if enabled
+                    if (binding.jobFieldNotificationsSwitch.isChecked && jobField.isNotEmpty()) {
+                        val fieldTopic = NotificationManager.TOPIC_JOB_CATEGORY_PREFIX + jobField.lowercase().replace(" ", "_")
+                        notificationManager.subscribeToTopic(fieldTopic)
+
+                        // Subscribe to specialization topic if available
+                        if (jobSpecialization.isNotEmpty()) {
+                            val specializationTopic = NotificationManager.TOPIC_JOB_SPECIALIZATION_PREFIX + jobSpecialization.lowercase().replace(" ", "_")
+                            notificationManager.subscribeToTopic(specializationTopic)
+                        }
+                    } else if (!binding.jobFieldNotificationsSwitch.isChecked && jobField.isNotEmpty()) {
+                        // Unsubscribe from field topics
+                        val fieldTopic = NotificationManager.TOPIC_JOB_CATEGORY_PREFIX + jobField.lowercase().replace(" ", "_")
+                        notificationManager.unsubscribeFromTopic(fieldTopic)
+
+                        // Unsubscribe from specialization topic if available
+                        if (jobSpecialization.isNotEmpty()) {
+                            val specializationTopic = NotificationManager.TOPIC_JOB_SPECIALIZATION_PREFIX + jobSpecialization.lowercase().replace(" ", "_")
+                            notificationManager.unsubscribeFromTopic(specializationTopic)
+                        }
+                    }
+
+                    Toast.makeText(this@NotificationPreferencesActivity, "Notification preferences saved", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Check if user is a company
+                    val companyQuery = db.collection("companies")
+                        .whereEqualTo("userId", userId)
+                        .get()
+                        .await()
+
+                    if (!companyQuery.isEmpty) {
+                        // User is a company
+                        val companyDoc = companyQuery.documents[0]
+
+                        // Create preferences map
+                        val preferences = mapOf(
+                            "messages" to binding.messageNotificationsSwitch.isChecked,
+                            "applications" to binding.applicationNotificationsSwitch.isChecked
+                        )
+
+                        // Save preferences to Firestore
+                        companyDoc.reference.update("notificationPreferences", preferences)
+                            .await()
+
+                        Toast.makeText(this@NotificationPreferencesActivity, "Notification preferences saved", Toast.LENGTH_SHORT).show()
+                    } else {
+                        // User not found in either collection
+                        Toast.makeText(this@NotificationPreferencesActivity, "User profile not found", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving notification preferences", e)
+                Toast.makeText(this@NotificationPreferencesActivity, "Error saving preferences: ${e.message}", Toast.LENGTH_SHORT).show()
+            } finally {
+                binding.progressBar.visibility = android.view.View.GONE
+                binding.saveButton.isEnabled = true
+            }
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            onBackPressed()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
+}

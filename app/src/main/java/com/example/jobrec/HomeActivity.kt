@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -20,12 +19,10 @@ import androidx.core.content.ContextCompat
 import com.example.jobrec.chatbot.ChatbotHelper
 import com.example.jobrec.databinding.ActivityHomeBinding
 import com.example.jobrec.utils.NotificationHelper
-
 class HomeActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "HomeActivity"
     }
-
     private lateinit var binding: ActivityHomeBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -33,69 +30,51 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var recentJobsAdapter: RecentJobsAdapter
     private lateinit var recommendedJobsAdapter: RecentJobsAdapter
     private lateinit var notificationHelper: NotificationHelper
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Initialize Firebase
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         userId = auth.currentUser?.uid
-
-        // Initialize notification helper
         notificationHelper = NotificationHelper(this)
         notificationHelper.createNotificationChannel()
-
-        // Initialize views
         initializeViews()
         setupClickListeners()
         setupBottomNavigation()
         setupSwipeRefresh()
         loadData()
     }
-
     private fun initializeViews() {
-        // Setup toolbar
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.title = "Student Dashboard"
-
-        // Setup RecyclerViews with animations
         recentJobsAdapter = RecentJobsAdapter { job ->
             navigateToJobDetails(job.id)
         }
         recommendedJobsAdapter = RecentJobsAdapter { job ->
             navigateToJobDetails(job.id)
         }
-
         binding.recentJobsRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@HomeActivity, LinearLayoutManager.HORIZONTAL, false)
             adapter = recentJobsAdapter
             addItemDecoration(SpacingItemDecoration(16))
         }
-
         binding.recommendedJobsRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@HomeActivity)
             adapter = recommendedJobsAdapter
             addItemDecoration(SpacingItemDecoration(16))
         }
-
-        // Apply entrance animations
         applyEntranceAnimations()
     }
-
     private fun applyEntranceAnimations() {
         val fadeIn = AnimationUtils.loadAnimation(this, android.R.anim.fade_in)
         val slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up)
-
         binding.welcomeText.startAnimation(fadeIn)
         binding.searchCard.startAnimation(slideUp)
         binding.myApplicationsCard.startAnimation(slideUp)
         binding.jobAlertsCard.startAnimation(slideUp)
     }
-
     private fun setupSwipeRefresh() {
         binding.swipeRefreshLayout.setColorSchemeColors(
             ContextCompat.getColor(this, R.color.primary),
@@ -106,57 +85,44 @@ class HomeActivity : AppCompatActivity() {
             loadData()
         }
     }
-
     private fun setupClickListeners() {
         binding.searchCard.setOnClickListener {
             animateClick(binding.searchCard) {
                 startActivity(Intent(this, SearchActivity::class.java))
             }
         }
-
         binding.myApplicationsCard.setOnClickListener {
             animateClick(binding.myApplicationsCard) {
                 startActivity(Intent(this, MyApplicationsActivity::class.java))
             }
         }
-
         binding.jobAlertsCard.setOnClickListener {
             animateClick(binding.jobAlertsCard) {
                 startActivity(Intent(this, ConversationsActivity::class.java))
             }
         }
-
-        // Add click listener for the saved jobs card
         findViewById<View>(R.id.savedJobsCard).setOnClickListener {
             animateClick(findViewById(R.id.savedJobsCard)) {
                 startActivity(Intent(this, SavedJobsActivity::class.java))
             }
         }
     }
-
     private fun logout() {
-        // Clear all user session data
         val sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
         sharedPreferences.edit()
             .putBoolean("override_to_student", false)
             .remove("user_type")
             .remove("user_id")
             .apply()
-
         auth.signOut()
-        // Navigate to login screen
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
     }
-
     private fun animateClick(view: View, action: () -> Unit) {
-        // Load and start the bounce animation
         val bounceAnimation = AnimationUtils.loadAnimation(this, R.anim.bounce)
         view.startAnimation(bounceAnimation)
-
-        // Execute the action after animation completes
         bounceAnimation.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation?) {}
             override fun onAnimationRepeat(animation: Animation?) {}
@@ -165,7 +131,6 @@ class HomeActivity : AppCompatActivity() {
             }
         })
     }
-
     private fun setupBottomNavigation() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -186,24 +151,17 @@ class HomeActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun loadData() {
         loadUserData()
         loadRecentJobs()
         loadRecommendedJobs()
         loadStats()
     }
-
     private fun loadUserData() {
-        // Check if this is a default student view (company user viewing as student)
         val isDefaultStudent = intent.getBooleanExtra("isDefaultStudent", false)
-
-        // Always hide the return to company view button
         binding.returnToCompanyView.visibility = View.GONE
-
         val userId = intent.getStringExtra("userId") ?: FirebaseAuth.getInstance().currentUser?.uid
         Log.d(TAG, "Loading user data for userId: $userId")
-
         if (userId != null) {
             db.collection("users")
                 .document(userId)
@@ -213,7 +171,6 @@ class HomeActivity : AppCompatActivity() {
                     if (document != null && document.exists()) {
                         val name = document.getString("name")
                         Log.d(TAG, "Retrieved name: $name")
-
                         val displayName = if (!name.isNullOrEmpty()) {
                             name.trim()
                         } else {
@@ -235,10 +192,8 @@ class HomeActivity : AppCompatActivity() {
             binding.welcomeText.text = "Welcome back, Student!"
         }
     }
-
     private fun loadStats() {
         userId?.let { uid ->
-            // Load applications count
             db.collection("applications")
                 .whereEqualTo("userId", uid)
                 .get()
@@ -249,8 +204,6 @@ class HomeActivity : AppCompatActivity() {
                 .addOnFailureListener { e ->
                     Log.w(TAG, "Error loading applications count", e)
                 }
-
-            // Load saved jobs count
             db.collection("savedJobs")
                 .whereEqualTo("userId", uid)
                 .get()
@@ -263,10 +216,8 @@ class HomeActivity : AppCompatActivity() {
                 }
         }
     }
-
     private fun loadRecentJobs() {
         Log.d(TAG, "Loading recent jobs...")
-        // Simple query without complex filters
         db.collection("jobs")
             .get()
             .addOnSuccessListener { documents ->
@@ -274,14 +225,12 @@ class HomeActivity : AppCompatActivity() {
                 val jobs = documents.mapNotNull { doc ->
                     try {
                         val job = doc.toObject(Job::class.java).copy(id = doc.id)
-                        // Filter active jobs in memory
                         if (job.status == "active") job else null
                     } catch (e: Exception) {
                         Log.e(TAG, "Error converting document to Job object: ${e.message}")
                         null
                     }
-                }.sortedByDescending { it.postedDate.toDate() } // Sort in memory
-
+                }.sortedByDescending { it.postedDate.toDate() } 
                 Log.d(TAG, "Successfully mapped ${jobs.size} jobs")
                 recentJobsAdapter.submitList(jobs)
                 binding.swipeRefreshLayout.isRefreshing = false
@@ -292,10 +241,8 @@ class HomeActivity : AppCompatActivity() {
                 binding.swipeRefreshLayout.isRefreshing = false
             }
     }
-
     private fun loadRecommendedJobs() {
         Log.d(TAG, "Loading recommended jobs...")
-        // Simple query without complex filters
         db.collection("jobs")
             .get()
             .addOnSuccessListener { documents ->
@@ -303,14 +250,12 @@ class HomeActivity : AppCompatActivity() {
                 val jobs = documents.mapNotNull { doc ->
                     try {
                         val job = doc.toObject(Job::class.java).copy(id = doc.id)
-                        // Filter active jobs in memory
                         if (job.status == "active") job else null
                     } catch (e: Exception) {
                         Log.e(TAG, "Error converting document to Job object: ${e.message}")
                         null
                     }
-                }.sortedByDescending { it.postedDate.toDate() } // Sort in memory
-
+                }.sortedByDescending { it.postedDate.toDate() } 
                 Log.d(TAG, "Successfully mapped ${jobs.size} recommended jobs")
                 recommendedJobsAdapter.submitList(jobs)
             }
@@ -319,7 +264,6 @@ class HomeActivity : AppCompatActivity() {
                 showError("Failed to load recommended jobs: ${e.message}")
             }
     }
-
     private fun navigateToJobDetails(jobId: String) {
         if (jobId.isBlank()) {
             Log.e(TAG, "Invalid job ID: $jobId")
@@ -330,30 +274,21 @@ class HomeActivity : AppCompatActivity() {
         startActivity(intent)
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
-
-
-
     private fun showError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
-
     override fun onResume() {
         super.onResume()
-        // Start listening for new job notifications
         notificationHelper.startJobNotificationsListener()
     }
-
     override fun onPause() {
         super.onPause()
-        // Stop listening for new job notifications
         notificationHelper.stopJobNotificationsListener()
     }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_my_applications -> {

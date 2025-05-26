@@ -10,7 +10,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Search field -->
+        
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
                 android:hint="Search jobs" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Field filter dropdown -->
+        
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fieldFilterContainer"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -40,7 +40,7 @@
                 android:inputType="none"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Filter chips -->
+        
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -72,13 +72,13 @@
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 
-        <!-- Jobs list -->
+        
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/jobsRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <!-- Empty state -->
+        
         <LinearLayout
             android:id="@+id/emptyStateLayout"
             android:layout_width="match_parent"
@@ -110,7 +110,7 @@
 
     </LinearLayout>
 
-    <!-- Progress indicator -->
+    
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"

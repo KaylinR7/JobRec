@@ -1,5 +1,4 @@
 package com.example.jobrec.chatbot
-
 import android.util.Log
 import com.google.gson.annotations.SerializedName
 import okhttp3.OkHttpClient
@@ -12,10 +11,6 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
 import java.util.concurrent.TimeUnit
-
-/**
- * Service interface for Hugging Face API
- */
 interface HuggingFaceApi {
     @POST("models/{modelId}")
     suspend fun generateResponse(
@@ -24,10 +19,6 @@ interface HuggingFaceApi {
         @Body request: ChatbotRequest
     ): Response<List<ChatbotResponse>>
 }
-
-/**
- * Request model for Hugging Face API
- */
 data class ChatbotRequest(
     val inputs: String,
     val parameters: Parameters = Parameters()
@@ -38,48 +29,28 @@ data class ChatbotRequest(
         @SerializedName("return_full_text") val returnFullText: Boolean = false
     )
 }
-
-/**
- * Response model for Hugging Face API
- */
 data class ChatbotResponse(
     @SerializedName("generated_text") val generatedText: String
 )
-
-/**
- * Service class for Hugging Face API
- */
 class HuggingFaceService {
     private val baseUrl = "https://api-inference.huggingface.co/"
-    private val defaultModel = "facebook/blenderbot-400M-distill" // More conversational model
+    private val defaultModel = "facebook/blenderbot-400M-distill"
     private val TAG = "HuggingFaceService"
-
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
-
     private val client = OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
-
     private val retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
-
     private val api = retrofit.create(HuggingFaceApi::class.java)
-
-    /**
-     * Generate a response from the Hugging Face API
-     * @param query The user's query
-     * @param token The Hugging Face API token
-     * @param modelId The model ID to use (optional)
-     * @return The generated response or an error message
-     */
     suspend fun generateResponse(
         query: String,
         token: String,
@@ -89,13 +60,11 @@ class HuggingFaceService {
             val authToken = "Bearer $token"
             val request = ChatbotRequest(inputs = query)
             val response = api.generateResponse(modelId, authToken, request)
-
             if (response.isSuccessful && response.body() != null) {
                 val generatedText = response.body()?.firstOrNull()?.generatedText
                 if (generatedText.isNullOrBlank()) {
                     "I'm not sure how to answer that. Could you try rephrasing your question?"
                 } else {
-                    // Clean up the response - remove any special tokens or formatting
                     generatedText.replace("<s>", "")
                         .replace("</s>", "")
                         .replace("<pad>", "")
@@ -110,10 +79,6 @@ class HuggingFaceService {
             "I'm sorry, I'm having trouble connecting to my knowledge base right now. Please try again later."
         }
     }
-
-    /**
-     * Fallback models to try if the primary model fails
-     */
     private val fallbackModels = listOf(
         "google/flan-t5-base",
         "gpt2",

@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
@@ -7,12 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
-
 class EditCompanyProfileActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private lateinit var companyId: String
-
-    // UI elements
     private lateinit var companyNameInput: TextInputEditText
     private lateinit var industryInput: TextInputEditText
     private lateinit var registrationNumberInput: TextInputEditText
@@ -24,12 +20,9 @@ class EditCompanyProfileActivity : AppCompatActivity() {
     private lateinit var contactPersonEmailInput: TextInputEditText
     private lateinit var contactPersonPhoneInput: TextInputEditText
     private lateinit var saveButton: Button
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_company_profile)
-
-        // Set up toolbar with white back button
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -37,21 +30,12 @@ class EditCompanyProfileActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
             title = "Edit Company Profile"
         }
-
-        // Set white navigation icon for red toolbar
         toolbar.navigationIcon = getDrawable(R.drawable.ic_back)
-
-        // Initialize Firestore
         db = FirebaseFirestore.getInstance()
-
-        // Get company ID from intent or use current user ID as fallback
         companyId = intent.getStringExtra("companyId") ?: ""
-
-        // If company ID is not provided in the intent, try to use the current user ID
         if (companyId.isEmpty()) {
             val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
             val currentUserId = auth.currentUser?.uid
-
             if (currentUserId != null) {
                 companyId = currentUserId
             } else {
@@ -60,13 +44,10 @@ class EditCompanyProfileActivity : AppCompatActivity() {
                 return
             }
         }
-
-        // Initialize UI elements
         initializeViews()
         setupButtons()
         loadCompanyData()
     }
-
     private fun initializeViews() {
         companyNameInput = findViewById(R.id.companyNameInput)
         industryInput = findViewById(R.id.industryInput)
@@ -80,7 +61,6 @@ class EditCompanyProfileActivity : AppCompatActivity() {
         contactPersonPhoneInput = findViewById(R.id.contactPersonPhoneInput)
         saveButton = findViewById(R.id.saveButton)
     }
-
     private fun setupButtons() {
         saveButton.setOnClickListener {
             if (validateInputs()) {
@@ -88,7 +68,6 @@ class EditCompanyProfileActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun loadCompanyData() {
         db.collection("companies")
             .document(companyId)
@@ -107,7 +86,6 @@ class EditCompanyProfileActivity : AppCompatActivity() {
                 finish()
             }
     }
-
     private fun fillFormWithCompanyData(company: Company) {
         companyNameInput.setText(company.companyName)
         industryInput.setText(company.industry)
@@ -120,74 +98,57 @@ class EditCompanyProfileActivity : AppCompatActivity() {
         contactPersonEmailInput.setText(company.contactPersonEmail)
         contactPersonPhoneInput.setText(company.contactPersonPhone)
     }
-
     private fun validateInputs(): Boolean {
         var isValid = true
-
         if (companyNameInput.text.isNullOrBlank()) {
             companyNameInput.error = "Company name is required"
             isValid = false
         }
-
         if (industryInput.text.isNullOrBlank()) {
             industryInput.error = "Industry is required"
             isValid = false
         }
-
         if (registrationNumberInput.text.isNullOrBlank()) {
             registrationNumberInput.error = "Registration number is required"
             isValid = false
         }
-
         if (companySizeInput.text.isNullOrBlank()) {
             companySizeInput.error = "Company size is required"
             isValid = false
         }
-
         if (locationInput.text.isNullOrBlank()) {
             locationInput.error = "Location is required"
             isValid = false
         }
-
         if (websiteInput.text.isNullOrBlank()) {
             websiteInput.error = "Website is required"
             isValid = false
         }
-
         if (descriptionInput.text.isNullOrBlank()) {
             descriptionInput.error = "Description is required"
             isValid = false
         }
-
         if (contactPersonNameInput.text.isNullOrBlank()) {
             contactPersonNameInput.error = "Contact person name is required"
             isValid = false
         }
-
         if (contactPersonEmailInput.text.isNullOrBlank()) {
             contactPersonEmailInput.error = "Contact person email is required"
             isValid = false
         }
-
         if (contactPersonPhoneInput.text.isNullOrBlank()) {
             contactPersonPhoneInput.error = "Contact person phone is required"
             isValid = false
         }
-
         return isValid
     }
-
     private fun updateCompanyProfile() {
-        // First get the current company data to preserve fields we're not updating
         db.collection("companies")
             .document(companyId)
             .get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
-                    // Get existing company data
                     val existingCompany = document.toObject(Company::class.java)
-
-                    // Create updated company object with all fields
                     val updatedCompany = existingCompany?.copy(
                         companyName = companyNameInput.text.toString(),
                         industry = industryInput.text.toString(),
@@ -213,8 +174,6 @@ class EditCompanyProfileActivity : AppCompatActivity() {
                         contactPersonPhone = contactPersonPhoneInput.text.toString(),
                         userId = companyId
                     )
-
-                    // Convert to map for Firestore (excluding id field which is handled separately)
                     val companyData = mapOf(
                         "companyName" to updatedCompany.companyName,
                         "industry" to updatedCompany.industry,
@@ -231,8 +190,6 @@ class EditCompanyProfileActivity : AppCompatActivity() {
                         "status" to (existingCompany?.status ?: "active"),
                         "userId" to (existingCompany?.userId ?: companyId)
                     )
-
-                    // Use set with merge option to update the document
                     db.collection("companies")
                         .document(companyId)
                         .set(companyData)
@@ -244,7 +201,6 @@ class EditCompanyProfileActivity : AppCompatActivity() {
                             Toast.makeText(this, "Error updating company profile: ${e.message}", Toast.LENGTH_LONG).show()
                         }
                 } else {
-                    // If document doesn't exist, create a new one
                     val newCompany = Company(
                         id = companyId,
                         companyName = companyNameInput.text.toString(),
@@ -259,8 +215,6 @@ class EditCompanyProfileActivity : AppCompatActivity() {
                         contactPersonPhone = contactPersonPhoneInput.text.toString(),
                         userId = companyId
                     )
-
-                    // Convert to map for Firestore
                     val companyData = mapOf(
                         "companyName" to newCompany.companyName,
                         "industry" to newCompany.industry,
@@ -277,8 +231,6 @@ class EditCompanyProfileActivity : AppCompatActivity() {
                         "status" to newCompany.status,
                         "userId" to newCompany.userId
                     )
-
-                    // Create a new document
                     db.collection("companies")
                         .document(companyId)
                         .set(companyData)
@@ -295,7 +247,6 @@ class EditCompanyProfileActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error retrieving company data: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
-
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true

@@ -30,7 +30,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Header Card -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -98,7 +98,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Description Card -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -131,7 +131,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Requirements Card -->
+            
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

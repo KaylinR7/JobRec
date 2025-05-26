@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -16,7 +15,6 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import android.widget.ArrayAdapter
-
 class JobsActivity : AppCompatActivity() {
     private lateinit var jobsRecyclerView: RecyclerView
     private lateinit var searchEditText: TextInputEditText
@@ -24,20 +22,14 @@ class JobsActivity : AppCompatActivity() {
     private lateinit var jobsAdapter: JobsAdapter
     private val db = FirebaseFirestore.getInstance()
     private lateinit var fieldFilterInput: MaterialAutoCompleteTextView
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_jobs)
-
-        // Initialize views
         jobsRecyclerView = findViewById(R.id.jobsRecyclerView)
         searchEditText = findViewById(R.id.searchEditText)
         filterChipGroup = findViewById(R.id.filterChipGroup)
         fieldFilterInput = findViewById(R.id.fieldFilterInput)
-
-        // Setup RecyclerView
         jobsAdapter = JobsAdapter { job ->
-            // Handle job item click
             val intent = Intent(this, JobDetailsActivity::class.java)
             intent.putExtra("jobId", job.id)
             startActivity(intent)
@@ -46,8 +38,6 @@ class JobsActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@JobsActivity)
             adapter = jobsAdapter
         }
-
-        // Setup search functionality
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -55,19 +45,12 @@ class JobsActivity : AppCompatActivity() {
                 filterJobs()
             }
         })
-
-        // Setup filter chips
         filterChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
             filterJobs()
         }
-
-        // Setup field filter
         setupFieldFilter()
-
-        // Load initial jobs
         loadJobs()
     }
-
     private fun setupFieldFilter() {
         val fieldOptions = arrayOf(
             "Information Technology",
@@ -88,15 +71,11 @@ class JobsActivity : AppCompatActivity() {
         )
         val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, fieldOptions)
         fieldFilterInput.setAdapter(fieldAdapter)
-
-        // Add listener for field filter changes
         fieldFilterInput.setOnItemClickListener { _, _, position, _ ->
             filterJobs()
         }
     }
-
     private fun loadJobs() {
-        // Simple query without complex filters or ordering
         db.collection("jobs")
             .get()
             .addOnSuccessListener { documents ->
@@ -104,13 +83,11 @@ class JobsActivity : AppCompatActivity() {
                     try {
                         val job = doc.toObject(Job::class.java)
                         job.id = doc.id
-                        // Filter active jobs in memory
                         if (job.status == "active") job else null
                     } catch (e: Exception) {
                         null
                     }
-                }.sortedByDescending { it.postedDate.toDate() } // Sort in memory
-
+                }.sortedByDescending { it.postedDate.toDate() } 
                 jobsAdapter.submitList(allJobs)
             }
             .addOnFailureListener { e ->
@@ -118,42 +95,28 @@ class JobsActivity : AppCompatActivity() {
                 jobsAdapter.submitList(emptyList())
             }
     }
-
-
-
     private fun filterJobs() {
-        // Get search filter
         val searchText = searchEditText.text.toString().trim().lowercase()
         val selectedField = fieldFilterInput.text.toString().trim()
-
-        // Show loading state
         jobsAdapter.submitList(null)
         findViewById<View>(R.id.progressBar).visibility = View.VISIBLE
-
-        // Simple query without complex filters or ordering
         db.collection("jobs")
             .get()
             .addOnSuccessListener { documents ->
-                // Get all jobs and filter in memory
                 val allJobs = documents.mapNotNull { doc ->
                     try {
                         val job = doc.toObject(Job::class.java)
                         job.id = doc.id
-                        // Only include active jobs
                         if (job.status == "active") job else null
                     } catch (e: Exception) {
                         null
                     }
-                }.sortedByDescending { it.postedDate.toDate() } // Sort in memory
-
-                // Apply field filter in memory
+                }.sortedByDescending { it.postedDate.toDate() } 
                 val fieldFilteredJobs = if (selectedField.isNotEmpty()) {
                     allJobs.filter { job -> job.jobField.equals(selectedField, ignoreCase = true) }
                 } else {
                     allJobs
                 }
-
-                // Apply search filter in memory
                 val searchFilteredJobs = if (searchText.isNotEmpty()) {
                     fieldFilteredJobs.filter { job ->
                         job.title.lowercase().contains(searchText) ||
@@ -164,8 +127,6 @@ class JobsActivity : AppCompatActivity() {
                 } else {
                     fieldFilteredJobs
                 }
-
-                // Apply type filters
                 val selectedChips = filterChipGroup.checkedChipIds
                 val finalJobs = if (selectedChips.isNotEmpty()) {
                     val types = selectedChips.map { chipId ->
@@ -176,7 +137,6 @@ class JobsActivity : AppCompatActivity() {
                             else -> null
                         }
                     }.filterNotNull()
-
                     if (types.isNotEmpty()) {
                         searchFilteredJobs.filter { job -> types.contains(job.type) }
                     } else {
@@ -185,12 +145,8 @@ class JobsActivity : AppCompatActivity() {
                 } else {
                     searchFilteredJobs
                 }
-
-                // Update UI
                 findViewById<View>(R.id.progressBar).visibility = View.GONE
                 jobsAdapter.submitList(finalJobs)
-
-                // Show empty state if no results
                 if (finalJobs.isEmpty()) {
                     findViewById<View>(R.id.emptyStateLayout).visibility = View.VISIBLE
                     findViewById<View>(R.id.jobsRecyclerView).visibility = View.GONE

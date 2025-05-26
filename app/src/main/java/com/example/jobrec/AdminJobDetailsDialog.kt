@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,14 +10,11 @@ import com.google.android.material.button.MaterialButton
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
-
 class AdminJobDetailsDialog : DialogFragment() {
     private lateinit var job: Job
     private val db = FirebaseFirestore.getInstance()
-
     companion object {
         private const val ARG_JOB_ID = "job_id"
-
         fun newInstance(job: Job): AdminJobDetailsDialog {
             val args = Bundle()
             args.putString(ARG_JOB_ID, job.id)
@@ -27,13 +23,11 @@ class AdminJobDetailsDialog : DialogFragment() {
             return fragment
         }
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val jobId = arguments?.getString(ARG_JOB_ID) ?: return
         loadJob(jobId)
     }
-
     private fun loadJob(jobId: String) {
         db.collection("jobs").document(jobId)
             .get()
@@ -42,7 +36,6 @@ class AdminJobDetailsDialog : DialogFragment() {
                 updateUI()
             }
     }
-
     private fun updateUI() {
         view?.let { view ->
             val titleTextView = view.findViewById<TextView>(R.id.jobTitleTextView)
@@ -55,8 +48,6 @@ class AdminJobDetailsDialog : DialogFragment() {
             val dateTextView = view.findViewById<TextView>(R.id.dateTextView)
             val editButton = view.findViewById<MaterialButton>(R.id.editButton)
             val deleteButton = view.findViewById<MaterialButton>(R.id.deleteButton)
-
-            // Set job details
             titleTextView.text = job.title
             companyTextView.text = job.companyName
             locationTextView.text = job.location
@@ -64,15 +55,11 @@ class AdminJobDetailsDialog : DialogFragment() {
             salaryTextView.text = job.salary
             descriptionTextView.text = job.description
             requirementsTextView.text = job.requirements
-
             val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
             dateTextView.text = dateFormat.format(job.postedDate.toDate())
-
             editButton.setOnClickListener {
-                // TODO: Implement edit functionality
                 dismiss()
             }
-
             deleteButton.setOnClickListener {
                 db.collection("jobs").document(job.id)
                     .delete()
@@ -82,7 +69,6 @@ class AdminJobDetailsDialog : DialogFragment() {
             }
         }
     }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -90,7 +76,6 @@ class AdminJobDetailsDialog : DialogFragment() {
     ): View? {
         return inflater.inflate(R.layout.dialog_admin_job_details, container, false)
     }
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return super.onCreateDialog(savedInstanceState).apply {
             window?.setLayout(

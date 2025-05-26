@@ -1,5 +1,4 @@
 package com.example.jobrec
-
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -15,7 +14,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-
 class CompanyJobsFragment : Fragment() {
     private lateinit var db: FirebaseFirestore
     private var companyId: String? = null
@@ -23,13 +21,11 @@ class CompanyJobsFragment : Fragment() {
     private lateinit var emptyView: TextView
     private lateinit var jobsAdapter: JobsAdapter
     private lateinit var addJobFab: FloatingActionButton
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         db = FirebaseFirestore.getInstance()
         companyId = FirebaseAuth.getInstance().currentUser?.uid
     }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -37,19 +33,15 @@ class CompanyJobsFragment : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_company_jobs, container, false)
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         jobsRecyclerView = view.findViewById(R.id.jobsRecyclerView)
         emptyView = view.findViewById(R.id.emptyView)
         addJobFab = view.findViewById(R.id.addJobFab)
-
         setupRecyclerView()
         setupFab()
         loadJobs()
     }
-
     private fun setupRecyclerView() {
         jobsAdapter = JobsAdapter(
             onJobClick = { job ->
@@ -58,14 +50,12 @@ class CompanyJobsFragment : Fragment() {
                 startActivity(intent)
             }
         )
-
         jobsRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = jobsAdapter
             setHasFixedSize(true)
         }
     }
-
     private fun setupFab() {
         addJobFab.setOnClickListener {
             val intent = Intent(requireContext(), PostJobActivity::class.java)
@@ -73,10 +63,8 @@ class CompanyJobsFragment : Fragment() {
             startActivity(intent)
         }
     }
-
     private fun loadJobs() {
         companyId?.let { id ->
-            // Simple query without complex ordering
             db.collection("jobs")
                 .whereEqualTo("companyId", id)
                 .get()
@@ -91,15 +79,12 @@ class CompanyJobsFragment : Fragment() {
                             null
                         }
                     }.sortedByDescending {
-                        // Sort in memory by posted date
                         try {
                             it.postedDate.toDate()
                         } catch (e: Exception) {
-                            // Fallback if postedDate is not available
                             java.util.Date()
                         }
                     }
-
                     jobsAdapter.submitList(jobs)
                     emptyView.visibility = if (jobs.isEmpty()) View.VISIBLE else View.GONE
                 }
