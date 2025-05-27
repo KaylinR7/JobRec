@@ -25,7 +25,7 @@ class AdminLoginActivity : AppCompatActivity() {
         loginButton.setOnClickListener {
             val email = emailInput.text.toString()
             val password = passwordInput.text.toString()
-            if (email == "admin@jobrec.com" && password == "admin123") {
+            if (email == "admin@careerworx.com" && password == "admin123") {
                 startActivity(Intent(this, AdminDashboardActivity::class.java))
                 overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
                 finish()
@@ -38,4 +38,4 @@ class AdminLoginActivity : AppCompatActivity() {
             overridePendingTransition(R.anim.fade_in, R.anim.slide_up)
         }
     }
-} 
+}

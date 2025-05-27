@@ -69,7 +69,7 @@ class SignupActivity : AppCompatActivity() {
         cellNumberInput = findViewById(R.id.etCellNumber)
         emailInput = findViewById(R.id.etEmail)
         passwordInput = findViewById(R.id.etPassword)
-        provinceInput = findViewById(R.id.provinceInput) 
+        provinceInput = findViewById(R.id.provinceInput)
         addressInput = findViewById(R.id.etAddress)
         summaryInput = findViewById(R.id.etSummary)
         skillsInput = findViewById(R.id.etSkills)
@@ -263,7 +263,7 @@ class SignupActivity : AppCompatActivity() {
                 linkedin = linkedin,
                 github = github,
                 portfolio = portfolio,
-                role = "user", 
+                role = "user",
                 yearsOfExperience = yearsOfExperienceInput.text.toString().trim(),
                 certificate = certificateInput.text.toString().trim(),
                 expectedSalary = expectedSalaryInput.text.toString().trim(),
@@ -323,49 +323,28 @@ class SignupActivity : AppCompatActivity() {
                     callback(true)
                     return@addOnSuccessListener
                 }
-                db.collection("Users")
+                // Check users collection (already checked above)
+                // Skip duplicate check for Users collection
+                db.collection("companies")
                     .whereEqualTo("email", email)
                     .get()
-                    .addOnSuccessListener { usersCapitalResult ->
-                        if (!usersCapitalResult.isEmpty) {
-                            Log.d(TAG, "Email found in Users collection")
-                            callback(true)
-                            return@addOnSuccessListener
+                    .addOnSuccessListener { companiesResult ->
+                        val exists = !companiesResult.isEmpty
+                        if (exists) {
+                            Log.d(TAG, "Email found in companies collection")
+                        } else {
+                            Log.d(TAG, "Email not found in any Firestore collection")
                         }
-                        db.collection("companies")
-                            .whereEqualTo("email", email)
-                            .get()
-                            .addOnSuccessListener { companiesResult ->
-                                val exists = !companiesResult.isEmpty
-                                if (exists) {
-                                    Log.d(TAG, "Email found in companies collection")
-                                } else {
-                                    Log.d(TAG, "Email not found in any Firestore collection")
-                                }
-                                callback(exists)
-                            }
-                            .addOnFailureListener { e ->
-                                Log.e(TAG, "Error checking companies collection", e)
-                                callback(false) 
-                            }
+                        callback(exists)
                     }
                     .addOnFailureListener { e ->
-                        Log.e(TAG, "Error checking Users collection", e)
-                        db.collection("companies")
-                            .whereEqualTo("email", email)
-                            .get()
-                            .addOnSuccessListener { companiesResult ->
-                                callback(!companiesResult.isEmpty)
-                            }
-                            .addOnFailureListener { e2 ->
-                                Log.e(TAG, "Error checking companies collection", e2)
-                                callback(false) 
-                            }
+                        Log.e(TAG, "Error checking companies collection", e)
+                        callback(false)
                     }
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Error checking users collection", e)
-                callback(false) 
+                callback(false)
             }
     }
     private fun checkEmailExists(email: String, callback: (Boolean) -> Unit) {
@@ -388,49 +367,27 @@ class SignupActivity : AppCompatActivity() {
                         callback(true)
                         return@addOnSuccessListener
                     }
-                    db.collection("Users")
+                    // Check companies collection directly since users collection already checked above
+                    db.collection("companies")
                         .whereEqualTo("email", email)
                         .get()
-                        .addOnSuccessListener { usersCapitalResult ->
-                            if (!usersCapitalResult.isEmpty) {
-                                Log.d(TAG, "Email found in Users collection")
-                                callback(true)
-                                return@addOnSuccessListener
+                        .addOnSuccessListener { companiesResult ->
+                            val exists = !companiesResult.isEmpty
+                            if (exists) {
+                                Log.d(TAG, "Email found in companies collection")
+                            } else {
+                                Log.d(TAG, "Email not found in any collection")
                             }
-                            db.collection("companies")
-                                .whereEqualTo("email", email)
-                                .get()
-                                .addOnSuccessListener { companiesResult ->
-                                    val exists = !companiesResult.isEmpty
-                                    if (exists) {
-                                        Log.d(TAG, "Email found in companies collection")
-                                    } else {
-                                        Log.d(TAG, "Email not found in any collection")
-                                    }
-                                    callback(exists)
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e(TAG, "Error checking companies collection", e)
-                                    callback(false) 
-                                }
+                            callback(exists)
                         }
                         .addOnFailureListener { e ->
-                            Log.e(TAG, "Error checking Users collection", e)
-                            db.collection("companies")
-                                .whereEqualTo("email", email)
-                                .get()
-                                .addOnSuccessListener { companiesResult ->
-                                    callback(!companiesResult.isEmpty)
-                                }
-                                .addOnFailureListener { e2 ->
-                                    Log.e(TAG, "Error checking companies collection", e2)
-                                    callback(false) 
-                                }
+                            Log.e(TAG, "Error checking companies collection", e)
+                            callback(false)
                         }
                 }
                 .addOnFailureListener { e ->
                     Log.e(TAG, "Error checking users collection", e)
-                    callback(false) 
+                    callback(false)
                 }
         }
     }
@@ -534,7 +491,7 @@ class SignupActivity : AppCompatActivity() {
                                 Log.e(TAG, "Failed to delete temporary user", deleteTask.exception)
                             }
                             tempAuth.signOut()
-                            callback(false) 
+                            callback(false)
                         }
                 } else {
                     val errorMessage = task.exception?.message ?: ""
@@ -545,11 +502,11 @@ class SignupActivity : AppCompatActivity() {
                             if (!existsInFirestore) {
                                 Log.d(TAG, "Email exists in Firebase Auth but not in Firestore. This is a recoverable situation.")
                             }
-                            callback(true) 
+                            callback(true)
                         }
                     } else {
                         Log.e(TAG, "Error in direct email check: $errorMessage")
-                        callback(false) 
+                        callback(false)
                     }
                 }
             }
@@ -567,7 +524,7 @@ class SignupActivity : AppCompatActivity() {
                     val userEmail = doc.getString("email") ?: ""
                     val normalizedUserEmail = userEmail.lowercase().replace(".", "").replace(" ", "")
                     val similarity = calculateSimilarity(normalizedEmail, normalizedUserEmail)
-                    if (similarity > 70) { 
+                    if (similarity > 70) {
                         Log.d(TAG, "Similar email found: $userEmail (${similarity.toInt()}% similar)")
                     }
                 }
@@ -578,7 +535,7 @@ class SignupActivity : AppCompatActivity() {
                             val companyEmail = doc.getString("email") ?: ""
                             val normalizedCompanyEmail = companyEmail.lowercase().replace(".", "").replace(" ", "")
                             val similarity = calculateSimilarity(normalizedEmail, normalizedCompanyEmail)
-                            if (similarity > 70) { 
+                            if (similarity > 70) {
                                 Log.d(TAG, "Similar company email found: $companyEmail (${similarity.toInt()}% similar)")
                             }
                         }
@@ -602,9 +559,9 @@ class SignupActivity : AppCompatActivity() {
             for (j in 1..n) {
                 val cost = if (s1[i - 1] == s2[j - 1]) 0 else 1
                 dp[i][j] = minOf(
-                    dp[i - 1][j] + 1,      
-                    dp[i][j - 1] + 1,      
-                    dp[i - 1][j - 1] + cost 
+                    dp[i - 1][j] + 1,
+                    dp[i][j - 1] + 1,
+                    dp[i - 1][j - 1] + cost
                 )
             }
         }
@@ -685,7 +642,7 @@ class SignupActivity : AppCompatActivity() {
             val subFieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, subFields)
             subFieldInput.setAdapter(subFieldAdapter)
             subFieldInput.isEnabled = true
-            subFieldInput.setText("", false) 
+            subFieldInput.setText("", false)
         } else {
             subFieldInput.setText("")
             subFieldInput.isEnabled = false

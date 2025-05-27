@@ -27,7 +27,7 @@ class ContactActivity : AppCompatActivity() {
         })
         contactText.text = """
             For any inquiries, please contact us at:
-            Email: support@jobrec.com
+            Email: support@careerworx.com
             Phone: +1 (555) 123-4567
             Address: 123 Job Street, Employment City, EC 12345
             Business Hours:
@@ -40,4 +40,4 @@ class ContactActivity : AppCompatActivity() {
         onBackPressed()
         return true
     }
-} 
+}

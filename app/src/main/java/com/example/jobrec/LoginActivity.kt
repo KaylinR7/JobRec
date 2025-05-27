@@ -56,13 +56,31 @@ class LoginActivity : AppCompatActivity() {
             R.id.studentRadioButton -> "student"
             R.id.companyRadioButton -> "company"
             R.id.adminRadioButton -> "admin"
-            else -> "student" 
+            else -> "student"
         }
         if (selectedUserType == "admin") {
-            if (email == "admin@jobrec.com" && password == "admin123") {
-                startActivity(Intent(this, AdminDashboardActivity::class.java))
-                overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
-                finish()
+            if (email == "admin@careerworx.com" && password == "admin123") {
+                // Authenticate admin with Firebase Auth
+                Toast.makeText(this, "Logging in as admin...", Toast.LENGTH_SHORT).show()
+                auth.signInWithEmailAndPassword(email, password)
+                    .addOnSuccessListener {
+                        Log.d(TAG, "Admin authenticated successfully")
+                        startActivity(Intent(this, AdminDashboardActivity::class.java))
+                        overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "Admin authentication failed", e)
+                        // If admin user doesn't exist in Firebase Auth, create it
+                        if (e.message?.contains("no user record", ignoreCase = true) == true ||
+                            e.message?.contains("incorrect, malformed or has expired", ignoreCase = true) == true ||
+                            e is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException) {
+                            Log.d(TAG, "Admin user doesn't exist in Firebase Auth, creating it...")
+                            createAdminUser(email, password)
+                        } else {
+                            Toast.makeText(this, "Admin authentication failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 return
             } else {
                 Toast.makeText(this, "Invalid admin credentials", Toast.LENGTH_SHORT).show()
@@ -344,6 +362,29 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
+    private fun createAdminUser(email: String, password: String) {
+        Log.d(TAG, "Creating admin user in Firebase Auth")
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnSuccessListener { authResult ->
+                Log.d(TAG, "Admin user created successfully in Firebase Auth")
+                val userId = authResult.user?.uid
+                if (userId != null) {
+                    Log.d(TAG, "Admin user ID: $userId")
+                    Toast.makeText(this, "Admin user created successfully", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, AdminDashboardActivity::class.java))
+                    overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
+                    finish()
+                } else {
+                    Log.e(TAG, "Failed to get admin user ID after creation")
+                    Toast.makeText(this, "Error: Failed to get admin user ID", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Error creating admin user in Firebase Auth", e)
+                Toast.makeText(this, "Error creating admin user: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
     private fun validateInput(email: String, password: String): Boolean {
         if (email.isEmpty()) {
             emailInput.error = "Email is required"

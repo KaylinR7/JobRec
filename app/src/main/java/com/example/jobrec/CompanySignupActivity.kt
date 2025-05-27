@@ -147,49 +147,27 @@ class CompanySignupActivity : AppCompatActivity() {
                         callback(true)
                         return@addOnSuccessListener
                     }
-                    db.collection("Users")
+                    // Check companies collection directly since users collection already checked above
+                    db.collection("companies")
                         .whereEqualTo("email", email)
                         .get()
-                        .addOnSuccessListener { usersCapitalResult ->
-                            if (!usersCapitalResult.isEmpty) {
-                                Log.d(TAG, "Email found in Users collection")
-                                callback(true)
-                                return@addOnSuccessListener
+                        .addOnSuccessListener { companiesResult ->
+                            val exists = !companiesResult.isEmpty
+                            if (exists) {
+                                Log.d(TAG, "Email found in companies collection")
+                            } else {
+                                Log.d(TAG, "Email not found in any collection")
                             }
-                            db.collection("companies")
-                                .whereEqualTo("email", email)
-                                .get()
-                                .addOnSuccessListener { companiesResult ->
-                                    val exists = !companiesResult.isEmpty
-                                    if (exists) {
-                                        Log.d(TAG, "Email found in companies collection")
-                                    } else {
-                                        Log.d(TAG, "Email not found in any collection")
-                                    }
-                                    callback(exists)
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e(TAG, "Error checking companies collection", e)
-                                    callback(false) 
-                                }
+                            callback(exists)
                         }
                         .addOnFailureListener { e ->
-                            Log.e(TAG, "Error checking Users collection", e)
-                            db.collection("companies")
-                                .whereEqualTo("email", email)
-                                .get()
-                                .addOnSuccessListener { companiesResult ->
-                                    callback(!companiesResult.isEmpty)
-                                }
-                                .addOnFailureListener { e2 ->
-                                    Log.e(TAG, "Error checking companies collection", e2)
-                                    callback(false) 
-                                }
+                            Log.e(TAG, "Error checking companies collection", e)
+                            callback(false)
                         }
                 }
                 .addOnFailureListener { e ->
                     Log.e(TAG, "Error checking users collection", e)
-                    callback(false) 
+                    callback(false)
                 }
         }
     }
@@ -293,7 +271,7 @@ class CompanySignupActivity : AppCompatActivity() {
                                 Log.e(TAG, "Failed to delete temporary user", deleteTask.exception)
                             }
                             tempAuth.signOut()
-                            callback(false) 
+                            callback(false)
                         }
                 } else {
                     val errorMessage = task.exception?.message ?: ""
@@ -356,7 +334,7 @@ class CompanySignupActivity : AppCompatActivity() {
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Error checking registration number", e)
-                callback(false) 
+                callback(false)
             }
     }
 }

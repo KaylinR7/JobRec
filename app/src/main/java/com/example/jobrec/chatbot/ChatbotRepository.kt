@@ -41,7 +41,7 @@ class ChatbotRepository(private val context: Context) {
         "review applications" to "As a company, you can review applications by going to the Applications section. You can filter applications by status and view candidate details including their CV and cover letter.",
         "candidate search" to "Companies can search for candidates by going to the Search Candidates section. You can filter by skills, experience, education, and other criteria to find qualified applicants.",
         "company dashboard" to "The Company Dashboard provides an overview of your job postings, applications received, and recent activity. It's your central hub for managing recruitment activities.",
-        "delete account" to "To delete your account, please contact our support team at support@jobrec.com. Note that this action is permanent and will remove all your data from our system.",
+        "delete account" to "To delete your account, please contact our support team at support@careerworx.com. Note that this action is permanent and will remove all your data from our system.",
         "change password" to "To change your password, go to the Profile section and tap on the 'Change Password' option. You'll need to enter your current password and then create a new one.",
         "notifications" to "You can manage your notification settings in the Profile section under 'Notification Preferences'. You can choose which alerts you want to receive and how you receive them.",
         "privacy" to "JobRec takes your privacy seriously. Your personal information is only shared with employers when you apply for a job. You can review our full privacy policy in the app settings.",
@@ -50,7 +50,7 @@ class ChatbotRepository(private val context: Context) {
         "messaging" to "The messaging feature allows direct communication between candidates and employers. You can access your conversations from the Messages section of the app.",
         "schedule interview" to "Employers can schedule interviews through the chat feature. You'll receive a notification when an interview is proposed, and you can accept or suggest an alternative time.",
         "app not working" to "If you're experiencing issues with the app, try these steps: 1) Restart the app, 2) Check your internet connection, 3) Update to the latest version, 4) Restart your device. If problems persist, contact support.",
-        "bug report" to "To report a bug, please email support@jobrec.com with details about the issue, including what you were doing when it occurred and any error messages you received.",
+        "bug report" to "To report a bug, please email support@careerworx.com with details about the issue, including what you were doing when it occurred and any error messages you received.",
         "slow app" to "If the app is running slowly, try clearing your cache, ensuring you have a stable internet connection, and closing other apps running in the background.",
         "contact support" to "For support, email support@careerworx.com or use the Contact section in the app. Our team is available Monday-Friday, 9am-5pm to assist with any issues or questions.",
         "feedback" to "We value your feedback! You can submit suggestions or comments through the Feedback option in the app settings or by emailing feedback@careerworx.com.",
@@ -126,7 +126,7 @@ class ChatbotRepository(private val context: Context) {
             }
             lowerQuery.contains("account") || lowerQuery.contains("password") || lowerQuery.contains("login") -> {
                 if (lowerQuery.contains("delete") || lowerQuery.contains("remove")) {
-                    "To delete your account, please contact our support team at support@jobrec.com. Note that this action is permanent and will remove all your data from our system."
+                    "To delete your account, please contact our support team at support@careerworx.com. Note that this action is permanent and will remove all your data from our system."
                 } else if (lowerQuery.contains("password")) {
                     "To change your password, go to the Profile section and tap on the 'Change Password' option. You'll need to enter your current password and then create a new one."
                 } else {

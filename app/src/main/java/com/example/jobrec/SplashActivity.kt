@@ -36,7 +36,7 @@ class SplashActivity : AppCompatActivity() {
         taglineText.startAnimation(slideUp)
         Handler(Looper.getMainLooper()).postDelayed({
             checkUserAndNavigate()
-        }, 2000) 
+        }, 2000)
     }
     private fun checkUserAndNavigate() {
         val currentUser = auth.currentUser
@@ -170,7 +170,7 @@ class SplashActivity : AppCompatActivity() {
             editor.putString("user_id", auth.currentUser?.uid ?: "")
             editor.apply()
             startActivity(Intent(this, CompanyDashboardActivityNew::class.java))
-        } else if (email == "admin@jobrec.com") {
+        } else if (email == "admin@careerworx.com") {
             editor.putString("user_type", "admin")
             editor.putString("user_id", auth.currentUser?.uid ?: "")
             editor.apply()

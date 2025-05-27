@@ -79,7 +79,7 @@ class AdminUsersActivity : AppCompatActivity() {
             } else {
                 loadUsers()
             }
-        } ?: loadUsers() 
+        } ?: loadUsers()
     }
     private fun setupSearch() {
         searchEditText.addTextChangedListener(object : TextWatcher {
@@ -131,42 +131,19 @@ class AdminUsersActivity : AppCompatActivity() {
                     updateUsersList()
                     showLoading(false)
                 } else {
-                    Log.d(TAG, "No users found in 'users' collection, trying 'Users' collection")
-                    loadUsersFromCapitalCollection()
+                    Log.d(TAG, "No users found in 'users' collection")
+                    showLoading(false)
+                    showEmptyState(true)
                 }
             }
             .addOnFailureListener { exception ->
                 Log.e(TAG, "Error loading users", exception)
                 Toast.makeText(this, "Error loading users: ${exception.message}", Toast.LENGTH_SHORT).show()
-                loadUsersFromCapitalCollection()
-            }
-    }
-    private fun loadUsersFromCapitalCollection() {
-        db.collection("Users")
-            .get()
-            .addOnSuccessListener { result ->
-                Log.d(TAG, "Found ${result.size()} users in 'Users' collection")
-                for (document in result) {
-                    try {
-                        val user = document.toObject(User::class.java)
-                        Log.d(TAG, "Loaded user from 'Users': ${user.email}, name: ${user.name}")
-                        allUsers.add(user)
-                        userIds.add(document.id)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error converting document to User: ${e.message}")
-                    }
-                }
-                filteredUsers.addAll(allUsers)
-                updateUsersList()
-                showLoading(false)
-            }
-            .addOnFailureListener { exception ->
-                Log.e(TAG, "Error loading from 'Users' collection", exception)
-                Toast.makeText(this, "Error loading users: ${exception.message}", Toast.LENGTH_SHORT).show()
                 showLoading(false)
                 showEmptyState(true)
             }
     }
+
     private fun searchUsers(query: String) {
         Log.d(TAG, "Searching users with query: $query")
         showLoading(true)
@@ -246,18 +223,8 @@ class AdminUsersActivity : AppCompatActivity() {
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Error deleting user from 'users'", e)
-                db.collection("Users").document(userId)
-                    .delete()
-                    .addOnSuccessListener {
-                        Log.d(TAG, "User deleted successfully from 'Users' collection")
-                        Toast.makeText(this, "User deleted", Toast.LENGTH_SHORT).show()
-                        loadUsers()
-                    }
-                    .addOnFailureListener { e2 ->
-                        Log.e(TAG, "Error deleting user from 'Users'", e2)
-                        Toast.makeText(this, "Error deleting user: ${e2.message}", Toast.LENGTH_SHORT).show()
-                        showLoading(false)
-                    }
+                Toast.makeText(this, "Error deleting user: ${e.message}", Toast.LENGTH_SHORT).show()
+                showLoading(false)
             }
     }
 }

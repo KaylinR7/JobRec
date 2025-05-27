@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "1090802108646",
-    "project_id": "job-rec-8006d",
-    "storage_bucket": "job-rec-8006d.firebasestorage.app"
+    "project_number": "820823115311",
+    "project_id": "careerworx-f5bc6",
+    "storage_bucket": "careerworx-f5bc6.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1090802108646:android:ec985b1dcd4fcc2ae61327",
+        "mobilesdk_app_id": "1:820823115311:android:7bc9899be0640c17cee8da",
         "android_client_info": {
           "package_name": "com.example.jobrec"
         }
@@ -15,12 +15,15 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyALRrTE3MaF71FCHhxBYbpG1HUkhL7Wpng"
+          "current_key": "AIzaSyCtx9phNT-1PGHQvdXF2B-nM1i8mjfLsrE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": []
+        },
+        "analytics_service": {
+          "status": 1
         }
       }
     }
