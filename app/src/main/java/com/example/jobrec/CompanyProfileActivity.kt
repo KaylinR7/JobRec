@@ -7,6 +7,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -16,6 +17,7 @@ class CompanyProfileActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
     private lateinit var companyId: String
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var companyLogo: CircleImageView
     private lateinit var companyNameText: TextView
     private lateinit var industryText: TextView
@@ -94,6 +96,8 @@ class CompanyProfileActivity : AppCompatActivity() {
         }
     }
     private fun initializeViews() {
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
+        setupSwipeRefresh()
         companyLogo = findViewById(R.id.companyLogo)
         companyNameText = findViewById(R.id.companyNameText)
         industryText = findViewById(R.id.industryText)
@@ -137,11 +141,45 @@ class CompanyProfileActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun setupSwipeRefresh() {
+        swipeRefreshLayout.setOnRefreshListener {
+            refreshCompanyProfile()
+        }
+        swipeRefreshLayout.setColorSchemeResources(
+            R.color.primary,
+            R.color.primary_dark,
+            R.color.accent
+        )
+    }
+
+    private fun refreshCompanyProfile() {
+        clearCompanyData()
+        loadCompanyData()
+    }
+
+    private fun clearCompanyData() {
+        companyNameText.text = ""
+        industryText.text = ""
+        registrationNumberText.text = ""
+        companySizeText.text = ""
+        locationText.text = ""
+        websiteText.text = ""
+        descriptionText.text = ""
+        contactPersonNameText.text = ""
+        contactPersonEmailText.text = ""
+        contactPersonPhoneText.text = ""
+        totalApplicationsText.text = "0"
+        activeJobsText.text = "0"
+        companyLogo.setImageResource(R.drawable.ic_company_placeholder)
+    }
+
     private fun loadCompanyData() {
         Log.d("CompanyProfile", "Loading data for company ID: $companyId")
         db.collection("companies").document(companyId)
             .get()
             .addOnSuccessListener { document ->
+                swipeRefreshLayout.isRefreshing = false
                 Log.d("CompanyProfile", "Document exists: ${document.exists()}")
                 if (document != null && document.exists()) {
                     companyNameText.text = document.getString("companyName") ?: "Not set"
@@ -168,6 +206,7 @@ class CompanyProfileActivity : AppCompatActivity() {
                 }
             }
             .addOnFailureListener { e ->
+                swipeRefreshLayout.isRefreshing = false
                 Log.e("CompanyProfile", "Error loading company data", e)
                 Toast.makeText(this, "Error loading company data: ${e.message}", Toast.LENGTH_SHORT).show()
             }

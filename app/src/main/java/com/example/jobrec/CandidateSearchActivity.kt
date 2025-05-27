@@ -23,6 +23,8 @@ import com.google.android.material.chip.ChipGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.example.jobrec.adapters.CertificateBadgeAdapter
+import com.example.jobrec.adapters.CertificateBadge
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -50,10 +52,10 @@ class CandidateSearchActivity : AppCompatActivity() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private val selectedSkills = mutableListOf<String>()
-    private val allSkills = mutableMapOf<String, Int>() 
-    private val allLocations = mutableMapOf<String, Int>() 
-    private val allFields = mutableMapOf<String, Int>() 
-    private val allEducationLevels = mutableMapOf<String, Int>() 
+    private val allSkills = mutableMapOf<String, Int>()
+    private val allLocations = mutableMapOf<String, Int>()
+    private val allFields = mutableMapOf<String, Int>()
+    private val allEducationLevels = mutableMapOf<String, Int>()
     private val allUsers = mutableListOf<User>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -160,7 +162,7 @@ class CandidateSearchActivity : AppCompatActivity() {
             if (!selectedSkills.contains(selectedSkill)) {
                 selectedSkills.add(selectedSkill)
                 addSkillChip(selectedSkill)
-                skillsFilter.setText("") 
+                skillsFilter.setText("")
             }
         }
         val certificateOptions = arrayOf(
@@ -253,7 +255,7 @@ class CandidateSearchActivity : AppCompatActivity() {
         resultsRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@CandidateSearchActivity)
             adapter = resultsAdapter
-            addItemDecoration(SpacingItemDecoration(16)) 
+            addItemDecoration(SpacingItemDecoration(16))
         }
     }
     private fun showCandidateProfileDialog(candidate: User) {
@@ -286,6 +288,50 @@ class CandidateSearchActivity : AppCompatActivity() {
         } else {
             skillsText.text = "No skills specified"
         }
+
+        // Setup certificate badges
+        val certificateBadgesRecyclerView = view.findViewById<RecyclerView>(R.id.certificateBadgesRecyclerView)
+        val noCertificatesText = view.findViewById<TextView>(R.id.noCertificatesText)
+
+        if (candidate.certificates.isNotEmpty()) {
+            val badges = candidate.certificates.map { cert ->
+                CertificateBadge(
+                    name = cert["name"] ?: "",
+                    issuer = cert["issuer"] ?: "",
+                    year = cert["year"] ?: "",
+                    description = cert["description"] ?: ""
+                )
+            }.filter { it.name.isNotEmpty() }
+
+            if (badges.isNotEmpty()) {
+                val badgeAdapter = CertificateBadgeAdapter { badge ->
+                    // Show badge details in a dialog
+                    androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle(badge.name)
+                        .setMessage(buildString {
+                            append("Issuer: ${badge.issuer}\n")
+                            append("Year: ${badge.year}")
+                            if (badge.description.isNotEmpty()) {
+                                append("\n\nDescription: ${badge.description}")
+                            }
+                        })
+                        .setPositiveButton("OK", null)
+                        .show()
+                }
+                certificateBadgesRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+                certificateBadgesRecyclerView.adapter = badgeAdapter
+                badgeAdapter.submitList(badges)
+                certificateBadgesRecyclerView.visibility = View.VISIBLE
+                noCertificatesText.visibility = View.GONE
+            } else {
+                certificateBadgesRecyclerView.visibility = View.GONE
+                noCertificatesText.visibility = View.VISIBLE
+            }
+        } else {
+            certificateBadgesRecyclerView.visibility = View.GONE
+            noCertificatesText.visibility = View.VISIBLE
+        }
+
         val educationText = view.findViewById<TextView>(R.id.educationText)
         if (candidate.education.isNotEmpty()) {
             val educationList = candidate.education.joinToString("\n") { edu ->
@@ -359,14 +405,14 @@ class CandidateSearchActivity : AppCompatActivity() {
             .setTitle("Contact ${candidate.name}")
             .setItems(options) { dialog, which ->
                 when (which) {
-                    0 -> { 
+                    0 -> {
                         val intent = Intent(Intent.ACTION_SENDTO).apply {
                             data = Uri.parse("mailto:${candidate.email}")
                             putExtra(Intent.EXTRA_SUBJECT, "Job Opportunity")
                         }
                         startActivity(intent)
                     }
-                    1 -> { 
+                    1 -> {
                         val intent = Intent(Intent.ACTION_DIAL).apply {
                             data = Uri.parse("tel:${candidate.phoneNumber}")
                         }
@@ -408,7 +454,7 @@ class CandidateSearchActivity : AppCompatActivity() {
             val subFieldAdapter = FilterDropdownAdapter(this, subFieldOptions)
             subFieldFilter.setAdapter(subFieldAdapter)
             subFieldFilter.isEnabled = true
-            subFieldFilter.setText("", false) 
+            subFieldFilter.setText("", false)
         } else {
             subFieldFilter.setText("")
             subFieldFilter.isEnabled = false
@@ -418,16 +464,16 @@ class CandidateSearchActivity : AppCompatActivity() {
         val startDate = try {
             Date(experience.startDate.toLong())
         } catch (e: NumberFormatException) {
-            Date() 
+            Date()
         }
         val endDate = try {
             if (experience.endDate.isNotEmpty()) {
                 Date(experience.endDate.toLong())
             } else {
-                Date() 
+                Date()
             }
         } catch (e: NumberFormatException) {
-            Date() 
+            Date()
         }
         val diffInMillis = endDate.time - startDate.time
         return TimeUnit.MILLISECONDS.toDays(diffInMillis) / 365

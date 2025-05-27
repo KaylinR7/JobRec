@@ -9,26 +9,28 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
-import java.text.SimpleDateFormat
-import java.util.*
-class RecentJobsAdapter(private val onJobClick: (Job) -> Unit) :
-    ListAdapter<Job, RecentJobsAdapter.JobViewHolder>(JobDiffCallback()) {
+
+class RecommendedJobsAdapter(private val onJobClick: (Job) -> Unit) :
+    ListAdapter<Job, RecommendedJobsAdapter.JobViewHolder>(JobDiffCallback()) {
+    
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_recent_job, parent, false)
+            .inflate(R.layout.item_job, parent, false)
         return JobViewHolder(view)
     }
+    
     override fun onBindViewHolder(holder: JobViewHolder, position: Int) {
         val job = getItem(position)
         holder.bind(job)
     }
+    
     inner class JobViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val titleTextView: TextView = itemView.findViewById(R.id.jobTitleText)
         private val companyTextView: TextView = itemView.findViewById(R.id.companyNameText)
-        private val locationTextView: TextView = itemView.findViewById(R.id.jobLocationText)
-        private val cardView: MaterialCardView = itemView as MaterialCardView
-        private val jobTypeChip: TextView = itemView.findViewById(R.id.jobTypeChip)
-        private val postedDateText: TextView = itemView.findViewById(R.id.postedDateText)
+        private val locationTextView: TextView = itemView.findViewById(R.id.locationText)
+        private val cardView: MaterialCardView = itemView.findViewById(R.id.jobCard)
+        private val jobTypeText: TextView = itemView.findViewById(R.id.jobTypeText)
+        private val salaryText: TextView? = itemView.findViewById(R.id.salaryText)
         private val matchContainer: LinearLayout? = itemView.findViewById(R.id.matchContainer)
         private val matchPercentageText: TextView? = itemView.findViewById(R.id.matchPercentageText)
 
@@ -36,23 +38,9 @@ class RecentJobsAdapter(private val onJobClick: (Job) -> Unit) :
             titleTextView.text = job.title
             companyTextView.text = job.companyName
             locationTextView.text = job.location
-            jobTypeChip.text = job.type
+            jobTypeText.text = job.type
+            salaryText?.text = job.salary
             cardView.setOnClickListener { onJobClick(job) }
-
-            // Format posted date
-            val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
-            val postedDate = job.postedDate.toDate()
-            val now = Date()
-            val diffInMillis = now.time - postedDate.time
-            val diffInDays = diffInMillis / (1000 * 60 * 60 * 24)
-
-            val dateText = when {
-                diffInDays == 0L -> "Posted today"
-                diffInDays == 1L -> "Posted yesterday"
-                diffInDays < 7 -> "Posted ${diffInDays} days ago"
-                else -> "Posted ${dateFormat.format(postedDate)}"
-            }
-            postedDateText.text = dateText
 
             // Show match percentage if available
             if (job.matchPercentage > 0 && matchContainer != null && matchPercentageText != null) {
@@ -70,10 +58,12 @@ class RecentJobsAdapter(private val onJobClick: (Job) -> Unit) :
             }
         }
     }
+    
     private class JobDiffCallback : DiffUtil.ItemCallback<Job>() {
         override fun areItemsTheSame(oldItem: Job, newItem: Job): Boolean {
             return oldItem.id == newItem.id
         }
+        
         override fun areContentsTheSame(oldItem: Job, newItem: Job): Boolean {
             return oldItem == newItem
         }

@@ -31,7 +31,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/jobTitleLayout"
                 android:layout_width="match_parent"
@@ -49,7 +49,7 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/jobFieldLayout"
                 android:layout_width="match_parent"
@@ -68,7 +68,7 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/jobSpecializationLayout"
                 android:layout_width="match_parent"
@@ -87,7 +87,34 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/skillsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="Required Skills"
+                app:boxStrokeColor="?attr/colorPrimary"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <AutoCompleteTextView
+                    android:id="@+id/skillsInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textColor="?android:attr/textColorPrimary"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/selectedSkillsChipGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"/>
+
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/jobTypeLayout"
                 android:layout_width="match_parent"
@@ -106,7 +133,7 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/provinceLayout"
                 android:layout_width="match_parent"
@@ -125,7 +152,7 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/locationLayout"
                 android:layout_width="match_parent"
@@ -144,7 +171,7 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/salaryLayout"
                 android:layout_width="match_parent"
@@ -163,7 +190,7 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/experienceLayout"
                 android:layout_width="match_parent"
@@ -182,7 +209,7 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/descriptionLayout"
                 android:layout_width="match_parent"
@@ -203,7 +230,7 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/requirementsLayout"
                 android:layout_width="match_parent"
@@ -224,7 +251,7 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/postButton"
                 android:layout_width="match_parent"

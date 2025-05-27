@@ -2,7 +2,9 @@ package com.example.jobrec
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +26,8 @@ class JobsAdapter(private val onJobClick: (Job) -> Unit) :
         private val locationTextView: TextView = itemView.findViewById(R.id.locationText)
         private val jobTypeTextView: TextView = itemView.findViewById(R.id.jobTypeText)
         private val salaryTextView: TextView = itemView.findViewById(R.id.salaryText)
+        private val matchContainer: LinearLayout = itemView.findViewById(R.id.matchContainer)
+        private val matchPercentageText: TextView = itemView.findViewById(R.id.matchPercentageText)
         init {
             itemView.setOnClickListener {
                 val position = adapterPosition
@@ -38,6 +42,20 @@ class JobsAdapter(private val onJobClick: (Job) -> Unit) :
             locationTextView.text = job.location
             jobTypeTextView.text = job.type
             salaryTextView.text = job.salary
+
+            if (job.matchPercentage > 0) {
+                matchContainer.visibility = View.VISIBLE
+                matchPercentageText.text = "${job.matchPercentage}%"
+
+                val matchColor = when {
+                    job.matchPercentage >= 80 -> ContextCompat.getColor(itemView.context, android.R.color.holo_green_dark)
+                    job.matchPercentage >= 60 -> ContextCompat.getColor(itemView.context, android.R.color.holo_orange_dark)
+                    else -> ContextCompat.getColor(itemView.context, android.R.color.holo_red_dark)
+                }
+                matchPercentageText.setTextColor(matchColor)
+            } else {
+                matchContainer.visibility = View.GONE
+            }
         }
         private fun calculateDaysAgo(timestamp: Long): Int {
             val currentTime = System.currentTimeMillis()

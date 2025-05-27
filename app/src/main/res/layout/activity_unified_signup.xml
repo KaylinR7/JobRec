@@ -13,7 +13,7 @@
         android:elevation="4dp"
         app:navigationIcon="@drawable/ic_back"
         app:title="Sign Up"
-        app:titleTextColor="@android:color/white"/>
+        app:titleTextColor="@color/white"/>
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"

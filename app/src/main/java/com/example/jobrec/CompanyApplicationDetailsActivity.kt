@@ -9,6 +9,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.jobrec.adapters.CertificateBadgeAdapter
+import com.example.jobrec.adapters.CertificateBadge
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -230,6 +234,50 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
         } else {
             skillsText.text = "No skills specified"
         }
+
+        // Setup certificate badges
+        val certificateBadgesRecyclerView = view.findViewById<RecyclerView>(R.id.certificateBadgesRecyclerView)
+        val noCertificatesText = view.findViewById<TextView>(R.id.noCertificatesText)
+
+        if (candidate.certificates.isNotEmpty()) {
+            val badges = candidate.certificates.map { cert ->
+                CertificateBadge(
+                    name = cert["name"] ?: "",
+                    issuer = cert["issuer"] ?: "",
+                    year = cert["year"] ?: "",
+                    description = cert["description"] ?: ""
+                )
+            }.filter { it.name.isNotEmpty() }
+
+            if (badges.isNotEmpty()) {
+                val badgeAdapter = CertificateBadgeAdapter { badge ->
+                    // Show badge details in a dialog
+                    androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle(badge.name)
+                        .setMessage(buildString {
+                            append("Issuer: ${badge.issuer}\n")
+                            append("Year: ${badge.year}")
+                            if (badge.description.isNotEmpty()) {
+                                append("\n\nDescription: ${badge.description}")
+                            }
+                        })
+                        .setPositiveButton("OK", null)
+                        .show()
+                }
+                certificateBadgesRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+                certificateBadgesRecyclerView.adapter = badgeAdapter
+                badgeAdapter.submitList(badges)
+                certificateBadgesRecyclerView.visibility = View.VISIBLE
+                noCertificatesText.visibility = View.GONE
+            } else {
+                certificateBadgesRecyclerView.visibility = View.GONE
+                noCertificatesText.visibility = View.VISIBLE
+            }
+        } else {
+            certificateBadgesRecyclerView.visibility = View.GONE
+            noCertificatesText.visibility = View.VISIBLE
+        }
+
         val educationText = view.findViewById<TextView>(R.id.educationText)
         if (candidate.education.isNotEmpty()) {
             val educationList = candidate.education.joinToString("\n") { edu ->
@@ -303,14 +351,14 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
             .setTitle("Contact ${candidate.name}")
             .setItems(options) { dialog, which ->
                 when (which) {
-                    0 -> { 
+                    0 -> {
                         val intent = Intent(Intent.ACTION_SENDTO).apply {
                             data = Uri.parse("mailto:${candidate.email}")
                             putExtra(Intent.EXTRA_SUBJECT, "Job Application: $jobTitle")
                         }
                         startActivity(intent)
                     }
-                    1 -> { 
+                    1 -> {
                         val intent = Intent(Intent.ACTION_DIAL).apply {
                             data = Uri.parse("tel:${candidate.phoneNumber}")
                         }
@@ -421,7 +469,7 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                 )
                 .addOnSuccessListener {
                     Toast.makeText(this, "Application $newStatus", Toast.LENGTH_SHORT).show()
-                    loadApplicationDetails() 
+                    loadApplicationDetails()
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(this, "Error updating application: ${e.message}", Toast.LENGTH_SHORT).show()

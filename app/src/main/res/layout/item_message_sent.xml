@@ -26,16 +26,16 @@
             android:orientation="vertical"
             android:padding="10dp">
 
-            
+
             <TextView
                 android:id="@+id/messageText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 android:textSize="16sp"
                 tools:text="Hello, how are you doing today?" />
 
-            
+
             <ScrollView
                 android:id="@+id/meetingScrollView"
                 android:layout_width="wrap_content"

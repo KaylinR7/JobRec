@@ -4,34 +4,42 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    
-    
+
+    <!-- Background -->
     <path
-        android:fillColor="#000000"
+        android:fillColor="#2196F3"
         android:pathData="M0,0h108v108h-108z" />
-    
-    
+
+    <!-- DUT Letters -->
+    <!-- Letter D -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M36,38h36v6h-36z"/>
+        android:pathData="M20,35h8c6,0 10,4 10,10v8c0,6 -4,10 -10,10h-8V35z M26,41v16h2c2,0 4,-2 4,-4v-8c0,-2 -2,-4 -4,-4h-2z"/>
+
+    <!-- Letter U -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M30,44h48v30h-48z"/>
+        android:pathData="M44,35v18c0,6 4,10 10,10s10,-4 10,-10V35h-6v18c0,2 -2,4 -4,4s-4,-2 -4,-4V35h-6z"/>
+
+    <!-- Letter T -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M42,38v-6h24v6z"/>
-    
-    
+        android:pathData="M70,35h18v6h-6v22h-6V41h-6V35z"/>
+
+    <!-- Decorative elements representing technology/innovation -->
     <path
-        android:fillColor="#000000"
-        android:pathData="M45,54h6v12h-6z"/>
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,70h6v6h-6z"/>
     <path
-        android:fillColor="#000000"
-        android:pathData="M45,54h12v6h-12z"/>
+        android:fillColor="#FFFFFF"
+        android:pathData="M42,70h6v6h-6z"/>
     <path
-        android:fillColor="#000000"
-        android:pathData="M57,54h6v12h-6z"/>
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,70h6v6h-6z"/>
     <path
-        android:fillColor="#000000"
-        android:pathData="M57,60h6v6h-6z"/>
+        android:fillColor="#FFFFFF"
+        android:pathData="M66,70h6v6h-6z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M78,70h6v6h-6z"/>
 </vector>

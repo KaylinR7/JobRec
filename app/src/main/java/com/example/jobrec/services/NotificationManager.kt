@@ -2,7 +2,7 @@ package com.example.jobrec.services
 import android.util.Log
 import com.example.jobrec.services.FCMService
 import com.example.jobrec.models.Conversation
-import com.example.jobrec.models.Job
+import com.example.jobrec.Job
 import com.example.jobrec.models.Message
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging

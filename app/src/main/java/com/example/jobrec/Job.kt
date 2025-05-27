@@ -21,7 +21,10 @@ data class Job(
     val jobField: String = "",
     val specialization: String = "",
     val province: String = "",
-    val experienceLevel: String = ""
+    val experienceLevel: String = "",
+    val requiredSkills: List<String> = emptyList(),
+    var matchPercentage: Int = 0,
+    var matchReasoning: String = ""
 ) : Parcelable {
     @Exclude
     fun getRequirementsList(): List<String> {
@@ -48,6 +51,9 @@ data class Job(
         parcel.readString() ?: "",
         parcel.readString() ?: "",
         parcel.readString() ?: "",
+        parcel.readString() ?: "",
+        parcel.createStringArrayList() ?: emptyList(),
+        parcel.readInt(),
         parcel.readString() ?: ""
     )
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -70,6 +76,9 @@ data class Job(
         parcel.writeString(specialization)
         parcel.writeString(province)
         parcel.writeString(experienceLevel)
+        parcel.writeStringList(requiredSkills)
+        parcel.writeInt(matchPercentage)
+        parcel.writeString(matchReasoning)
     }
     override fun describeContents(): Int {
         return 0

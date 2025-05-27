@@ -43,7 +43,7 @@
                 android:textColor="@android:color/darker_gray"
                 android:layout_marginBottom="32dp"/>
 
-            
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -175,7 +175,7 @@
                     style="@style/Widget.CareerWorx.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -284,7 +284,7 @@
                     style="@style/Widget.CareerWorx.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -310,7 +310,7 @@
                 app:backgroundTint="@android:color/black"
                 android:layout_marginBottom="24dp"/>
 
-            
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -336,7 +336,7 @@
                 app:backgroundTint="@android:color/black"
                 android:layout_marginBottom="24dp"/>
 
-            
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -350,15 +350,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 app:boxStrokeColor="@android:color/black"
                 app:hintTextColor="@android:color/black">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <AutoCompleteTextView
                     android:id="@+id/etSkills"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Add skills"
+                    android:hint="Select skills"
+                    android:inputType="none"
                     style="@style/Widget.CareerWorx.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -368,7 +369,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"/>
 
-            
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -429,7 +430,7 @@
                     style="@style/Widget.CareerWorx.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -455,7 +456,7 @@
                 app:backgroundTint="@android:color/black"
                 android:layout_marginBottom="32dp"/>
 
-            
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRegister"
                 android:layout_width="match_parent"

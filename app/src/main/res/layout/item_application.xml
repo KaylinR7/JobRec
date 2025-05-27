@@ -56,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
                 app:chipBackgroundColor="@color/status_pending"
-                android:textColor="@android:color/white"/>
+                android:textColor="@color/white"/>
 
         </LinearLayout>
 

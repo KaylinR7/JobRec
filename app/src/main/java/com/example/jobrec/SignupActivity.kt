@@ -31,12 +31,13 @@ class SignupActivity : AppCompatActivity() {
     private lateinit var signupButton: MaterialButton
     private lateinit var addressInput: TextInputEditText
     private lateinit var summaryInput: TextInputEditText
-    private lateinit var skillsInput: TextInputEditText
+    private lateinit var skillsInput: AutoCompleteTextView
     private lateinit var linkedinInput: TextInputEditText
     private lateinit var githubInput: TextInputEditText
     private lateinit var portfolioInput: TextInputEditText
     private lateinit var registerButton: MaterialButton
     private lateinit var skillsChipGroup: ChipGroup
+    private val selectedSkills = mutableListOf<String>()
     private lateinit var referencesContainer: LinearLayout
     private lateinit var experienceContainer: LinearLayout
     private lateinit var educationContainer: LinearLayout
@@ -113,24 +114,14 @@ class SignupActivity : AppCompatActivity() {
         }
     }
     private fun setupSkillsInput() {
-        skillsInput.setOnEditorActionListener { _, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_DONE || (event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                val skill = skillsInput.text.toString().trim()
-                if (skill.isNotEmpty()) {
-                    addSkillChip(skill)
-                    skillsInput.text?.clear()
-                }
-                true
-            } else {
-                false
-            }
-        }
+        skillsInput.isEnabled = false
     }
     private fun addSkillChip(skill: String) {
         val chip = Chip(this).apply {
             text = skill
             isCloseIconVisible = true
             setOnCloseIconClickListener {
+                selectedSkills.remove(skill)
                 skillsChipGroup.removeView(this)
             }
         }
@@ -158,12 +149,7 @@ class SignupActivity : AppCompatActivity() {
         educationContainer.addView(educationLayout)
     }
     private fun getSkillsList(): List<String> {
-        val skills = mutableListOf<String>()
-        for (i in 0 until skillsChipGroup.childCount) {
-            val chip = skillsChipGroup.getChildAt(i) as? Chip
-            chip?.text?.toString()?.let { skills.add(it) }
-        }
-        return skills
+        return selectedSkills.toList()
     }
     private fun getReferencesList(): List<Map<String, String>> {
         val references = mutableListOf<Map<String, String>>()
@@ -634,6 +620,7 @@ class SignupActivity : AppCompatActivity() {
         fieldInput.setOnItemClickListener { _, _, _, _ ->
             val selectedField = fieldInput.text.toString()
             updateSubFieldDropdown(selectedField)
+            updateSkillsDropdown(selectedField)
         }
     }
     private fun updateSubFieldDropdown(field: String) {
@@ -646,6 +633,30 @@ class SignupActivity : AppCompatActivity() {
         } else {
             subFieldInput.setText("")
             subFieldInput.isEnabled = false
+        }
+    }
+
+    private fun updateSkillsDropdown(field: String) {
+        val skills = FieldCategories.skills[field] ?: listOf()
+        if (skills.isNotEmpty()) {
+            val skillsAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, skills)
+            skillsInput.setAdapter(skillsAdapter)
+            skillsInput.isEnabled = true
+            skillsInput.setText("", false)
+
+            skillsInput.setOnItemClickListener { _, _, position, _ ->
+                val selectedSkill = skills[position]
+                if (!selectedSkills.contains(selectedSkill)) {
+                    selectedSkills.add(selectedSkill)
+                    addSkillChip(selectedSkill)
+                    skillsInput.setText("", false)
+                }
+            }
+        } else {
+            skillsInput.setText("")
+            skillsInput.isEnabled = false
+            selectedSkills.clear()
+            skillsChipGroup.removeAllViews()
         }
     }
 }

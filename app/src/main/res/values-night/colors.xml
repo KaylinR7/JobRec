@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    
-    <color name="primary">#EF5350</color>           
-    <color name="primary_dark">#D32F2F</color>      
-    <color name="primary_light">#EF9A9A</color>     
-    <color name="accent">#EF5350</color>            
-    <color name="accent_dark">#D32F2F</color>       
-    <color name="accent_light">#EF9A9A</color>      
 
-    
+    <color name="primary">#42A5F5</color>
+    <color name="primary_dark">#2196F3</color>
+    <color name="primary_light">#90CAF9</color>
+    <color name="accent">#42A5F5</color>
+    <color name="accent_dark">#2196F3</color>
+    <color name="accent_light">#90CAF9</color>
+
+
     <color name="background">#121212</color>
     <color name="background_dark">#121212</color>
     <color name="surface">#1E1E1E</color>
@@ -22,35 +22,35 @@
     <color name="on_surface">#FFFFFF</color>
     <color name="on_surface_dark">#FFFFFF</color>
 
-    
+
     <color name="text_primary">#FFFFFF</color>
     <color name="text_primary_dark">#FFFFFF</color>
     <color name="text_secondary">#DDDDDD</color>
     <color name="text_secondary_dark">#DDDDDD</color>
 
-    
+
     <color name="error">#CF6679</color>
     <color name="error_dark">#CF6679</color>
 
-    
-    <color name="status_pending">#FFD54F</color>     
-    <color name="status_reviewing">#64B5F6</color>   
-    <color name="status_shortlisted">#81C784</color> 
+
+    <color name="status_pending">#FFD54F</color>
+    <color name="status_reviewing">#64B5F6</color>
+    <color name="status_shortlisted">#81C784</color>
     <color name="status_interviewing">#BA68C8</color>
-    <color name="status_offered">#FFB74D</color>     
-    <color name="status_rejected">#E57373</color>    
+    <color name="status_offered">#FFB74D</color>
+    <color name="status_rejected">#E57373</color>
 
-    
-    <color name="custom_chip_background">#D32F2F</color> 
-    <color name="custom_chip_text">#FFFFFF</color>       
 
-    
+    <color name="custom_chip_background">#2196F3</color>
+    <color name="custom_chip_text">#FFFFFF</color>
+
+
     <color name="card_border">#424242</color>
     <color name="card_background">#1E1E1E</color>
     <color name="colorOutline">#424242</color>
 
-    
-    <color name="button_primary">#EF5350</color>    
-    <color name="button_secondary">#EF5350</color>  
-    <color name="button_disabled">#757575</color>   
+
+    <color name="button_primary">#42A5F5</color>
+    <color name="button_secondary">#42A5F5</color>
+    <color name="button_disabled">#757575</color>
 </resources>

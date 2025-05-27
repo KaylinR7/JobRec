@@ -19,6 +19,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
@@ -39,15 +40,18 @@ import android.view.MenuItem
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.example.jobrec.models.FieldCategories
 import com.example.jobrec.adapters.CertificateAdapter
+import com.example.jobrec.adapters.CertificateBadgeAdapter
+import com.example.jobrec.adapters.CertificateBadge
 class ProfileActivity : AppCompatActivity() {
     private lateinit var toolbar: MaterialToolbar
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var nameInput: TextInputEditText
     private lateinit var surnameInput: TextInputEditText
     private lateinit var emailInput: TextInputEditText
     private lateinit var phoneNumberInput: TextInputEditText
     private lateinit var addressInput: TextInputEditText
     private lateinit var summaryInput: TextInputEditText
-    private lateinit var skillsInput: TextInputEditText
+    private lateinit var skillsInput: AutoCompleteTextView
     private lateinit var linkedinInput: TextInputEditText
     private lateinit var githubInput: TextInputEditText
     private lateinit var portfolioInput: TextInputEditText
@@ -60,6 +64,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var fieldInput: AutoCompleteTextView
     private lateinit var subFieldInput: AutoCompleteTextView
     private lateinit var skillsChipGroup: ChipGroup
+    private val selectedSkills = mutableListOf<String>()
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
@@ -70,9 +75,11 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var experienceAdapter: ExperienceAdapter
     private lateinit var educationAdapter: EducationAdapter
     private lateinit var certificateAdapter: CertificateAdapter
+    private lateinit var certificateBadgeAdapter: CertificateBadgeAdapter
     private lateinit var referencesContainer: LinearLayout
     private lateinit var addReferenceButton: MaterialButton
     private lateinit var certificatesRecyclerView: RecyclerView
+    private lateinit var certificateBadgesRecyclerView: RecyclerView
     private lateinit var addCertificateButton: MaterialButton
     private lateinit var getSuggestionsButton: MaterialButton
     private val TAG = "ProfileActivity"
@@ -116,6 +123,7 @@ class ProfileActivity : AppCompatActivity() {
         loadUserData()
     }
     private fun initializeViews() {
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         nameInput = findViewById(R.id.nameInput)
         surnameInput = findViewById(R.id.surnameInput)
         emailInput = findViewById(R.id.emailInput)
@@ -148,8 +156,36 @@ class ProfileActivity : AppCompatActivity() {
         educationAdapter = EducationAdapter()
         experienceRecyclerView.adapter = experienceAdapter
         educationRecyclerView.adapter = educationAdapter
+
+        // Initialize certificate components
+        certificatesRecyclerView = findViewById(R.id.certificatesRecyclerView)
+        certificateBadgesRecyclerView = findViewById(R.id.certificateBadgesRecyclerView)
+        addCertificateButton = findViewById(R.id.addCertificateButton)
+
+        // Setup certificate adapters
+        certificateAdapter = CertificateAdapter()
+        certificateBadgeAdapter = CertificateBadgeAdapter { badge ->
+            // Handle badge click - could show details dialog
+            showCertificateBadgeDetails(badge)
+        }
+
+        certificatesRecyclerView.layoutManager = LinearLayoutManager(this)
+        certificatesRecyclerView.adapter = certificateAdapter
+
+        certificateBadgesRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        certificateBadgesRecyclerView.adapter = certificateBadgeAdapter
     }
     private fun setupClickListeners() {
+        // Setup pull-to-refresh
+        swipeRefreshLayout.setOnRefreshListener {
+            refreshProfile()
+        }
+        swipeRefreshLayout.setColorSchemeResources(
+            R.color.primary,
+            R.color.primary_dark,
+            R.color.accent
+        )
+
         changePhotoButton.setOnClickListener {
             checkPermissionAndPickImage()
         }
@@ -164,6 +200,10 @@ class ProfileActivity : AppCompatActivity() {
         }
         addReferenceButton.setOnClickListener {
             addReferenceField()
+        }
+        addCertificateButton.setOnClickListener {
+            certificateAdapter.addNewCertificate()
+            updateCertificateBadges()
         }
         getSuggestionsButton.setOnClickListener {
             showSummarySuggestions()
@@ -319,9 +359,54 @@ class ProfileActivity : AppCompatActivity() {
         fieldInput.setOnItemClickListener { _, _, _, _ ->
             val selectedField = fieldInput.text.toString()
             updateSubFieldDropdown(selectedField)
+            updateSkillsDropdown(selectedField)
+            updateCertificateOptionsForField(selectedField)
         }
         subFieldInput.isEnabled = false
+        skillsInput.isEnabled = false
     }
+    private fun refreshProfile() {
+        clearProfileData()
+        loadUserData()
+    }
+
+    private fun clearProfileData() {
+        // Clear all input fields
+        nameInput.setText("")
+        surnameInput.setText("")
+        emailInput.setText("")
+        phoneNumberInput.setText("")
+        addressInput.setText("")
+        summaryInput.setText("")
+        linkedinInput.setText("")
+        githubInput.setText("")
+        portfolioInput.setText("")
+        provinceInput.setText("")
+        yearsOfExperienceInput.setText("")
+        expectedSalaryInput.setText("")
+        fieldInput.setText("")
+        subFieldInput.setText("")
+
+        // Clear skills
+        selectedSkills.clear()
+        skillsChipGroup.removeAllViews()
+
+        // Clear adapters
+        experienceAdapter.clearExperienceList()
+        educationAdapter.clearEducationList()
+        certificateAdapter.clearCertificates()
+
+        // Clear references
+        referencesContainer.removeAllViews()
+
+        // Reset profile image
+        profileImage.setImageResource(R.drawable.ic_person)
+
+        // Reset dropdowns
+        subFieldInput.isEnabled = false
+        skillsInput.isEnabled = false
+    }
+
     private fun loadUserData() {
         val userId = auth.currentUser?.uid
         if (userId != null) {
@@ -329,6 +414,7 @@ class ProfileActivity : AppCompatActivity() {
             db.collection("users").document(userId)
                 .get()
                 .addOnSuccessListener { document ->
+                    swipeRefreshLayout.isRefreshing = false
                     if (document.exists()) {
                         Log.d(TAG, "Document exists: ${document.exists()}")
                         nameInput.setText(document.getString("name"))
@@ -344,6 +430,8 @@ class ProfileActivity : AppCompatActivity() {
                         fieldInput.setText(field)
                         if (field.isNotEmpty()) {
                             updateSubFieldDropdown(field)
+                            updateSkillsDropdown(field)
+                            updateCertificateOptionsForField(field)
                             subFieldInput.setText(document.getString("subField") ?: "")
                         }
                         linkedinInput.setText(document.getString("linkedin"))
@@ -351,6 +439,7 @@ class ProfileActivity : AppCompatActivity() {
                         portfolioInput.setText(document.getString("portfolio"))
                         val skills = document.get("skills") as? List<String>
                         skills?.forEach { skill ->
+                            selectedSkills.add(skill)
                             addSkillChip(skill)
                         }
                         val experienceList = document.get("experience") as? List<Map<String, Any>>
@@ -390,6 +479,21 @@ class ProfileActivity : AppCompatActivity() {
                             }
                             referencesContainer.addView(referenceLayout)
                         }
+
+                        // Load certificates
+                        val certificatesList = document.get("certificates") as? List<Map<String, String>>
+                        certificatesList?.forEach { certificate ->
+                            certificateAdapter.addCertificate(
+                                CertificateAdapter.Certificate(
+                                    certificate["name"] ?: "",
+                                    certificate["issuer"] ?: "",
+                                    certificate["year"] ?: "",
+                                    certificate["description"] ?: ""
+                                )
+                            )
+                        }
+                        updateCertificateBadges()
+
                         val imageUrl = document.getString("profileImageUrl")
                         if (!imageUrl.isNullOrEmpty()) {
                             Glide.with(this)
@@ -406,6 +510,7 @@ class ProfileActivity : AppCompatActivity() {
                     }
                 }
                 .addOnFailureListener { e ->
+                    swipeRefreshLayout.isRefreshing = false
                     Log.e(TAG, "Error loading user data", e)
                     Toast.makeText(this, "Error loading profile data", Toast.LENGTH_SHORT).show()
                 }
@@ -428,6 +533,7 @@ class ProfileActivity : AppCompatActivity() {
                 "experience" to experienceAdapter.getExperienceList(),
                 "education" to educationAdapter.getEducationList(),
                 "references" to getReferencesList(),
+                "certificates" to certificateAdapter.getCertificatesList(),
                 "province" to provinceInput.text.toString().trim(),
                 "yearsOfExperience" to yearsOfExperienceInput.text.toString().trim(),
                 "expectedSalary" to expectedSalaryInput.text.toString().trim(),
@@ -447,18 +553,14 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
     private fun getSkillsList(): List<String> {
-        val skills = mutableListOf<String>()
-        for (i in 0 until skillsChipGroup.childCount) {
-            val chip = skillsChipGroup.getChildAt(i) as? Chip
-            chip?.text?.toString()?.let { skills.add(it) }
-        }
-        return skills
+        return selectedSkills.toList()
     }
     private fun addSkillChip(skill: String) {
         val chip = Chip(this).apply {
             text = skill
             isCloseIconVisible = true
             setOnCloseIconClickListener {
+                selectedSkills.remove(skill)
                 skillsChipGroup.removeView(this)
             }
         }
@@ -608,7 +710,7 @@ class ProfileActivity : AppCompatActivity() {
                 }
             }
             subFieldInput.isEnabled = true
-            subFieldInput.setText("", false) 
+            subFieldInput.setText("", false)
             subFieldInput.setAdapter(subFieldAdapter)
             subFieldInput.setOnClickListener {
                 subFieldInput.showDropDown()
@@ -617,6 +719,32 @@ class ProfileActivity : AppCompatActivity() {
             subFieldInput.setText("")
             subFieldInput.isEnabled = false
         }
+    }
+
+    private fun updateSkillsDropdown(field: String) {
+        val skills = FieldCategories.skills[field] ?: listOf()
+        if (skills.isNotEmpty()) {
+            val skillsAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, skills)
+            skillsInput.setAdapter(skillsAdapter)
+            skillsInput.isEnabled = true
+            skillsInput.setText("", false)
+
+            skillsInput.setOnItemClickListener { _, _, position, _ ->
+                val selectedSkill = skills[position]
+                if (!selectedSkills.contains(selectedSkill)) {
+                    selectedSkills.add(selectedSkill)
+                    addSkillChip(selectedSkill)
+                    skillsInput.setText("", false)
+                }
+            }
+        } else {
+            skillsInput.setText("")
+            skillsInput.isEnabled = false
+        }
+    }
+
+    private fun updateCertificateOptionsForField(field: String) {
+        certificateAdapter.updateCertificateOptionsForField(field)
     }
     private fun showSummarySuggestions() {
         val field = fieldInput.text.toString()
@@ -660,5 +788,33 @@ class ProfileActivity : AppCompatActivity() {
             suggestions.add("Dedicated $fieldSpecific professional with ${experience.lowercase()} experience $skillsText. Seeking opportunities to apply my skills and knowledge to make a meaningful impact.")
         }
         return suggestions
+    }
+
+    private fun updateCertificateBadges() {
+        val certificates = certificateAdapter.getCertificatesList()
+        val badges = certificates.map { cert ->
+            CertificateBadge(
+                name = cert["name"] ?: "",
+                issuer = cert["issuer"] ?: "",
+                year = cert["year"] ?: "",
+                description = cert["description"] ?: ""
+            )
+        }.filter { it.name.isNotEmpty() } // Only show badges with names
+
+        certificateBadgeAdapter.submitList(badges)
+    }
+
+    private fun showCertificateBadgeDetails(badge: CertificateBadge) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(badge.name)
+            .setMessage(buildString {
+                append("Issuer: ${badge.issuer}\n")
+                append("Year: ${badge.year}")
+                if (badge.description.isNotEmpty()) {
+                    append("\n\nDescription: ${badge.description}")
+                }
+            })
+            .setPositiveButton("OK", null)
+            .show()
     }
 }

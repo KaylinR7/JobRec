@@ -86,11 +86,11 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:hint="Password (leave blank to keep unchanged)"
             app:startIconDrawable="@android:drawable/ic_lock_lock"
-            app:startIconTint="#FF0000"
-            app:boxStrokeColor="#FF0000"
-            app:hintTextColor="#FF0000"
+            app:startIconTint="#2196F3"
+            app:boxStrokeColor="#2196F3"
+            app:hintTextColor="#2196F3"
             app:passwordToggleEnabled="true"
-            app:passwordToggleTint="#FF0000">
+            app:passwordToggleTint="#2196F3">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/passwordEditText"
@@ -111,7 +111,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Delete"
-                app:backgroundTint="#FF0000"
+                app:backgroundTint="#2196F3"
                 android:layout_marginEnd="8dp" />
 
             <com.google.android.material.button.MaterialButton
@@ -127,7 +127,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Save Changes"
-                app:backgroundTint="#FF0000" />
+                app:backgroundTint="#2196F3" />
         </LinearLayout>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

@@ -1,52 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    
-    <color name="primary">#D32F2F</color>           
-    <color name="primary_dark">#B71C1C</color>      
-    <color name="primary_light">#FFCDD2</color>     
-    <color name="accent">#D32F2F</color>            
-    <color name="accent_dark">#B71C1C</color>       
-    <color name="accent_light">#EF9A9A</color>      
 
-    
-    <color name="background">#F5F7FA</color>        
+    <color name="primary">#2196F3</color>
+    <color name="primary_dark">#1976D2</color>
+    <color name="primary_light">#BBDEFB</color>
+    <color name="accent">#2196F3</color>
+    <color name="accent_dark">#1976D2</color>
+    <color name="accent_light">#90CAF9</color>
+
+
+    <color name="background">#F5F7FA</color>
     <color name="surface">#FFFFFF</color>
-    <color name="on_background">#263238</color>     
-    <color name="on_surface">#263238</color>        
+    <color name="on_background">#263238</color>
+    <color name="on_surface">#263238</color>
 
-    
-    <color name="text_primary">#263238</color>      
-    <color name="text_secondary">#607D8B</color>    
 
-    
-    <color name="error">#F44336</color>             
+    <color name="text_primary">#263238</color>
+    <color name="text_secondary">#607D8B</color>
 
-    
-    <color name="status_pending">#FFC107</color>    
-    <color name="status_reviewed">#2196F3</color>   
-    <color name="status_accepted">#4CAF50</color>   
-    <color name="status_rejected">#F44336</color>   
+
+    <color name="error">#F44336</color>
+
+
+    <color name="status_pending">#FFC107</color>
+    <color name="status_reviewed">#2196F3</color>
+    <color name="status_accepted">#4CAF50</color>
+    <color name="status_rejected">#F44336</color>
     <color name="status_shortlisted">#9C27B0</color>
     <color name="status_interviewing">#009688</color>
-    <color name="status_offered">#FF9800</color>    
-    <color name="status_applied">#FFC107</color>    
+    <color name="status_offered">#FF9800</color>
+    <color name="status_applied">#FFC107</color>
     <color name="status_interviewed">#009688</color>
 
-    
-    <color name="custom_chip_background">#FFEBEE</color> 
-    <color name="custom_chip_text">#D32F2F</color>       
 
-    
+    <color name="custom_chip_background">#E3F2FD</color>
+    <color name="custom_chip_text">#2196F3</color>
+
+
     <color name="card_border">#E0E0E0</color>
     <color name="card_background">#FFFFFF</color>
     <color name="colorOutline">#E0E0E0</color>
 
-    
-    <color name="button_primary">#D32F2F</color>    
-    <color name="button_secondary">#D32F2F</color>  
-    <color name="button_disabled">#BDBDBD</color>   
+
+    <color name="button_primary">#2196F3</color>
+    <color name="button_secondary">#2196F3</color>
+    <color name="button_disabled">#BDBDBD</color>
+
+    <!-- Certificate brand colors -->
+    <color name="aws_orange">#FF9900</color>
+    <color name="azure_blue">#0078D4</color>
+    <color name="google_blue">#4285F4</color>
+    <color name="oracle_red">#F80000</color>
+    <color name="cisco_blue">#1BA0D7</color>
+    <color name="comptia_red">#C8102E</color>
+    <color name="pmp_green">#4CAF50</color>
+    <color name="scrum_blue">#2196F3</color>
 </resources>

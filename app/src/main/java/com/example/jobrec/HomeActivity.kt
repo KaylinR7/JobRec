@@ -16,9 +16,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.jobrec.ai.JobMatchingRepository
 import com.example.jobrec.chatbot.ChatbotHelper
 import com.example.jobrec.databinding.ActivityHomeBinding
 import com.example.jobrec.utils.NotificationHelper
+import kotlinx.coroutines.launch
 class HomeActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "HomeActivity"
@@ -28,8 +31,9 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private var userId: String? = null
     private lateinit var recentJobsAdapter: RecentJobsAdapter
-    private lateinit var recommendedJobsAdapter: RecentJobsAdapter
+    private lateinit var recommendedJobsAdapter: JobsAdapter
     private lateinit var notificationHelper: NotificationHelper
+    private lateinit var jobMatchingRepository: JobMatchingRepository
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
@@ -39,6 +43,7 @@ class HomeActivity : AppCompatActivity() {
         userId = auth.currentUser?.uid
         notificationHelper = NotificationHelper(this)
         notificationHelper.createNotificationChannel()
+        jobMatchingRepository = JobMatchingRepository()
         initializeViews()
         setupClickListeners()
         setupBottomNavigation()
@@ -52,7 +57,7 @@ class HomeActivity : AppCompatActivity() {
         recentJobsAdapter = RecentJobsAdapter { job ->
             navigateToJobDetails(job.id)
         }
-        recommendedJobsAdapter = RecentJobsAdapter { job ->
+        recommendedJobsAdapter = JobsAdapter { job ->
             navigateToJobDetails(job.id)
         }
         binding.recentJobsRecyclerView.apply {
@@ -217,21 +222,47 @@ class HomeActivity : AppCompatActivity() {
         }
     }
     private fun loadRecentJobs() {
-        Log.d(TAG, "Loading recent jobs...")
+        Log.d(TAG, "Loading recent jobs with match percentages...")
+        lifecycleScope.launch {
+            try {
+                // Get all jobs with match percentages
+                val allJobsWithMatches = jobMatchingRepository.getJobsWithMatches(50)
+
+                // Filter for active jobs and sort by posted date
+                val recentJobs = allJobsWithMatches
+                    .filter { it.status == "active" }
+                    .sortedByDescending { it.postedDate.toDate() }
+                    .take(10) // Limit to 10 most recent jobs
+
+                Log.d(TAG, "Successfully loaded ${recentJobs.size} recent jobs with match percentages")
+                recentJobsAdapter.submitList(recentJobs)
+                binding.swipeRefreshLayout.isRefreshing = false
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading recent jobs with matches: ${e.message}", e)
+                // Fallback to loading jobs without match percentages
+                loadRecentJobsFallback()
+            }
+        }
+    }
+
+    private fun loadRecentJobsFallback() {
+        Log.d(TAG, "Loading recent jobs fallback...")
         db.collection("jobs")
+            .whereEqualTo("status", "active")
+            .orderBy("postedDate", Query.Direction.DESCENDING)
+            .limit(10)
             .get()
             .addOnSuccessListener { documents ->
-                Log.d(TAG, "Found ${documents.size()} jobs")
+                Log.d(TAG, "Found ${documents.size()} recent jobs")
                 val jobs = documents.mapNotNull { doc ->
                     try {
-                        val job = doc.toObject(Job::class.java).copy(id = doc.id)
-                        if (job.status == "active") job else null
+                        doc.toObject(Job::class.java).copy(id = doc.id)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error converting document to Job object: ${e.message}")
                         null
                     }
-                }.sortedByDescending { it.postedDate.toDate() } 
-                Log.d(TAG, "Successfully mapped ${jobs.size} jobs")
+                }
+                Log.d(TAG, "Successfully mapped ${jobs.size} recent jobs")
                 recentJobsAdapter.submitList(jobs)
                 binding.swipeRefreshLayout.isRefreshing = false
             }
@@ -242,27 +273,76 @@ class HomeActivity : AppCompatActivity() {
             }
     }
     private fun loadRecommendedJobs() {
-        Log.d(TAG, "Loading recommended jobs...")
+        Log.d(TAG, "Loading AI-powered recommended jobs...")
+        lifecycleScope.launch {
+            try {
+                val allJobsWithMatches = jobMatchingRepository.getJobsWithMatches(100) // Get more jobs to filter from
+                // Filter for recommended jobs (50%+ match with much improved algorithm)
+                val highMatchJobs = allJobsWithMatches.filter { job ->
+                    job.matchPercentage >= 50
+                }.take(10) // Limit to 10 high-match jobs
+
+                Log.d(TAG, "Successfully loaded ${highMatchJobs.size} recommended jobs (50%+ match) from ${allJobsWithMatches.size} total jobs")
+                recommendedJobsAdapter.submitList(highMatchJobs)
+
+                // Update subtitle based on results
+                updateRecommendedJobsSubtitle(highMatchJobs.size, true)
+
+                // If no high-match jobs found, show empty state message
+                if (highMatchJobs.isEmpty()) {
+                    Log.d(TAG, "No high-match jobs (75%+) found")
+                    updateRecommendedJobsSubtitle(0, true)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading AI-powered recommended jobs: ${e.message}", e)
+                // Show empty state instead of fallback for recommended jobs
+                updateRecommendedJobsSubtitle(0, false)
+            }
+        }
+    }
+
+    private fun loadFallbackRecommendedJobs() {
+        Log.d(TAG, "Loading fallback recommended jobs...")
         db.collection("jobs")
+            .whereEqualTo("status", "active")
+            .orderBy("postedDate", Query.Direction.DESCENDING)
+            .limit(20) // Get more jobs to potentially find some with matches
             .get()
             .addOnSuccessListener { documents ->
-                Log.d(TAG, "Found ${documents.size()} recommended jobs")
+                Log.d(TAG, "Found ${documents.size()} fallback recommended jobs")
                 val jobs = documents.mapNotNull { doc ->
                     try {
-                        val job = doc.toObject(Job::class.java).copy(id = doc.id)
-                        if (job.status == "active") job else null
+                        doc.toObject(Job::class.java).copy(id = doc.id)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error converting document to Job object: ${e.message}")
                         null
                     }
-                }.sortedByDescending { it.postedDate.toDate() } 
-                Log.d(TAG, "Successfully mapped ${jobs.size} recommended jobs")
-                recommendedJobsAdapter.submitList(jobs)
+                }
+
+                // Try to prioritize jobs with any match percentage > 0, then by posted date
+                val sortedJobs = jobs.sortedWith(compareByDescending<Job> { it.matchPercentage }.thenByDescending { it.postedDate.toDate() })
+                    .take(10)
+
+                Log.d(TAG, "Successfully mapped ${sortedJobs.size} fallback recommended jobs")
+                recommendedJobsAdapter.submitList(sortedJobs)
+
+                // Update subtitle for fallback jobs
+                updateRecommendedJobsSubtitle(sortedJobs.size, false)
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "Error loading recommended jobs: ${e.message}", e)
+                Log.e(TAG, "Error loading fallback recommended jobs: ${e.message}", e)
                 showError("Failed to load recommended jobs: ${e.message}")
             }
+    }
+
+    private fun updateRecommendedJobsSubtitle(jobCount: Int, isHighMatch: Boolean) {
+        val subtitle = when {
+            jobCount == 0 && isHighMatch -> "No matching jobs found at the moment"
+            jobCount == 0 -> "No recommendations available at the moment"
+            isHighMatch -> "Recommended jobs (50%+ compatibility) • $jobCount found"
+            else -> "Recent job postings • $jobCount available"
+        }
+        binding.recommendedJobsSubtitle.text = subtitle
     }
     private fun navigateToJobDetails(jobId: String) {
         if (jobId.isBlank()) {

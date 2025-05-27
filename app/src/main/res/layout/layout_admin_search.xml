@@ -20,7 +20,7 @@
             android:text="Search"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColorPrimary"
             android:layout_marginBottom="8dp"/>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -31,9 +31,9 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:hint="Search by keyword"
             app:startIconDrawable="@android:drawable/ic_menu_search"
-            app:startIconTint="#FF0000"
-            app:boxStrokeColor="#FF0000"
-            app:hintTextColor="#FF0000">
+            app:startIconTint="#2196F3"
+            app:boxStrokeColor="#2196F3"
+            app:hintTextColor="#2196F3">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/searchEditText"
@@ -56,11 +56,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Filters"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="#FF0000"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/primary"
                 app:cornerRadius="4dp"
                 app:icon="@android:drawable/ic_menu_sort_by_size"
-                app:iconTint="#FFFFFF"
+                app:iconTint="@color/white"
                 style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
 
             <View
@@ -73,8 +73,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Search"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="#FF0000"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/primary"
                 app:cornerRadius="4dp"
                 style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
         </LinearLayout>

@@ -25,6 +25,7 @@ data class User(
     val portfolio: String = "",
     val yearsOfExperience: String = "",
     val certificate: String = "",
+    val certificates: List<Map<String, String>> = emptyList(),
     val expectedSalary: String = "",
     val field: String = "",
     val subField: String = ""
@@ -53,6 +54,7 @@ data class User(
         parcel.readString() ?: "",
         parcel.readString() ?: "",
         parcel.readString() ?: "",
+        CREATOR.readCertificatesFromParcel(parcel),
         parcel.readString() ?: "",
         parcel.readString() ?: "",
         parcel.readString() ?: ""
@@ -81,6 +83,7 @@ data class User(
         parcel.writeString(portfolio)
         parcel.writeString(yearsOfExperience)
         parcel.writeString(certificate)
+        CREATOR.writeCertificatesToParcel(parcel, certificates)
         parcel.writeString(expectedSalary)
         parcel.writeString(field)
         parcel.writeString(subField)
@@ -94,6 +97,30 @@ data class User(
         }
         override fun newArray(size: Int): Array<User?> {
             return arrayOfNulls(size)
+        }
+
+        fun readCertificatesFromParcel(parcel: Parcel): List<Map<String, String>> {
+            val size = parcel.readInt()
+            val certificates = mutableListOf<Map<String, String>>()
+            repeat(size) {
+                val certificate = mutableMapOf<String, String>()
+                certificate["name"] = parcel.readString() ?: ""
+                certificate["issuer"] = parcel.readString() ?: ""
+                certificate["year"] = parcel.readString() ?: ""
+                certificate["description"] = parcel.readString() ?: ""
+                certificates.add(certificate)
+            }
+            return certificates
+        }
+
+        fun writeCertificatesToParcel(parcel: Parcel, certificates: List<Map<String, String>>) {
+            parcel.writeInt(certificates.size)
+            certificates.forEach { certificate ->
+                parcel.writeString(certificate["name"] ?: "")
+                parcel.writeString(certificate["issuer"] ?: "")
+                parcel.writeString(certificate["year"] ?: "")
+                parcel.writeString(certificate["description"] ?: "")
+            }
         }
     }
 }
@@ -168,7 +195,7 @@ data class Experience(
 }
 data class Language(
     val name: String = "",
-    val proficiency: String = "" 
+    val proficiency: String = ""
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",

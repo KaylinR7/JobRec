@@ -16,6 +16,7 @@ import com.google.android.material.textfield.TextInputLayout
 import java.util.Locale
 class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateViewHolder>() {
     private val certificates = mutableListOf<Certificate>()
+    private var userField: String = ""
     data class Certificate(
         var name: String = "",
         var issuer: String = "",
@@ -39,6 +40,11 @@ class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateVi
         certificates.add(certificate)
         notifyItemInserted(certificates.size - 1)
     }
+
+    fun clearCertificates() {
+        certificates.clear()
+        notifyDataSetChanged()
+    }
     fun getCertificatesList(): List<Map<String, String>> {
         return certificates.map { certificate ->
             mapOf(
@@ -48,6 +54,12 @@ class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateVi
                 "description" to certificate.description
             )
         }
+    }
+
+    fun updateCertificateOptionsForField(field: String) {
+        this.userField = field
+        // This will update all existing certificate dropdowns to show field-specific options
+        notifyDataSetChanged()
     }
     inner class CertificateViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val certificateNameLayout: TextInputLayout = itemView.findViewById(R.id.certificateNameLayout)
@@ -143,7 +155,18 @@ class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateVi
             }
         }
         private fun setupCertificateNameDropdown() {
-            val adapter = SearchableAdapter(itemView.context, android.R.layout.simple_dropdown_item_1line, certificateOptions)
+            val options = if (userField.isNotEmpty()) {
+                val fieldSpecificCertificates = com.example.jobrec.models.FieldCategories.getCertificationsForField(userField)
+                if (fieldSpecificCertificates.isNotEmpty()) {
+                    (fieldSpecificCertificates + "Other").toTypedArray()
+                } else {
+                    certificateOptions
+                }
+            } else {
+                certificateOptions
+            }
+
+            val adapter = SearchableAdapter(itemView.context, android.R.layout.simple_dropdown_item_1line, options)
             certificateName.setAdapter(adapter)
             certificateName.setOnFocusChangeListener { _, hasFocus ->
                 if (hasFocus) {
@@ -154,12 +177,13 @@ class CertificateAdapter : RecyclerView.Adapter<CertificateAdapter.CertificateVi
                 certificateName.showDropDown()
             }
         }
+
     }
     class SearchableAdapter(
         context: Context,
         resource: Int,
         private val items: Array<String>
-    ) : ArrayAdapter<String>(context, resource, items) {
+    ) : ArrayAdapter<String>(context, resource, items.toMutableList()) {
         private val allItems: List<String> = items.toList()
         override fun getFilter(): Filter {
             return object : Filter() {

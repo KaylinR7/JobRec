@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:text="Job Title"
             android:textStyle="bold"
-            android:textColor="#000000"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp" />
 
         <TextView
@@ -30,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Company Name"
-            android:textColor="#666666"
+            android:textColor="?android:attr/textColorSecondary"
             android:layout_marginBottom="8dp" />
 
         <TextView
@@ -51,8 +51,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="View"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="#FF0000"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/black"
                 app:cornerRadius="4dp"
                 android:layout_marginEnd="8dp"
                 style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
@@ -63,7 +63,7 @@
                 android:layout_height="wrap_content"
                 android:text="Edit"
                 android:textColor="#FFFFFF"
-                app:backgroundTint="#FF0000"
+                app:backgroundTint="#2196F3"
                 app:cornerRadius="4dp"
                 android:layout_marginEnd="8dp"
                 style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
@@ -74,7 +74,7 @@
                 android:layout_height="wrap_content"
                 android:text="Delete"
                 android:textColor="#FFFFFF"
-                app:backgroundTint="#FF0000"
+                app:backgroundTint="#2196F3"
                 app:cornerRadius="4dp"
                 style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
         </LinearLayout>

@@ -8,11 +8,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.chip.ChipGroup
+import com.google.android.material.chip.Chip
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Date
 import com.example.jobrec.databinding.ActivityPostJobBinding
 import com.example.jobrec.models.FieldCategories
-import com.example.jobrec.models.Job
+import com.example.jobrec.Job
+import com.example.jobrec.Company
 import com.example.jobrec.services.NotificationManager
 import kotlinx.coroutines.launch
 class PostJobActivity : AppCompatActivity() {
@@ -22,6 +25,8 @@ class PostJobActivity : AppCompatActivity() {
     private lateinit var jobTitleInput: TextInputEditText
     private lateinit var jobFieldInput: AutoCompleteTextView
     private lateinit var jobSpecializationInput: AutoCompleteTextView
+    private lateinit var skillsInput: AutoCompleteTextView
+    private lateinit var selectedSkillsChipGroup: ChipGroup
     private lateinit var jobTypeInput: AutoCompleteTextView
     private lateinit var provinceInput: AutoCompleteTextView
     private lateinit var locationInput: TextInputEditText
@@ -30,6 +35,7 @@ class PostJobActivity : AppCompatActivity() {
     private lateinit var descriptionInput: TextInputEditText
     private lateinit var requirementsInput: TextInputEditText
     private lateinit var postButton: MaterialButton
+    private val selectedSkills = mutableListOf<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPostJobBinding.inflate(layoutInflater)
@@ -55,6 +61,8 @@ class PostJobActivity : AppCompatActivity() {
         jobTitleInput = binding.jobTitleInput
         jobFieldInput = binding.jobFieldInput
         jobSpecializationInput = binding.jobSpecializationInput
+        skillsInput = binding.skillsInput
+        selectedSkillsChipGroup = binding.selectedSkillsChipGroup
         jobTypeInput = binding.jobTypeInput
         provinceInput = binding.provinceInput
         locationInput = binding.locationInput
@@ -69,9 +77,11 @@ class PostJobActivity : AppCompatActivity() {
         val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, fieldOptions)
         jobFieldInput.setAdapter(fieldAdapter)
         jobSpecializationInput.isEnabled = false
+        skillsInput.isEnabled = false
         jobFieldInput.setOnItemClickListener { _, _, position, _ ->
             val selectedField = fieldOptions[position]
             updateSpecializationDropdown(selectedField)
+            updateSkillsDropdown(selectedField)
         }
         val jobTypes = arrayOf("Full-time", "Part-time", "Contract", "Internship", "Remote")
         val typeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, jobTypes)
@@ -102,11 +112,47 @@ class PostJobActivity : AppCompatActivity() {
             val subFieldAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, subFields)
             jobSpecializationInput.setAdapter(subFieldAdapter)
             jobSpecializationInput.isEnabled = true
-            jobSpecializationInput.setText("", false) 
+            jobSpecializationInput.setText("", false)
         } else {
             jobSpecializationInput.setText("")
             jobSpecializationInput.isEnabled = false
         }
+    }
+
+    private fun updateSkillsDropdown(field: String) {
+        val skills = FieldCategories.skills[field] ?: listOf()
+        if (skills.isNotEmpty()) {
+            val skillsAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, skills)
+            skillsInput.setAdapter(skillsAdapter)
+            skillsInput.isEnabled = true
+            skillsInput.setText("", false)
+
+            skillsInput.setOnItemClickListener { _, _, position, _ ->
+                val selectedSkill = skills[position]
+                if (!selectedSkills.contains(selectedSkill)) {
+                    selectedSkills.add(selectedSkill)
+                    addSkillChip(selectedSkill)
+                    skillsInput.setText("", false)
+                }
+            }
+        } else {
+            skillsInput.setText("")
+            skillsInput.isEnabled = false
+            selectedSkills.clear()
+            selectedSkillsChipGroup.removeAllViews()
+        }
+    }
+
+    private fun addSkillChip(skill: String) {
+        val chip = Chip(this).apply {
+            text = skill
+            isCloseIconVisible = true
+            setOnCloseIconClickListener {
+                selectedSkills.remove(skill)
+                selectedSkillsChipGroup.removeView(this)
+            }
+        }
+        selectedSkillsChipGroup.addView(chip)
     }
     private fun setupPostButton() {
         postButton.setOnClickListener {
@@ -186,6 +232,7 @@ class PostJobActivity : AppCompatActivity() {
             "experienceLevel" to experienceInput.text.toString(),
             "description" to descriptionInput.text.toString(),
             "requirements" to requirementsInput.text.toString(),
+            "requiredSkills" to selectedSkills,
             "postedDate" to com.google.firebase.Timestamp.now(),
             "status" to "active"
         )
@@ -213,6 +260,7 @@ class PostJobActivity : AppCompatActivity() {
                             experienceLevel = experienceInput.text.toString(),
                             description = descriptionInput.text.toString(),
                             requirements = requirementsInput.text.toString(),
+                            requiredSkills = selectedSkills.toList(),
                             postedDate = com.google.firebase.Timestamp.now(),
                             status = "active"
                         )

@@ -10,9 +10,9 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 private val DarkColorScheme = darkColorScheme(
-    primary = Red400,
-    secondary = Red300,
-    tertiary = Red200,
+    primary = Blue400,
+    secondary = Blue300,
+    tertiary = Blue200,
     background = DarkBackground,
     surface = DarkSurface,
     onPrimary = DarkTextPrimary,
@@ -23,13 +23,13 @@ private val DarkColorScheme = darkColorScheme(
     error = StatusRejected
 )
 private val LightColorScheme = lightColorScheme(
-    primary = Red700,
-    secondary = Red500,
-    tertiary = Red100,
+    primary = Blue700,
+    secondary = Blue500,
+    tertiary = Blue100,
     background = LightBackground,
     surface = LightSurface,
-    onPrimary = DarkTextPrimary, 
-    onSecondary = DarkTextPrimary, 
+    onPrimary = DarkTextPrimary,
+    onSecondary = DarkTextPrimary,
     onTertiary = LightTextPrimary,
     onBackground = LightTextPrimary,
     onSurface = LightTextPrimary,
