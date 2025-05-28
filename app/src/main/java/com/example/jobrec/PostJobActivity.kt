@@ -17,7 +17,6 @@ import com.example.jobrec.models.FieldCategories
 import com.example.jobrec.Job
 import com.example.jobrec.Company
 import com.example.jobrec.utils.LocationUtils
-
 import kotlinx.coroutines.launch
 class PostJobActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
@@ -309,6 +308,8 @@ class PostJobActivity : AppCompatActivity() {
                             status = "active"
                         )
 
+
+
                         Toast.makeText(this, "Job posted successfully", Toast.LENGTH_SHORT).show()
                         finish()
                     }
@@ -324,6 +325,8 @@ class PostJobActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error posting job: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             onBackPressed()

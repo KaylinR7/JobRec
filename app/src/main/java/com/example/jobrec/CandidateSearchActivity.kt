@@ -263,28 +263,6 @@ class CandidateSearchActivity : AppCompatActivity() {
         }
     }
     private fun showCandidateProfileDialog(candidate: User) {
-        // Send profile view notification
-        lifecycleScope.launch {
-            try {
-                // Get company name from current user
-                val currentUser = auth.currentUser
-                if (currentUser != null) {
-                    db.collection("companies")
-                        .whereEqualTo("userId", currentUser.uid)
-                        .get()
-                        .addOnSuccessListener { documents ->
-                            if (!documents.isEmpty) {
-                                val companyDoc = documents.documents[0]
-                                val companyName = companyDoc.getString("companyName") ?: "Unknown Company"
-
-
-                            }
-                        }
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("CandidateSearch", "Error getting company info for notification", e)
-            }
-        }
 
         val view = createCandidateProfileView(candidate)
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this)

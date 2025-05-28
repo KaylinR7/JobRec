@@ -14,10 +14,14 @@ class CareerWorxApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+
+        // Initialize Firestore
         val settings = FirebaseFirestoreSettings.Builder()
             .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
             .build()
         FirebaseFirestore.getInstance().firestoreSettings = settings
+
+        // Create Firestore indexes
         try {
             Log.d(TAG, "Creating Firestore indexes...")
             FirestoreIndexManager.createIndexes()
@@ -25,5 +29,9 @@ class CareerWorxApp : Application() {
         } catch (e: Exception) {
             Log.e(TAG, "Error creating Firestore indexes", e)
         }
+
+
     }
+
+
 }
