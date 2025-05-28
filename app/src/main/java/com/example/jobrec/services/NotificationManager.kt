@@ -255,7 +255,7 @@ class NotificationManager {
                 val dataObject = if (jsonObject.has("data")) jsonObject.getJSONObject("data") else JSONObject()
                 val notificationObject = if (jsonObject.has("notification")) jsonObject.getJSONObject("notification") else JSONObject()
 
-                val title = if (notificationObject.has("title")) notificationObject.getString("title") else "CareerWorx"
+                val title = if (notificationObject.has("title")) notificationObject.getString("title") else "JobRec"
                 val body = if (notificationObject.has("body")) notificationObject.getString("body") else "New notification"
                 val type = if (dataObject.has("type")) dataObject.getString("type") else "general"
 

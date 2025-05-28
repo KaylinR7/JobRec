@@ -3,7 +3,7 @@ package com.example.jobrec.utils
 import android.content.Context
 import android.util.Log
 import com.example.jobrec.services.NotificationManager
-import com.example.jobrec.models.Job
+import com.example.jobrec.Job
 import com.example.jobrec.models.Message
 import com.example.jobrec.models.Conversation
 import com.google.firebase.Timestamp
