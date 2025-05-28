@@ -18,6 +18,7 @@ data class User(
     val languages: List<Language> = emptyList(),
     val references: List<Reference> = emptyList(),
     val profileImageUrl: String? = null,
+    val profileImageBase64: String? = null,
     val role: String = "user",
     val achievements: String = "",
     val linkedin: String = "",
@@ -46,6 +47,7 @@ data class User(
         parcel.createTypedArrayList(Experience.CREATOR) ?: emptyList(),
         parcel.createTypedArrayList(Language.CREATOR) ?: emptyList(),
         parcel.createTypedArrayList(Reference.CREATOR) ?: emptyList(),
+        parcel.readString(),
         parcel.readString(),
         parcel.readString() ?: "",
         parcel.readString() ?: "",
@@ -76,6 +78,7 @@ data class User(
         parcel.writeTypedList(languages)
         parcel.writeTypedList(references)
         parcel.writeString(profileImageUrl)
+        parcel.writeString(profileImageBase64)
         parcel.writeString(role)
         parcel.writeString(achievements)
         parcel.writeString(linkedin)

@@ -29,6 +29,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.Timestamp
+import com.example.jobrec.utils.ImageUtils
+import de.hdodenhof.circleimageview.CircleImageView
 import java.util.Date
 import java.util.concurrent.TimeUnit
 class CandidateSearchActivity : AppCompatActivity() {
@@ -272,6 +274,16 @@ class CandidateSearchActivity : AppCompatActivity() {
     }
     private fun createCandidateProfileView(candidate: User): View {
         val view = layoutInflater.inflate(R.layout.dialog_candidate_profile, null)
+
+        // Load profile image
+        val profileImage = view.findViewById<CircleImageView>(R.id.profileImage)
+        ImageUtils.loadProfileImage(
+            context = this,
+            imageView = profileImage,
+            user = candidate,
+            isCircular = true
+        )
+
         val nameText = view.findViewById<TextView>(R.id.nameText)
         nameText.text = "${candidate.name} ${candidate.surname}"
         val emailText = view.findViewById<TextView>(R.id.emailText)

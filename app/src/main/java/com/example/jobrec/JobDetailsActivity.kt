@@ -19,6 +19,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.util.UUID
 import java.util.Date
+import android.util.Base64
+import java.io.InputStream
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
@@ -41,7 +43,14 @@ class JobDetailsActivity : AppCompatActivity() {
     private var isJobSaved = false
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
-    private val storage = FirebaseStorage.getInstance()
+    private val storage: FirebaseStorage by lazy {
+        try {
+            FirebaseStorage.getInstance("gs://careerworx-f5bc6.firebasestorage.app")
+        } catch (e: Exception) {
+            Log.e("JobDetailsActivity", "Error initializing Firebase Storage with custom bucket, using default", e)
+            FirebaseStorage.getInstance()
+        }
+    }
     private var jobId: String? = null
     private var companyId: String? = null
     private var currentCvUrl: String? = null
@@ -281,9 +290,24 @@ class JobDetailsActivity : AppCompatActivity() {
                 }
                 .addOnFailureListener { e ->
                     Log.e("JobDetailsActivity", "Failed to upload CV file", e)
-                    Toast.makeText(this, "Error uploading CV: ${e.message}", Toast.LENGTH_SHORT).show()
-                    applyButton.isEnabled = true
-                    applyButton.text = "Apply Now"
+                    when {
+                        e.message?.contains("Object does not exist") == true ||
+                        e.message?.contains("404") == true ||
+                        e.message?.contains("bucket") == true -> {
+                            Log.e("JobDetailsActivity", "Storage bucket not available - using Firestore fallback")
+                            uploadCvToFirestore(uri)
+                        }
+                        e.message?.contains("403") == true -> {
+                            Log.e("JobDetailsActivity", "Permission denied - check storage rules")
+                            Toast.makeText(this, "Permission denied. Please check storage permissions.", Toast.LENGTH_LONG).show()
+                            applyButton.isEnabled = true
+                            applyButton.text = "Apply Now"
+                        }
+                        else -> {
+                            Log.e("JobDetailsActivity", "Storage upload failed, trying Firestore fallback")
+                            uploadCvToFirestore(uri)
+                        }
+                    }
                 }
         } catch (e: Exception) {
             Log.e("JobDetailsActivity", "Exception during CV upload setup", e)
@@ -366,9 +390,9 @@ class JobDetailsActivity : AppCompatActivity() {
                                 "applicantEducation" to user.education,
                                 "applicantExperience" to user.experience,
                                 "companyId" to companyId,
-                                "companyName" to companyName.text.toString(), 
+                                "companyName" to companyName.text.toString(),
                                 "timestamp" to com.google.firebase.Timestamp.now(),
-                                "applieddate" to com.google.firebase.Timestamp.now(), 
+                                "applieddate" to com.google.firebase.Timestamp.now(),
                                 "status" to "pending",
                                 "resumeUrl" to cvUrl,
                                 "coverLetter" to coverLetter
@@ -633,6 +657,67 @@ class JobDetailsActivity : AppCompatActivity() {
                     Log.e("JobDetailsActivity", "Error saving job", e)
                     Toast.makeText(this, "Error saving job", Toast.LENGTH_SHORT).show()
                 }
+        }
+    }
+
+    private fun uploadCvToFirestore(uri: Uri) {
+        val userId = auth.currentUser?.uid ?: return
+
+        try {
+            Toast.makeText(this, "Processing CV for upload...", Toast.LENGTH_SHORT).show()
+
+            // Read the PDF file and convert to base64
+            val inputStream: InputStream? = contentResolver.openInputStream(uri)
+            val bytes = inputStream?.readBytes()
+            inputStream?.close()
+
+            if (bytes == null) {
+                Toast.makeText(this, "Error: Could not read CV file", Toast.LENGTH_SHORT).show()
+                applyButton.isEnabled = true
+                applyButton.text = "Apply Now"
+                return
+            }
+
+            // Check file size (limit to 5MB for Firestore)
+            if (bytes.size > 5 * 1024 * 1024) {
+                Toast.makeText(this, "Error: CV file is too large (max 5MB)", Toast.LENGTH_LONG).show()
+                applyButton.isEnabled = true
+                applyButton.text = "Apply Now"
+                return
+            }
+
+            val base64String = Base64.encodeToString(bytes, Base64.DEFAULT)
+
+            Log.d("JobDetailsActivity", "CV converted to base64, size: ${base64String.length} characters")
+
+            // Store in Firestore
+            val cvRef = db.collection("cvs").document()
+            val cvData = hashMapOf(
+                "userId" to userId,
+                "cvBase64" to base64String,
+                "fileName" to "CV_${userId}_${System.currentTimeMillis()}.pdf",
+                "uploadedAt" to com.google.firebase.Timestamp.now(),
+                "fileSize" to bytes.size
+            )
+
+            cvRef.set(cvData)
+                .addOnSuccessListener {
+                    Log.d("JobDetailsActivity", "CV stored in Firestore successfully")
+                    currentCvUrl = cvRef.id // Use document ID as reference
+                    showCoverLetterDialog()
+                }
+                .addOnFailureListener { e ->
+                    Log.e("JobDetailsActivity", "Error storing CV in Firestore", e)
+                    Toast.makeText(this, "Error saving CV: ${e.message}", Toast.LENGTH_SHORT).show()
+                    applyButton.isEnabled = true
+                    applyButton.text = "Apply Now"
+                }
+
+        } catch (e: Exception) {
+            Log.e("JobDetailsActivity", "Error processing CV for Firestore upload", e)
+            Toast.makeText(this, "Error processing CV: ${e.message}", Toast.LENGTH_SHORT).show()
+            applyButton.isEnabled = true
+            applyButton.text = "Apply Now"
         }
     }
 }

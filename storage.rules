@@ -1,11 +1,29 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // Rules for CV uploads
     match /cvs/{cvFileName} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null 
+      allow write: if request.auth != null
                   && request.resource.size < 5 * 1024 * 1024  // 5MB limit
                   && request.resource.contentType.matches('application/pdf');
     }
+
+    // Rules for profile image uploads
+    match /profile_images/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                  && request.auth.uid == userId
+                  && request.resource.size < 2 * 1024 * 1024  // 2MB limit for images
+                  && request.resource.contentType.matches('image/.*');
+    }
+
+    // Rules for company logo uploads
+    match /company_logos/{companyId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                  && request.resource.size < 2 * 1024 * 1024  // 2MB limit for images
+                  && request.resource.contentType.matches('image/.*');
+    }
   }
-} 
+}

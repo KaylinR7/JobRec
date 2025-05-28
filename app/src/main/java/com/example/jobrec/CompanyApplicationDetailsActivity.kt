@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.jobrec.adapters.CertificateBadgeAdapter
 import com.example.jobrec.adapters.CertificateBadge
 import com.google.firebase.firestore.FirebaseFirestore
+import com.example.jobrec.utils.PdfUtils
 import java.text.SimpleDateFormat
 import java.util.Locale
 class CompanyApplicationDetailsActivity : AppCompatActivity() {
@@ -138,41 +139,10 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
             showApplicantProfile(applicantId!!)
             return
         }
-        if (cvId.startsWith("http")) {
-            openResume(cvId)
-            return
-        }
-        android.util.Log.d("CompanyApplicationDetails", "Loading CV with ID: $cvId")
-        db.collection("cvs")
-            .document(cvId)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    val cvContent = document.getString("content")
-                    if (!cvContent.isNullOrEmpty()) {
-                        showCvContent(cvContent)
-                    } else {
-                        android.util.Log.e("CompanyApplicationDetails", "CV document exists but has no content")
-                        Toast.makeText(this, "No resume content available", Toast.LENGTH_SHORT).show()
-                        if (!applicantId.isNullOrEmpty()) {
-                            showApplicantProfile(applicantId!!)
-                        }
-                    }
-                } else {
-                    android.util.Log.e("CompanyApplicationDetails", "CV document does not exist: $cvId")
-                    Toast.makeText(this, "Resume not found", Toast.LENGTH_SHORT).show()
-                    if (!applicantId.isNullOrEmpty()) {
-                        showApplicantProfile(applicantId!!)
-                    }
-                }
-            }
-            .addOnFailureListener { e ->
-                android.util.Log.e("CompanyApplicationDetails", "Error loading CV: ${e.message}", e)
-                Toast.makeText(this, "Error loading resume: ${e.message}", Toast.LENGTH_SHORT).show()
-                if (!applicantId.isNullOrEmpty()) {
-                    showApplicantProfile(applicantId!!)
-                }
-            }
+
+        // Use PdfUtils to handle both URL and document ID cases
+        android.util.Log.d("CompanyApplicationDetails", "Loading CV with reference: $cvId")
+        PdfUtils.openCvOrResume(this, cvId, "Resume")
     }
     private fun showCvContent(content: String) {
         val intent = Intent(this, ViewCvActivity::class.java).apply {
@@ -368,43 +338,31 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
             }
             .show()
     }
+    private fun openPdfViewer(pdfUrl: String?, pdfId: String?) {
+        android.util.Log.d("CompanyApplicationDetails", "Opening PDF viewer - URL: $pdfUrl, ID: $pdfId")
+
+        val intent = Intent(this, PdfViewerActivity::class.java).apply {
+            if (!pdfUrl.isNullOrEmpty()) {
+                putExtra(PdfViewerActivity.EXTRA_PDF_URL, pdfUrl)
+            }
+            if (!pdfId.isNullOrEmpty()) {
+                putExtra(PdfViewerActivity.EXTRA_PDF_ID, pdfId)
+            }
+            putExtra(PdfViewerActivity.EXTRA_TITLE, "Resume")
+        }
+        startActivity(intent)
+    }
+
     private fun openResume(url: String) {
         if (!applicantId.isNullOrEmpty()) {
             android.util.Log.d("CompanyApplicationDetails", "Using applicant profile instead of resume URL")
             showApplicantProfile(applicantId!!)
             return
         }
+
+        // Use PdfUtils for better PDF handling
         android.util.Log.d("CompanyApplicationDetails", "Opening resume URL: $url")
-        if (!url.startsWith("http")) {
-            android.util.Log.e("CompanyApplicationDetails", "Invalid resume URL format: $url")
-            Toast.makeText(this, "Invalid resume URL format", Toast.LENGTH_SHORT).show()
-            return
-        }
-        try {
-            val uri = Uri.parse(url)
-            android.util.Log.d("CompanyApplicationDetails", "Opening PDF with URI: $uri")
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(uri, "application/pdf")
-                flags = Intent.FLAG_ACTIVITY_NO_HISTORY
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent)
-            } else {
-                android.util.Log.e("CompanyApplicationDetails", "No PDF viewer app found")
-                Toast.makeText(this, "No PDF viewer app found. Please install a PDF viewer.", Toast.LENGTH_LONG).show()
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("CompanyApplicationDetails", "Error opening PDF: ${e.message}", e)
-            Toast.makeText(this, "Error opening PDF: ${e.message}", Toast.LENGTH_LONG).show()
-            try {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                startActivity(browserIntent)
-            } catch (e2: Exception) {
-                android.util.Log.e("CompanyApplicationDetails", "Error opening in browser: ${e2.message}", e2)
-                Toast.makeText(this, "Could not open the resume. Please check if the URL is valid.", Toast.LENGTH_LONG).show()
-            }
-        }
+        PdfUtils.openPdfFromUrl(this, url, "Resume")
     }
     private fun loadApplicationDetails() {
         applicationId?.let { id ->

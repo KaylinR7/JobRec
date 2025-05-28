@@ -1,17 +1,24 @@
 package com.example.jobrec
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Base64
 import android.util.Log
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import android.widget.LinearLayout
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -42,6 +49,7 @@ import com.example.jobrec.models.FieldCategories
 import com.example.jobrec.adapters.CertificateAdapter
 import com.example.jobrec.adapters.CertificateBadgeAdapter
 import com.example.jobrec.adapters.CertificateBadge
+import com.example.jobrec.utils.ImageUtils
 class ProfileActivity : AppCompatActivity() {
     private lateinit var toolbar: MaterialToolbar
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
@@ -84,10 +92,28 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var getSuggestionsButton: MaterialButton
     private val TAG = "ProfileActivity"
     private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.data?.let { uri ->
-                uploadImage(uri)
+        try {
+            when (result.resultCode) {
+                Activity.RESULT_OK -> {
+                    result.data?.data?.let { uri ->
+                        Log.d(TAG, "Image selected successfully: $uri")
+                        uploadImage(uri)
+                    } ?: run {
+                        Log.e(TAG, "No image data received")
+                        Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                Activity.RESULT_CANCELED -> {
+                    Log.d(TAG, "Image selection cancelled by user")
+                }
+                else -> {
+                    Log.e(TAG, "Image selection failed with result code: ${result.resultCode}")
+                    Toast.makeText(this, "Failed to select image", Toast.LENGTH_SHORT).show()
+                }
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error handling image selection result", e)
+            Toast.makeText(this, "Error processing selected image: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
     private val requestPermissionLauncher = registerForActivityResult(
@@ -111,7 +137,17 @@ class ProfileActivity : AppCompatActivity() {
         }
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
-        storage = FirebaseStorage.getInstance()
+
+        // Initialize Firebase Storage with explicit bucket configuration
+        try {
+            storage = FirebaseStorage.getInstance("gs://careerworx-f5bc6.firebasestorage.app")
+            Log.d(TAG, "Firebase Storage initialized with bucket: ${storage.reference.bucket}")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing Firebase Storage with custom bucket, using default", e)
+            storage = FirebaseStorage.getInstance()
+        }
+
+        Log.d(TAG, "Current user: ${auth.currentUser?.uid}")
         initializeViews()
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -187,7 +223,12 @@ class ProfileActivity : AppCompatActivity() {
         )
 
         changePhotoButton.setOnClickListener {
-            checkPermissionAndPickImage()
+            // Hide keyboard and clear focus to prevent IME conflicts
+            hideKeyboard()
+            // Add a small delay to ensure keyboard is hidden before opening picker
+            changePhotoButton.postDelayed({
+                checkPermissionAndPickImage()
+            }, 150)
         }
         saveButton.setOnClickListener {
             saveProfile()
@@ -494,17 +535,17 @@ class ProfileActivity : AppCompatActivity() {
                         }
                         updateCertificateBadges()
 
+                        // Load profile image using ImageUtils
                         val imageUrl = document.getString("profileImageUrl")
-                        if (!imageUrl.isNullOrEmpty()) {
-                            Glide.with(this)
-                                .load(imageUrl)
-                                .transform(CircleCrop())
-                                .placeholder(R.drawable.ic_person)
-                                .error(R.drawable.ic_person)
-                                .into(profileImage)
-                        } else {
-                            profileImage.setImageResource(R.drawable.ic_person)
-                        }
+                        val imageBase64 = document.getString("profileImageBase64")
+
+                        ImageUtils.loadProfileImage(
+                            context = this,
+                            imageView = profileImage,
+                            imageUrl = imageUrl,
+                            imageBase64 = imageBase64,
+                            isCircular = true
+                        )
                     } else {
                         Log.d(TAG, "No such document")
                     }
@@ -612,39 +653,216 @@ class ProfileActivity : AppCompatActivity() {
             }
             .show()
     }
+    private fun hideKeyboard() {
+        try {
+            currentFocus?.let { view ->
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(view.windowToken, 0)
+                view.clearFocus()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error hiding keyboard", e)
+        }
+    }
+
     private fun openImagePicker() {
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        getContent.launch(intent)
+        try {
+            // Ensure keyboard is hidden before opening image picker
+            hideKeyboard()
+            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
+                type = "image/*"
+                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/jpeg", "image/png", "image/jpg"))
+            }
+            getContent.launch(intent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error opening image picker", e)
+            Toast.makeText(this, "Error opening image picker: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
     private fun uploadImage(imageUri: Uri) {
-        val userId = auth.currentUser?.uid ?: return
-        val storageRef = storage.reference.child("profile_images/$userId.jpg")
-        Toast.makeText(this, "Uploading profile picture...", Toast.LENGTH_SHORT).show()
-        storageRef.putFile(imageUri)
-            .addOnSuccessListener {
-                storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                    db.collection("users").document(userId)
-                        .update("profileImageUrl", downloadUri.toString())
-                        .addOnSuccessListener {
-                            Glide.with(this)
-                                .load(downloadUri)
-                                .transform(CircleCrop())
-                                .placeholder(R.drawable.ic_person)
-                                .error(R.drawable.ic_person)
-                                .into(profileImage)
-                            Toast.makeText(this, "Profile picture updated successfully", Toast.LENGTH_SHORT).show()
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e(TAG, "Error updating profile image URL in Firestore", e)
-                            Toast.makeText(this, "Error saving profile picture URL", Toast.LENGTH_SHORT).show()
-                        }
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            Log.e(TAG, "Cannot upload image: User ID is null")
+            Toast.makeText(this, "Error: User not authenticated", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        try {
+            // Use the correct path format that matches our storage rules
+            val fileName = "$userId.jpg"
+            val storageRef = storage.reference.child("profile_images/$fileName")
+
+            Log.d(TAG, "Uploading image to path: profile_images/$fileName")
+            Log.d(TAG, "Storage bucket: ${storage.reference.bucket}")
+            Log.d(TAG, "User ID: $userId")
+
+            Toast.makeText(this, "Uploading profile picture...", Toast.LENGTH_SHORT).show()
+
+            storageRef.putFile(imageUri)
+                .addOnProgressListener { taskSnapshot ->
+                    val progress = (100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount)
+                    Log.d(TAG, "Upload progress: $progress%")
                 }
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error uploading image", e)
-                Toast.makeText(this, "Error uploading image", Toast.LENGTH_SHORT).show()
-            }
+                .addOnSuccessListener { taskSnapshot ->
+                    Log.d(TAG, "Image uploaded successfully to Firebase Storage")
+                    storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                        Log.d(TAG, "Download URL obtained: $downloadUri")
+                        db.collection("users").document(userId)
+                            .update("profileImageUrl", downloadUri.toString())
+                            .addOnSuccessListener {
+                                Log.d(TAG, "Profile image URL updated in Firestore")
+                                Glide.with(this)
+                                    .load(downloadUri)
+                                    .transform(CircleCrop())
+                                    .placeholder(R.drawable.ic_person)
+                                    .error(R.drawable.ic_person)
+                                    .into(profileImage)
+                                Toast.makeText(this, "Profile picture updated successfully", Toast.LENGTH_SHORT).show()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e(TAG, "Error updating profile image URL in Firestore", e)
+                                Toast.makeText(this, "Error saving profile picture URL: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    }.addOnFailureListener { e ->
+                        Log.e(TAG, "Error getting download URL", e)
+                        Toast.makeText(this, "Error getting download URL: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Error uploading image to Firebase Storage", e)
+                    when {
+                        e.message?.contains("Object does not exist") == true ||
+                        e.message?.contains("404") == true ||
+                        e.message?.contains("bucket") == true -> {
+                            Log.e(TAG, "Storage bucket not available - using Firestore fallback")
+                            // Use Firestore as fallback for image storage
+                            uploadImageToFirestore(imageUri)
+                        }
+                        e.message?.contains("403") == true -> {
+                            Log.e(TAG, "Permission denied - check storage rules")
+                            Toast.makeText(this, "Permission denied. Please check storage permissions.", Toast.LENGTH_LONG).show()
+                        }
+                        else -> {
+                            Log.e(TAG, "Storage upload failed, trying Firestore fallback")
+                            uploadImageToFirestore(imageUri)
+                        }
+                    }
+                }
+        } catch (e: Exception) {
+            Log.e(TAG, "Unexpected error during image upload", e)
+            Toast.makeText(this, "Unexpected error: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
+
+    private fun uploadImageToFirestore(imageUri: Uri) {
+        val userId = auth.currentUser?.uid ?: return
+
+        try {
+            Toast.makeText(this, "Processing image for upload...", Toast.LENGTH_SHORT).show()
+
+            // Convert image to base64 and store in Firestore
+            val inputStream: InputStream? = contentResolver.openInputStream(imageUri)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+
+            if (bitmap == null) {
+                Toast.makeText(this, "Error: Could not process image", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            // Resize image to reduce size (max 512x512)
+            val resizedBitmap = resizeBitmap(bitmap, 512, 512)
+
+            // Convert to base64
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
+            val byteArray = byteArrayOutputStream.toByteArray()
+            val base64String = Base64.encodeToString(byteArray, Base64.DEFAULT)
+
+            Log.d(TAG, "Image converted to base64, size: ${base64String.length} characters")
+
+            // Store in Firestore
+            db.collection("users").document(userId)
+                .update("profileImageBase64", base64String)
+                .addOnSuccessListener {
+                    Log.d(TAG, "Profile image stored in Firestore successfully")
+                    // Load the image into the ImageView
+                    profileImage.setImageBitmap(resizedBitmap)
+                    Toast.makeText(this, "Profile picture updated successfully", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Error storing image in Firestore", e)
+                    Toast.makeText(this, "Error saving profile picture: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing image for Firestore upload", e)
+            Toast.makeText(this, "Error processing image: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun resizeBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+        val width = bitmap.width
+        val height = bitmap.height
+
+        val aspectRatio = width.toFloat() / height.toFloat()
+
+        val newWidth: Int
+        val newHeight: Int
+
+        if (width > height) {
+            newWidth = maxWidth
+            newHeight = (maxWidth / aspectRatio).toInt()
+        } else {
+            newHeight = maxHeight
+            newWidth = (maxHeight * aspectRatio).toInt()
+        }
+
+        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+    }
+
+    private fun retryUploadWithDifferentStorage(imageUri: Uri) {
+        val userId = auth.currentUser?.uid ?: return
+
+        try {
+            // Try with default Firebase Storage instance
+            val defaultStorage = FirebaseStorage.getInstance()
+            val fileName = "$userId.jpg"
+            val storageRef = defaultStorage.reference.child("profile_images/$fileName")
+
+            Log.d(TAG, "Retrying upload with default storage instance")
+            Toast.makeText(this, "Retrying upload...", Toast.LENGTH_SHORT).show()
+
+            storageRef.putFile(imageUri)
+                .addOnSuccessListener { taskSnapshot ->
+                    Log.d(TAG, "Retry upload successful")
+                    storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                        db.collection("users").document(userId)
+                            .update("profileImageUrl", downloadUri.toString())
+                            .addOnSuccessListener {
+                                Glide.with(this)
+                                    .load(downloadUri)
+                                    .transform(CircleCrop())
+                                    .placeholder(R.drawable.ic_person)
+                                    .error(R.drawable.ic_person)
+                                    .into(profileImage)
+                                Toast.makeText(this, "Profile picture updated successfully", Toast.LENGTH_SHORT).show()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e(TAG, "Error updating profile image URL in Firestore on retry", e)
+                                Toast.makeText(this, "Error saving profile picture URL: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Retry upload also failed", e)
+                    Toast.makeText(this, "Upload failed. Firebase Storage may not be configured properly.", Toast.LENGTH_LONG).show()
+                }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during retry upload", e)
+            Toast.makeText(this, "Retry failed: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true

@@ -10,6 +10,7 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.button.MaterialButton
 import com.bumptech.glide.Glide
 import com.google.firebase.Timestamp
+import com.example.jobrec.utils.ImageUtils
 import java.util.Date
 import java.util.concurrent.TimeUnit
 class CandidateSearchAdapter(
@@ -38,27 +39,29 @@ class CandidateSearchAdapter(
             val startDate = try {
                 Date(experience.startDate.toLong())
             } catch (e: NumberFormatException) {
-                Date() 
+                Date()
             }
             val endDate = try {
                 if (experience.endDate.isNotEmpty()) {
                     Date(experience.endDate.toLong())
                 } else {
-                    Date() 
+                    Date()
                 }
             } catch (e: NumberFormatException) {
-                Date() 
+                Date()
             }
             val diffInMillis = endDate.time - startDate.time
             return TimeUnit.MILLISECONDS.toDays(diffInMillis) / 365
         }
         fun bind(candidate: User) {
-            if (!candidate.profileImageUrl.isNullOrEmpty()) {
-                Glide.with(itemView.context)
-                    .load(candidate.profileImageUrl)
-                    .placeholder(R.drawable.ic_person)
-                    .into(profileImage)
-            }
+            // Load profile image using ImageUtils (handles both URL and base64)
+            ImageUtils.loadProfileImage(
+                context = itemView.context,
+                imageView = profileImage,
+                user = candidate,
+                isCircular = true
+            )
+
             nameText.text = "${candidate.name} ${candidate.surname}"
             val highestEducation = candidate.education.maxByOrNull { it.degree }?.degree ?: "No education specified"
             educationText.text = highestEducation

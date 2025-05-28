@@ -9,6 +9,7 @@ import androidx.fragment.app.DialogFragment
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.example.jobrec.utils.PdfUtils
 import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.util.*
@@ -91,6 +92,10 @@ class UserApplicationDetailsDialog : DialogFragment() {
             Toast.makeText(context, "No CV available", Toast.LENGTH_SHORT).show()
             return
         }
-        Toast.makeText(context, "Downloading CV...", Toast.LENGTH_SHORT).show()
+
+        // Use PdfUtils to open the CV
+        context?.let { ctx ->
+            PdfUtils.openCvOrResume(ctx, application.cvUrl, "CV - ${application.jobTitle}")
+        }
     }
 }

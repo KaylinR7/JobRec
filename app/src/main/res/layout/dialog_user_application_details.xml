@@ -54,9 +54,9 @@
             android:id="@+id/downloadCvButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Download CV"
-            app:icon="@drawable/ic_download"/>
+            android:text="View CV"
+            app:icon="@drawable/ic_list"/>
 
     </LinearLayout>
 
-</androidx.core.widget.NestedScrollView> 
+</androidx.core.widget.NestedScrollView>

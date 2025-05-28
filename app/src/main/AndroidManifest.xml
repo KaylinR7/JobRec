@@ -3,13 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.jobrec">
 
-    
+
     <uses-permission android:name="android.permission.INTERNET" />
-    
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    
+
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Required for Android 13+ (API 33+) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
@@ -29,7 +31,7 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        
+
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -40,7 +42,7 @@
             </intent-filter>
         </activity>
 
-        
+
         <activity
             android:name=".LoginActivity"
             android:exported="true"
@@ -92,7 +94,7 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        
+
         <activity
             android:name=".JobDetailsActivity"
             android:exported="false"
@@ -108,7 +110,7 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        
+
         <activity
             android:name=".HelpActivity"
             android:exported="false"
@@ -119,19 +121,19 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        
+
         <activity
             android:name=".MyApplicationsActivity"
             android:exported="false"
             android:parentActivityName=".HomeActivity" />
 
-        
+
         <activity
             android:name=".ApplicationsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        
+
         <activity
             android:name=".CVDetailsActivity"
             android:exported="false"
@@ -149,20 +151,20 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        
+
         <activity
             android:name=".JobAlertsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        
+
         <activity
             android:name=".SavedJobsActivity"
             android:exported="false"
             android:label="Saved Jobs"
             android:parentActivityName=".HomeActivity" />
 
-        
+
         <activity
             android:name=".StudentApplicationDetailsActivity"
             android:exported="false"
@@ -175,13 +177,19 @@
             android:label="Application Review"
             android:parentActivityName=".ApplicationsActivity" />
 
-        
+
         <activity
             android:name=".ViewCvActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        
+        <activity
+            android:name=".PdfViewerActivity"
+            android:exported="false"
+            android:label="PDF Viewer"
+            android:windowSoftInputMode="adjustResize" />
+
+
         <service
             android:name="com.google.firebase.components.ComponentDiscoveryService"
             android:exported="false">
@@ -199,7 +207,7 @@
                 android:value="com.google.firebase.components.ComponentRegistrar" />
         </service>
 
-        
+
         <service
             android:name=".services.FCMService"
             android:exported="false">
@@ -208,7 +216,7 @@
             </intent-filter>
         </service>
 
-        
+
         <receiver
             android:name=".notifications.NotificationReceiver"
             android:exported="false">
@@ -267,7 +275,7 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        
+
         <activity
             android:name=".ChatActivity"
             android:exported="false"
@@ -278,25 +286,36 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        
+
         <activity
             android:name=".chatbot.ChatbotActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        
+
         <activity
             android:name=".NotificationsActivity"
             android:exported="false"
             android:label="Notifications"
             android:parentActivityName=".HomeActivity" />
 
-        
+
         <activity
             android:name=".NotificationPreferencesActivity"
             android:exported="false"
             android:label="Notification Preferences"
             android:parentActivityName=".HomeActivity" />
+
+        <!-- FileProvider for sharing temporary PDF files -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 
