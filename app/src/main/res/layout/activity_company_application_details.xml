@@ -33,7 +33,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -64,7 +64,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -125,16 +125,18 @@
                         android:textAppearance="?attr/textAppearanceBody1" />
 
                     <Button
-                        android:id="@+id/viewResumeButton"
+                        android:id="@+id/viewProfileButton"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="View Resume" />
+                        android:layout_height="56dp"
+                        android:text="View Profile"
+                        android:textSize="16sp"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
-            
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -187,7 +189,7 @@
 
     </ScrollView>
 
-    
+
     <LinearLayout
         android:id="@+id/actionButtonsLayout"
         android:layout_width="match_parent"
@@ -196,7 +198,7 @@
         android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        
+
         <Button
             android:id="@+id/chatButton"
             android:layout_width="match_parent"
@@ -206,7 +208,7 @@
             android:backgroundTint="@color/primary"
             android:textColor="@android:color/white" />
 
-        
+
         <Button
             android:id="@+id/reviewCvButton"
             android:layout_width="match_parent"

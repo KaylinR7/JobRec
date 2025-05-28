@@ -165,16 +165,33 @@ class PdfViewerActivity : AppCompatActivity() {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
 
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent)
+            // Create chooser to show all available apps
+            val chooserIntent = Intent.createChooser(intent, "Open PDF with...")
+
+            if (chooserIntent.resolveActivity(packageManager) != null) {
+                startActivity(chooserIntent)
                 finish()
             } else {
-                Toast.makeText(this, "No PDF viewer app found. Please install a PDF viewer.", Toast.LENGTH_LONG).show()
-                finish()
+                // Fallback: try to open with any app that can handle the file
+                val fallbackIntent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(Uri.parse(url), "*/*")
+                    flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+
+                val fallbackChooser = Intent.createChooser(fallbackIntent, "Open file with...")
+
+                if (fallbackChooser.resolveActivity(packageManager) != null) {
+                    startActivity(fallbackChooser)
+                    finish()
+                } else {
+                    Toast.makeText(this, "No app found to open PDF. Please install a PDF viewer from the Play Store.", Toast.LENGTH_LONG).show()
+                    finish()
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error opening with external viewer", e)
-            Toast.makeText(this, "Error opening PDF", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Error opening PDF: ${e.message}", Toast.LENGTH_SHORT).show()
             finish()
         }
     }
@@ -193,12 +210,29 @@ class PdfViewerActivity : AppCompatActivity() {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
 
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent)
+            // Create chooser to show all available apps
+            val chooserIntent = Intent.createChooser(intent, "Open PDF with...")
+
+            if (chooserIntent.resolveActivity(packageManager) != null) {
+                startActivity(chooserIntent)
                 finish()
             } else {
-                Toast.makeText(this, "No PDF viewer app found. Please install a PDF viewer.", Toast.LENGTH_LONG).show()
-                finish()
+                // Fallback: try to open with any app that can handle the file
+                val fallbackIntent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, "*/*")
+                    flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+
+                val fallbackChooser = Intent.createChooser(fallbackIntent, "Open file with...")
+
+                if (fallbackChooser.resolveActivity(packageManager) != null) {
+                    startActivity(fallbackChooser)
+                    finish()
+                } else {
+                    Toast.makeText(this, "No app found to open PDF. Please install a PDF viewer from the Play Store.", Toast.LENGTH_LONG).show()
+                    finish()
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error opening temporary file with external viewer", e)
