@@ -277,18 +277,7 @@ class CandidateSearchActivity : AppCompatActivity() {
                                 val companyDoc = documents.documents[0]
                                 val companyName = companyDoc.getString("companyName") ?: "Unknown Company"
 
-                                lifecycleScope.launch {
-                                    try {
-                                        val notificationManager = com.example.jobrec.services.NotificationManager()
-                                        notificationManager.sendProfileViewNotification(
-                                            candidateId = candidate.id,
-                                            companyName = companyName
-                                        )
-                                        android.util.Log.d("CandidateSearch", "Profile view notification sent")
-                                    } catch (e: Exception) {
-                                        android.util.Log.e("CandidateSearch", "Error sending profile view notification", e)
-                                    }
-                                }
+
                             }
                         }
                 }

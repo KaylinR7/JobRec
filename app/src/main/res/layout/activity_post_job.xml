@@ -136,12 +136,12 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/provinceLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:hint="Province"
-                app:boxStrokeColor="?attr/colorPrimary"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+                app:boxStrokeColor="?attr/colorPrimary">
 
                 <AutoCompleteTextView
                     android:id="@+id/provinceInput"
@@ -152,21 +152,20 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/locationLayout"
+                android:id="@+id/jobCityLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="Specific Location (City/Town)"
-                app:boxStrokeColor="?attr/colorPrimary"
-                style="@style/Widget.CareerWorx.TextInputLayout">
+                android:layout_marginTop="8dp"
+                android:hint="City"
+                app:boxStrokeColor="?attr/colorPrimary">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/locationInput"
+                <AutoCompleteTextView
+                    android:id="@+id/cityInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text"
+                    android:inputType="none"
                     android:textColor="?android:attr/textColorPrimary"/>
 
             </com.google.android.material.textfield.TextInputLayout>

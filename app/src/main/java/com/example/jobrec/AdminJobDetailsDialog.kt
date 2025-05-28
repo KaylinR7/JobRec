@@ -50,7 +50,7 @@ class AdminJobDetailsDialog : DialogFragment() {
             val deleteButton = view.findViewById<MaterialButton>(R.id.deleteButton)
             titleTextView.text = job.title
             companyTextView.text = job.companyName
-            locationTextView.text = job.location
+            locationTextView.text = job.city
             typeTextView.text = job.type
             salaryTextView.text = job.salary
             descriptionTextView.text = job.description
@@ -84,4 +84,4 @@ class AdminJobDetailsDialog : DialogFragment() {
             )
         }
     }
-} 
+}

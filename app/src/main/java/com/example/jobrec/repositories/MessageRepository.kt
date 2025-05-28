@@ -2,7 +2,7 @@ package com.example.jobrec.repositories
 import com.example.jobrec.models.Conversation
 import com.example.jobrec.models.Message
 import com.example.jobrec.models.InterviewDetails
-import com.example.jobrec.services.NotificationManager
+
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
@@ -50,22 +50,7 @@ class MessageRepository {
                 )
                 .await()
             android.util.Log.d("MessageRepo", "Conversation updated successfully")
-            try {
-                val conversation = conversationDoc.toObject(Conversation::class.java)
-                if (conversation != null) {
-                    withContext(Dispatchers.IO) {
-                        try {
-                            val notificationManager = NotificationManager()
-                            notificationManager.sendNewMessageNotification(newMessage, conversation)
-                            android.util.Log.d("MessageRepo", "Message notification sent successfully")
-                        } catch (e: Exception) {
-                            android.util.Log.e("MessageRepo", "Error sending message notification", e)
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("MessageRepo", "Error preparing notification", e)
-            }
+
         }
         return messageId
     }

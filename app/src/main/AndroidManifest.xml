@@ -202,28 +202,7 @@
             <meta-data
                 android:name="com.google.firebase.components:com.google.firebase.storage.StorageRegistrar"
                 android:value="com.google.firebase.components.ComponentRegistrar" />
-            <meta-data
-                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingRegistrar"
-                android:value="com.google.firebase.components.ComponentRegistrar" />
         </service>
-
-
-        <service
-            android:name=".services.FCMService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
-
-        <receiver
-            android:name=".notifications.NotificationReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.example.jobrec.NOTIFICATION_CLICKED" />
-            </intent-filter>
-        </receiver>
 
         <activity
             android:name=".AdminLoginActivity"
@@ -293,18 +272,7 @@
             android:windowSoftInputMode="adjustResize" />
 
 
-        <activity
-            android:name=".NotificationsActivity"
-            android:exported="false"
-            android:label="Notifications"
-            android:parentActivityName=".HomeActivity" />
 
-
-        <activity
-            android:name=".NotificationPreferencesActivity"
-            android:exported="false"
-            android:label="Notification Preferences"
-            android:parentActivityName=".HomeActivity" />
 
         <!-- FileProvider for sharing temporary PDF files -->
         <provider

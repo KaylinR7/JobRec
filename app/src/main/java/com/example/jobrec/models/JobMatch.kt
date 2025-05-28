@@ -17,5 +17,10 @@ data class MatchCriteria(
     val experience: List<String>,
     val education: List<String>,
     val summary: String,
-    val location: String
+    val province: String,
+    val city: String,
+    val field: String,
+    val subField: String,
+    val yearsOfExperience: String,
+    val expectedSalary: String
 )

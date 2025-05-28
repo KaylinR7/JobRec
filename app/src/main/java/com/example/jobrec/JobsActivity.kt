@@ -87,7 +87,7 @@ class JobsActivity : AppCompatActivity() {
                     } catch (e: Exception) {
                         null
                     }
-                }.sortedByDescending { it.postedDate.toDate() } 
+                }.sortedByDescending { it.postedDate.toDate() }
                 jobsAdapter.submitList(allJobs)
             }
             .addOnFailureListener { e ->
@@ -111,7 +111,7 @@ class JobsActivity : AppCompatActivity() {
                     } catch (e: Exception) {
                         null
                     }
-                }.sortedByDescending { it.postedDate.toDate() } 
+                }.sortedByDescending { it.postedDate.toDate() }
                 val fieldFilteredJobs = if (selectedField.isNotEmpty()) {
                     allJobs.filter { job -> job.jobField.equals(selectedField, ignoreCase = true) }
                 } else {
@@ -121,7 +121,7 @@ class JobsActivity : AppCompatActivity() {
                     fieldFilteredJobs.filter { job ->
                         job.title.lowercase().contains(searchText) ||
                                 job.description.lowercase().contains(searchText) ||
-                                job.location.lowercase().contains(searchText) ||
+                                job.city.lowercase().contains(searchText) ||
                                 job.type.lowercase().contains(searchText)
                     }
                 } else {

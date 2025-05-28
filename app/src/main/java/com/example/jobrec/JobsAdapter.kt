@@ -39,7 +39,7 @@ class JobsAdapter(private val onJobClick: (Job) -> Unit) :
         fun bind(job: Job) {
             titleTextView.text = job.title
             companyTextView.text = job.companyName
-            locationTextView.text = job.location
+            locationTextView.text = job.city
             jobTypeTextView.text = job.type
             salaryTextView.text = job.salary
 

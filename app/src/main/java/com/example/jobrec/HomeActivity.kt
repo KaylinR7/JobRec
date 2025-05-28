@@ -9,6 +9,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
@@ -20,7 +21,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.jobrec.ai.JobMatchingRepository
 import com.example.jobrec.chatbot.ChatbotHelper
 import com.example.jobrec.databinding.ActivityHomeBinding
-import com.example.jobrec.utils.NotificationHelper
 import kotlinx.coroutines.launch
 class HomeActivity : AppCompatActivity() {
     companion object {
@@ -32,7 +32,7 @@ class HomeActivity : AppCompatActivity() {
     private var userId: String? = null
     private lateinit var recentJobsAdapter: RecentJobsAdapter
     private lateinit var recommendedJobsAdapter: JobsAdapter
-    private lateinit var notificationHelper: NotificationHelper
+
     private lateinit var jobMatchingRepository: JobMatchingRepository
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,8 +41,8 @@ class HomeActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         userId = auth.currentUser?.uid
-        notificationHelper = NotificationHelper(this)
-        notificationHelper.createNotificationChannel()
+
+
         jobMatchingRepository = JobMatchingRepository()
         initializeViews()
         setupClickListeners()
@@ -277,12 +277,12 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val allJobsWithMatches = jobMatchingRepository.getJobsWithMatches(100) // Get more jobs to filter from
-                // Filter for recommended jobs (50%+ match with much improved algorithm)
+                // Filter for recommended jobs (70%+ match with stricter algorithm)
                 val highMatchJobs = allJobsWithMatches.filter { job ->
-                    job.matchPercentage >= 50
+                    job.matchPercentage >= 70
                 }.take(10) // Limit to 10 high-match jobs
 
-                Log.d(TAG, "Successfully loaded ${highMatchJobs.size} recommended jobs (50%+ match) from ${allJobsWithMatches.size} total jobs")
+                Log.d(TAG, "Successfully loaded ${highMatchJobs.size} recommended jobs (70%+ match) from ${allJobsWithMatches.size} total jobs")
                 recommendedJobsAdapter.submitList(highMatchJobs)
 
                 // Update subtitle based on results
@@ -290,7 +290,7 @@ class HomeActivity : AppCompatActivity() {
 
                 // If no high-match jobs found, show empty state message
                 if (highMatchJobs.isEmpty()) {
-                    Log.d(TAG, "No high-match jobs (75%+) found")
+                    Log.d(TAG, "No high-match jobs (70%+) found")
                     updateRecommendedJobsSubtitle(0, true)
                 }
             } catch (e: Exception) {
@@ -339,7 +339,7 @@ class HomeActivity : AppCompatActivity() {
         val subtitle = when {
             jobCount == 0 && isHighMatch -> "No matching jobs found at the moment"
             jobCount == 0 -> "No recommendations available at the moment"
-            isHighMatch -> "Recommended jobs (50%+ compatibility) • $jobCount found"
+            isHighMatch -> "Recommended jobs (70%+ compatibility) • $jobCount found"
             else -> "Recent job postings • $jobCount available"
         }
         binding.recommendedJobsSubtitle.text = subtitle
@@ -357,16 +357,12 @@ class HomeActivity : AppCompatActivity() {
     private fun showError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
-    override fun onResume() {
-        super.onResume()
-        notificationHelper.startJobNotificationsListener()
-    }
-    override fun onPause() {
-        super.onPause()
-        notificationHelper.stopJobNotificationsListener()
-    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
+
+
+
         return true
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -375,10 +371,7 @@ class HomeActivity : AppCompatActivity() {
                 startActivity(Intent(this, MyApplicationsActivity::class.java))
                 true
             }
-            R.id.action_notifications -> {
-                startActivity(Intent(this, NotificationsActivity::class.java))
-                true
-            }
+
             R.id.action_saved_jobs -> {
                 startActivity(Intent(this, SavedJobsActivity::class.java))
                 true
@@ -395,7 +388,18 @@ class HomeActivity : AppCompatActivity() {
                 logout()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
+
+
+
+
+
+
+
+
+
+
 }

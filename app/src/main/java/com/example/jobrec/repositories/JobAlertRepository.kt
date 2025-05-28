@@ -1,6 +1,6 @@
 package com.example.jobrec.repositories
 import com.example.jobrec.models.JobAlert
-import com.example.jobrec.models.NotificationPreference
+
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -41,21 +41,7 @@ class JobAlertRepository {
             .await()
             .toObjects(JobAlert::class.java)
     }
-    suspend fun updateNotificationPreference(preference: NotificationPreference) {
-        val userId = auth.currentUser?.uid ?: throw Exception("User not authenticated")
-        db.collection("notificationPreferences")
-            .document(userId)
-            .set(preference)
-            .await()
-    }
-    suspend fun getNotificationPreference(): NotificationPreference? {
-        val userId = auth.currentUser?.uid ?: throw Exception("User not authenticated")
-        return db.collection("notificationPreferences")
-            .document(userId)
-            .get()
-            .await()
-            .toObject(NotificationPreference::class.java)
-    }
+
     suspend fun checkForNewJobs(jobAlert: JobAlert): List<String> {
         val allJobs = db.collection("jobs")
             .whereEqualTo("isActive", true)

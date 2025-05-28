@@ -12,6 +12,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
@@ -171,7 +173,7 @@ class JobDetailsActivity : AppCompatActivity() {
                                 append("${user.name} ${user.surname}\n")
                                 append("${user.email}\n")
                                 append("${user.phoneNumber}\n")
-                                append("${user.address}\n\n")
+                                append("${user.city}, ${user.province}\n\n")
                                 append("SUMMARY\n")
                                 append("${user.summary}\n\n")
                                 append("SKILLS\n")
@@ -384,7 +386,7 @@ class JobDetailsActivity : AppCompatActivity() {
                                 "applicantName" to "${user.name} ${user.surname}",
                                 "applicantEmail" to user.email,
                                 "applicantPhone" to user.phoneNumber,
-                                "applicantAddress" to user.address,
+                                "applicantAddress" to "${user.city}, ${user.province}",
                                 "applicantSummary" to user.summary,
                                 "applicantSkills" to user.skills,
                                 "applicantEducation" to user.education,
@@ -402,6 +404,9 @@ class JobDetailsActivity : AppCompatActivity() {
                                 .add(application)
                                 .addOnSuccessListener { documentReference ->
                                     Log.d("JobDetailsActivity", "Application submitted successfully with ID: ${documentReference.id}")
+
+
+
                                     Toast.makeText(this, "Application submitted successfully", Toast.LENGTH_SHORT).show()
                                     finish()
                                 }
@@ -471,7 +476,7 @@ class JobDetailsActivity : AppCompatActivity() {
     private fun displayJobDetails(job: Job) {
         jobTitle.text = job.title
         companyName.text = job.companyName
-        jobLocation.text = job.location
+        jobLocation.text = job.city
         jobType.text = job.type
         jobSalary.text = job.salary
         jobDescription.text = job.description
@@ -533,7 +538,7 @@ class JobDetailsActivity : AppCompatActivity() {
                     "description" to updatedDescription,
                     "requirements" to updatedRequirements.split("\n"),
                     "salary" to updatedSalary,
-                    "location" to updatedLocation,
+                    "city" to updatedLocation,
                     "type" to updatedType,
                     "lastUpdated" to System.currentTimeMillis()
                 )
@@ -552,7 +557,7 @@ class JobDetailsActivity : AppCompatActivity() {
         dialogView.findViewById<TextInputEditText>(R.id.editJobDescription).setText(job.description)
         dialogView.findViewById<TextInputEditText>(R.id.editJobRequirements).setText(job.getRequirementsList().joinToString("\n"))
         dialogView.findViewById<TextInputEditText>(R.id.editJobSalary).setText(job.salary)
-        dialogView.findViewById<TextInputEditText>(R.id.editJobLocation).setText(job.location)
+        dialogView.findViewById<TextInputEditText>(R.id.editJobLocation).setText(job.city)
         dialogView.findViewById<TextInputEditText>(R.id.editJobType).setText(job.type)
         dialog.show()
     }

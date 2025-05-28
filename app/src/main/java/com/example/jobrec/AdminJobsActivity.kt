@@ -130,7 +130,7 @@ class AdminJobsActivity : AppCompatActivity() {
             job.title.lowercase().contains(searchQuery) ||
             job.description.lowercase().contains(searchQuery) ||
             job.companyName.lowercase().contains(searchQuery) ||
-            job.location.lowercase().contains(searchQuery) ||
+            job.city.lowercase().contains(searchQuery) ||
             job.jobField.lowercase().contains(searchQuery)
         })
         pagination.resetToFirstPage()

@@ -26,7 +26,7 @@ class EmployerJobsAdapter(
     override fun onBindViewHolder(holder: JobViewHolder, position: Int) {
         val job = jobs[position]
         holder.jobTitleText.text = job.title
-        holder.jobLocationText.text = job.location
+        holder.jobLocationText.text = job.city
         holder.jobTypeText.text = job.type
         holder.jobStatusText.text = job.status.capitalize()
         holder.jobStatusText.setBackgroundResource(
@@ -44,4 +44,4 @@ class EmployerJobsAdapter(
         jobs = newJobs
         notifyDataSetChanged()
     }
-} 
+}

@@ -88,21 +88,7 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                     "applicantId=$applicantId, resumeUrl=$resumeUrl")
             updateApplicationStatus("reviewed")
 
-            // Send CV review notification
-            applicantId?.let { candidateId ->
-                lifecycleScope.launch {
-                    try {
-                        val notificationManager = com.example.jobrec.services.NotificationManager()
-                        notificationManager.sendCvReviewNotification(
-                            candidateId = candidateId,
-                            companyName = companyName ?: "Unknown Company"
-                        )
-                        android.util.Log.d("CompanyApplicationDetails", "CV review notification sent")
-                    } catch (e: Exception) {
-                        android.util.Log.e("CompanyApplicationDetails", "Error sending CV review notification", e)
-                    }
-                }
-            }
+
 
             // Priority: Try to show CV/Resume first, then fallback to profile
             if (!resumeUrl.isNullOrEmpty()) {
@@ -174,19 +160,7 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
             }
     }
     private fun showCandidateProfileDialog(candidate: User) {
-        // Send profile view notification
-        lifecycleScope.launch {
-            try {
-                val notificationManager = com.example.jobrec.services.NotificationManager()
-                notificationManager.sendProfileViewNotification(
-                    candidateId = candidate.id,
-                    companyName = companyName ?: "Unknown Company"
-                )
-                android.util.Log.d("CompanyApplicationDetails", "Profile view notification sent")
-            } catch (e: Exception) {
-                android.util.Log.e("CompanyApplicationDetails", "Error sending profile view notification", e)
-            }
-        }
+
 
         val view = createCandidateProfileView(candidate)
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
@@ -208,7 +182,7 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
         val phoneText = view.findViewById<TextView>(R.id.phoneText)
         phoneText.text = candidate.phoneNumber
         val locationText = view.findViewById<TextView>(R.id.locationText)
-        locationText.text = candidate.address
+        locationText.text = "${candidate.city}, ${candidate.province}"
         val summaryText = view.findViewById<TextView>(R.id.summaryText)
         summaryText.text = candidate.summary
         val skillsText = view.findViewById<TextView>(R.id.skillsText)
@@ -437,24 +411,7 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                 .addOnSuccessListener {
                     Toast.makeText(this, "Application $newStatus", Toast.LENGTH_SHORT).show()
 
-                    // Send notification to candidate about status change
-                    applicantId?.let { candidateId ->
-                        lifecycleScope.launch {
-                            try {
-                                val notificationManager = com.example.jobrec.services.NotificationManager()
-                                notificationManager.sendApplicationStatusNotification(
-                                    applicationId = id,
-                                    candidateId = candidateId,
-                                    status = newStatus,
-                                    jobTitle = jobTitle ?: "Unknown Job",
-                                    companyName = companyName ?: "Unknown Company"
-                                )
-                                android.util.Log.d("CompanyApplicationDetails", "Application status notification sent")
-                            } catch (e: Exception) {
-                                android.util.Log.e("CompanyApplicationDetails", "Error sending notification", e)
-                            }
-                        }
-                    }
+
 
                     loadApplicationDetails()
                 }

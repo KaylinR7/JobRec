@@ -5,8 +5,15 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 class CareerWorxApp : Application() {
     private val TAG = "CareerWorxApp"
+
+    companion object {
+        lateinit var instance: CareerWorxApp
+            private set
+    }
+
     override fun onCreate() {
         super.onCreate()
+        instance = this
         val settings = FirebaseFirestoreSettings.Builder()
             .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
             .build()
