@@ -15,8 +15,10 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.launch
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -261,6 +263,40 @@ class CandidateSearchActivity : AppCompatActivity() {
         }
     }
     private fun showCandidateProfileDialog(candidate: User) {
+        // Send profile view notification
+        lifecycleScope.launch {
+            try {
+                // Get company name from current user
+                val currentUser = auth.currentUser
+                if (currentUser != null) {
+                    db.collection("companies")
+                        .whereEqualTo("userId", currentUser.uid)
+                        .get()
+                        .addOnSuccessListener { documents ->
+                            if (!documents.isEmpty) {
+                                val companyDoc = documents.documents[0]
+                                val companyName = companyDoc.getString("companyName") ?: "Unknown Company"
+
+                                lifecycleScope.launch {
+                                    try {
+                                        val notificationManager = com.example.jobrec.services.NotificationManager()
+                                        notificationManager.sendProfileViewNotification(
+                                            candidateId = candidate.id,
+                                            companyName = companyName
+                                        )
+                                        android.util.Log.d("CandidateSearch", "Profile view notification sent")
+                                    } catch (e: Exception) {
+                                        android.util.Log.e("CandidateSearch", "Error sending profile view notification", e)
+                                    }
+                                }
+                            }
+                        }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("CandidateSearch", "Error getting company info for notification", e)
+            }
+        }
+
         val view = createCandidateProfileView(candidate)
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("${candidate.name} ${candidate.surname}")

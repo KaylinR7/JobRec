@@ -12,6 +12,7 @@ import com.example.jobrec.HomeActivity
 import com.example.jobrec.R
 import com.example.jobrec.ChatActivity
 import com.example.jobrec.JobDetailsActivity
+import com.example.jobrec.StudentApplicationDetailsActivity
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.firebase.firestore.FirebaseFirestore
@@ -20,8 +21,12 @@ class FCMService : FirebaseMessagingService() {
     companion object {
         const val CHANNEL_ID_JOBS = "job_notifications"
         const val CHANNEL_ID_MESSAGES = "message_notifications"
+        const val CHANNEL_ID_APPLICATIONS = "application_notifications"
+        const val CHANNEL_ID_PROFILE_VIEWS = "profile_view_notifications"
         const val CHANNEL_NAME_JOBS = "Job Notifications"
         const val CHANNEL_NAME_MESSAGES = "Message Notifications"
+        const val CHANNEL_NAME_APPLICATIONS = "Application Updates"
+        const val CHANNEL_NAME_PROFILE_VIEWS = "Profile Views"
     }
     override fun onNewToken(token: String) {
         Log.d(TAG, "Refreshed token: $token")
@@ -35,6 +40,9 @@ class FCMService : FirebaseMessagingService() {
             when (notificationType) {
                 "job" -> handleJobNotification(remoteMessage.data)
                 "message" -> handleMessageNotification(remoteMessage.data)
+                "application" -> handleApplicationNotification(remoteMessage.data)
+                "profile_view" -> handleProfileViewNotification(remoteMessage.data)
+                "cv_review" -> handleCvReviewNotification(remoteMessage.data)
                 else -> handleGeneralNotification(remoteMessage.data)
             }
         }
@@ -69,6 +77,24 @@ class FCMService : FirebaseMessagingService() {
                             sendNotification(title, body, null, CHANNEL_ID_MESSAGES)
                         }
                     }
+                    "application" -> {
+                        val applicationId = remoteMessage.data["applicationId"]
+                        if (applicationId != null) {
+                            val intent = Intent(this, StudentApplicationDetailsActivity::class.java).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                putExtra("applicationId", applicationId)
+                            }
+                            sendNotification(title, body, intent, CHANNEL_ID_APPLICATIONS)
+                        } else {
+                            sendNotification(title, body, null, CHANNEL_ID_APPLICATIONS)
+                        }
+                    }
+                    "profile_view", "cv_review" -> {
+                        val intent = Intent(this, HomeActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        }
+                        sendNotification(title, body, intent, CHANNEL_ID_PROFILE_VIEWS)
+                    }
                     else -> sendNotification(title, body, null, null)
                 }
             } else {
@@ -96,6 +122,35 @@ class FCMService : FirebaseMessagingService() {
         }
         sendNotification(title, body, intent, CHANNEL_ID_MESSAGES)
     }
+    private fun handleApplicationNotification(data: Map<String, String>) {
+        val title = data["title"] ?: "Application Update"
+        val body = data["body"] ?: "Your application status has been updated"
+        val applicationId = data["applicationId"]
+        val intent = Intent(this, StudentApplicationDetailsActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            putExtra("applicationId", applicationId)
+        }
+        sendNotification(title, body, intent, CHANNEL_ID_APPLICATIONS)
+    }
+
+    private fun handleProfileViewNotification(data: Map<String, String>) {
+        val title = data["title"] ?: "Profile Viewed"
+        val body = data["body"] ?: "An employer has viewed your profile"
+        val intent = Intent(this, HomeActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+        sendNotification(title, body, intent, CHANNEL_ID_PROFILE_VIEWS)
+    }
+
+    private fun handleCvReviewNotification(data: Map<String, String>) {
+        val title = data["title"] ?: "CV Reviewed"
+        val body = data["body"] ?: "An employer has reviewed your CV"
+        val intent = Intent(this, HomeActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+        sendNotification(title, body, intent, CHANNEL_ID_PROFILE_VIEWS)
+    }
+
     private fun handleGeneralNotification(data: Map<String, String>) {
         val title = data["title"] ?: "CareerWorx"
         val body = data["body"] ?: "You have a new notification"
@@ -156,8 +211,34 @@ class FCMService : FirebaseMessagingService() {
                 setShowBadge(true)
                 setSound(defaultSoundUri, null)
             }
+            val applicationChannel = NotificationChannel(
+                CHANNEL_ID_APPLICATIONS,
+                CHANNEL_NAME_APPLICATIONS,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notifications for application status updates"
+                enableLights(true)
+                enableVibration(true)
+                lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
+                setShowBadge(true)
+                setSound(defaultSoundUri, null)
+            }
+            val profileViewChannel = NotificationChannel(
+                CHANNEL_ID_PROFILE_VIEWS,
+                CHANNEL_NAME_PROFILE_VIEWS,
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = "Notifications for profile views and CV reviews"
+                enableLights(true)
+                enableVibration(false) // Less intrusive for profile views
+                lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
+                setShowBadge(true)
+                setSound(defaultSoundUri, null)
+            }
             notificationManager.createNotificationChannel(jobChannel)
             notificationManager.createNotificationChannel(messageChannel)
+            notificationManager.createNotificationChannel(applicationChannel)
+            notificationManager.createNotificationChannel(profileViewChannel)
         }
         val notificationId = System.currentTimeMillis().toInt()
         notificationManager.notify(notificationId, notificationBuilder.build())
