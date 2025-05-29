@@ -10,12 +10,12 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            style="@style/Widget.CareerWorx.TextInputLayout">
+            style="@style/Widget.DUTCareerHub.TextInputLayout">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/searchEditText"
@@ -24,7 +24,7 @@
                 android:hint="Search jobs" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fieldFilterContainer"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -40,7 +40,7 @@
                 android:inputType="none"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        
+
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -72,13 +72,13 @@
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 
-        
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/jobsRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        
+
         <LinearLayout
             android:id="@+id/emptyStateLayout"
             android:layout_width="match_parent"
@@ -110,7 +110,7 @@
 
     </LinearLayout>
 
-    
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"

@@ -25,6 +25,7 @@
 
 
     <color name="error">#F44336</color>
+    <color name="success">#4CAF50</color>
 
 
     <color name="status_pending">#FFC107</color>

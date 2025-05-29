@@ -11,22 +11,22 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    
-    <style name="Widget.JobRec.Button" parent="Widget.CareerWorx.Button">
-        
+
+    <style name="Widget.JobRec.Button" parent="Widget.DUTCareerHub.Button">
+
     </style>
 
-    <style name="Widget.JobRec.Button.Outlined" parent="Widget.CareerWorx.Button.Outlined">
-        
+    <style name="Widget.JobRec.Button.Outlined" parent="Widget.DUTCareerHub.Button.Outlined">
+
     </style>
 
-    
-    <style name="Widget.CareerWorx.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+    <style name="Widget.DUTCareerHub.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="boxStrokeColor">?attr/colorPrimary</item>
         <item name="hintTextColor">?attr/colorPrimary</item>
     </style>
 
-    <style name="Widget.CareerWorx.TextInputEditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
+    <style name="Widget.DUTCareerHub.TextInputEditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textColorHint">?android:attr/textColorSecondary</item>
     </style>

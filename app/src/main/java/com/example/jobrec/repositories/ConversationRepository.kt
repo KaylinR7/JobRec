@@ -116,7 +116,7 @@ class ConversationRepository {
                         name.isNotEmpty() && surname.isNotEmpty() -> "$name $surname"
                         name.isNotEmpty() -> name
                         surname.isNotEmpty() -> surname
-                        else -> "Student" 
+                        else -> "Student"
                     }
                     android.util.Log.d("ConversationRepo", "Using candidate name for new conversation: $validCandidateName")
                 } else {
@@ -232,7 +232,7 @@ class ConversationRepository {
                                      conversation.candidateName == "!!!!!" ||
                                      conversation.candidateName == "Company" ||
                                      conversation.candidateName == "Student" ||
-                                     conversation.candidateName == "nasty juice" 
+                                     conversation.candidateName == "nasty juice"
                 if (needsNameUpdate) {
                     android.util.Log.d("ConversationRepo", "Conversation ${conversation.id} has invalid candidate name: '${conversation.candidateName}', attempting to fix")
                 }
@@ -249,7 +249,7 @@ class ConversationRepository {
                             name.isNotEmpty() && surname.isNotEmpty() -> "$name $surname"
                             name.isNotEmpty() -> name
                             surname.isNotEmpty() -> surname
-                            else -> "" 
+                            else -> ""
                         }
                         if (fullName.isNotEmpty()) {
                             android.util.Log.d("ConversationRepo", "Using name from user document: $fullName")
@@ -411,21 +411,44 @@ class ConversationRepository {
     ): String {
         val currentUser = auth.currentUser ?: throw Exception("User not authenticated")
         val senderId = currentUser.uid
+
+        // Get conversation details to populate job and company information
+        val conversation = getConversationById(conversationId)
+
+        // Get sender name
+        val senderName = try {
+            val senderDoc = db.collection("companies").document(senderId).get().await()
+            if (senderDoc.exists()) {
+                senderDoc.getString("companyName") ?: "Company"
+            } else {
+                val userDoc = db.collection("users").document(senderId).get().await()
+                userDoc.getString("name") ?: "User"
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ConversationRepo", "Error getting sender name", e)
+            "Company"
+        }
+
         val interviewDetails = InterviewDetails(
             date = date,
             time = time,
             duration = duration,
             type = type,
             location = location,
-            meetingLink = meetingLink
+            meetingLink = meetingLink,
+            jobTitle = conversation?.jobTitle,
+            companyName = conversation?.companyName,
+            jobId = conversation?.jobId,
+            companyId = conversation?.companyId
         )
         val message = Message(
             conversationId = conversationId,
             senderId = senderId,
             receiverId = receiverId,
             content = "Meeting invitation",
-            type = "interview",
-            interviewDetails = interviewDetails
+            type = "meeting_invite",
+            interviewDetails = interviewDetails,
+            senderName = senderName
         )
         val messageId = messageRepository.sendMessage(message)
         db.collection("conversations")

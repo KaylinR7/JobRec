@@ -5,12 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        
+
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,13 +21,13 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                style="@style/Widget.CareerWorx.Toolbar"
+                style="@style/Widget.DUTCareerHub.Toolbar"
                 app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6"
                 app:title="Search Candidates" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        
+
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -39,7 +39,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                
+
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -56,7 +56,7 @@
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/searchLayout"
-                            style="@style/Widget.CareerWorx.TextInputLayout"
+                            style="@style/Widget.DUTCareerHub.TextInputLayout"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -83,7 +83,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                
+
                 <TextView
                     android:id="@+id/resultsCountText"
                     android:layout_width="match_parent"
@@ -94,7 +94,7 @@
                     android:layout_marginBottom="8dp"
                     android:visibility="gone"/>
 
-                
+
                 <TextView
                     android:id="@+id/resultsLabel"
                     android:layout_width="wrap_content"
@@ -113,7 +113,7 @@
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
-        
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/searchFab"
             android:layout_width="wrap_content"
@@ -126,7 +126,7 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    
+
     <include layout="@layout/layout_candidate_filter_drawer" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

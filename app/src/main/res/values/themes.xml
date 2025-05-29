@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.CareerWorx" parent="Theme.MaterialComponents.Light.NoActionBar">
-        
+    <style name="Theme.DUTCareerHub" parent="Theme.MaterialComponents.Light.NoActionBar">
+
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_dark</item>
         <item name="colorOnPrimary">@color/white</item>
-        
+
         <item name="colorSecondary">@color/accent</item>
         <item name="colorSecondaryVariant">@color/accent_dark</item>
         <item name="colorOnSecondary">@color/white</item>
-        
+
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        
+
         <item name="android:colorBackground">@color/background</item>
         <item name="colorSurface">@color/surface</item>
         <item name="colorOnBackground">@color/on_background</item>
         <item name="colorOnSurface">@color/on_surface</item>
-        
+
         <item name="colorError">@color/error</item>
         <item name="colorOnError">@color/white</item>
-        
+
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
-        
+
         <item name="cardBackgroundColor">@color/surface</item>
         <item name="cardForegroundColor">@color/on_surface</item>
-        
+
         <item name="colorOutline">@color/colorOutline</item>
-        
+
         <item name="actionOverflowButtonStyle">@style/OverflowButtonStyle</item>
     </style>
 
-    
-    <style name="Theme.CareerWorx.Splash" parent="Theme.CareerWorx">
+
+    <style name="Theme.DUTCareerHub.Splash" parent="Theme.DUTCareerHub">
         <item name="android:windowBackground">@drawable/splash_background</item>
         <item name="android:statusBarColor">@color/primary</item>
         <item name="android:navigationBarColor">@color/primary</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
 
-    
-    <style name="Widget.CareerWorx.Button" parent="Widget.MaterialComponents.Button">
+
+    <style name="Widget.DUTCareerHub.Button" parent="Widget.MaterialComponents.Button">
         <item name="backgroundTint">@color/primary</item>
         <item name="android:textColor">@color/white</item>
         <item name="cornerRadius">8dp</item>
@@ -51,20 +51,20 @@
         <item name="android:paddingEnd">16dp</item>
     </style>
 
-    <style name="Widget.CareerWorx.Button.Secondary" parent="Widget.MaterialComponents.Button">
+    <style name="Widget.DUTCareerHub.Button.Secondary" parent="Widget.MaterialComponents.Button">
         <item name="backgroundTint">@color/button_secondary</item>
         <item name="android:textColor">@color/white</item>
         <item name="cornerRadius">8dp</item>
     </style>
 
-    <style name="Widget.CareerWorx.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+    <style name="Widget.DUTCareerHub.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="strokeColor">@color/primary</item>
         <item name="android:textColor">@color/primary</item>
         <item name="cornerRadius">8dp</item>
     </style>
 
-    
-    <style name="Widget.CareerWorx.Card" parent="Widget.MaterialComponents.CardView">
+
+    <style name="Widget.DUTCareerHub.Card" parent="Widget.MaterialComponents.CardView">
         <item name="cardCornerRadius">12dp</item>
         <item name="cardElevation">2dp</item>
         <item name="strokeWidth">1dp</item>
@@ -72,8 +72,8 @@
         <item name="cardBackgroundColor">@color/card_background</item>
     </style>
 
-    
-    <style name="Widget.CareerWorx.Toolbar" parent="Widget.MaterialComponents.Toolbar">
+
+    <style name="Widget.DUTCareerHub.Toolbar" parent="Widget.MaterialComponents.Toolbar">
         <item name="android:background">@color/primary</item>
         <item name="titleTextColor">@color/white</item>
         <item name="colorControlNormal">@color/white</item>
@@ -86,12 +86,16 @@
         <item name="tint">@color/white</item>
     </style>
 
-    
-    <style name="Widget.CareerWorx.Toolbar.Company" parent="Widget.MaterialComponents.Toolbar">
+
+    <style name="Widget.DUTCareerHub.Toolbar.Company" parent="Widget.MaterialComponents.Toolbar">
         <item name="android:background">@color/primary</item>
         <item name="titleTextColor">@color/white</item>
         <item name="colorControlNormal">@color/white</item>
         <item name="navigationIconTint">@color/white</item>
         <item name="actionOverflowButtonStyle">@style/OverflowButtonStyle</item>
+    </style>
+
+    <!-- CareerWorx theme for compatibility -->
+    <style name="Theme.CareerWorx" parent="Theme.DUTCareerHub">
     </style>
 </resources>

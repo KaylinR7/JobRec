@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.CareerWorx" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        
+
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_dark</item>
         <item name="colorOnPrimary">@color/white</item>
-        
+
         <item name="colorSecondary">@color/accent</item>
         <item name="colorSecondaryVariant">@color/accent_dark</item>
         <item name="colorOnSecondary">@color/white</item>
-        
+
         <item name="android:statusBarColor">@color/primary_dark</item>
-        
+
         <item name="android:colorBackground">@color/background_dark</item>
         <item name="colorSurface">@color/surface_dark</item>
         <item name="colorOnBackground">@color/on_background_dark</item>
         <item name="colorOnSurface">@color/on_surface_dark</item>
-        
+
         <item name="colorError">@color/error_dark</item>
         <item name="colorOnError">@color/white</item>
-        
+
         <item name="android:textColorPrimary">@color/text_primary_dark</item>
         <item name="android:textColorSecondary">@color/text_secondary_dark</item>
-        
+
         <item name="cardBackgroundColor">@color/surface_dark</item>
         <item name="cardForegroundColor">@color/on_surface_dark</item>
-        
+
         <item name="colorOutline">@color/colorOutline</item>
     </style>
 
-    
+
     <style name="Widget.CareerWorx.Button" parent="Widget.MaterialComponents.Button">
         <item name="backgroundTint">@color/primary</item>
         <item name="android:textColor">@color/white</item>
@@ -52,12 +52,34 @@
         <item name="cornerRadius">8dp</item>
     </style>
 
-    
+
     <style name="Widget.CareerWorx.Card" parent="Widget.MaterialComponents.CardView">
         <item name="cardCornerRadius">12dp</item>
         <item name="cardElevation">2dp</item>
         <item name="strokeWidth">1dp</item>
         <item name="strokeColor">@color/card_border</item>
         <item name="cardBackgroundColor">@color/card_background</item>
+    </style>
+
+    <!-- CareerWorx TextInput styles for compatibility -->
+    <style name="Widget.CareerWorx.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">?attr/colorPrimary</item>
+        <item name="hintTextColor">?attr/colorPrimary</item>
+    </style>
+
+    <style name="Widget.CareerWorx.TextInputEditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColorHint">?android:attr/textColorSecondary</item>
+    </style>
+
+    <!-- CareerWorx Toolbar styles for compatibility -->
+    <style name="Widget.CareerWorx.Toolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="android:background">@color/primary</item>
+        <item name="titleTextColor">@color/white</item>
+        <item name="colorControlNormal">@color/white</item>
+        <item name="navigationIconTint">@color/white</item>
+    </style>
+
+    <style name="Widget.CareerWorx.Toolbar.Company" parent="Widget.CareerWorx.Toolbar">
     </style>
 </resources>

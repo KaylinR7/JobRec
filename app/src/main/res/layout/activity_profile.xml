@@ -16,7 +16,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            style="@style/Widget.CareerWorx.Toolbar"
+            style="@style/Widget.DUTCareerHub.Toolbar"
             app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -104,7 +104,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        style="@style/Widget.CareerWorx.TextInputLayout">
+                        style="@style/Widget.DUTCareerHub.TextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/nameInput"

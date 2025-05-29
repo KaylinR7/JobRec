@@ -11,6 +11,11 @@
         android:title="Applications" />
 
     <item
+        android:id="@+id/navigation_calendar"
+        android:icon="@drawable/ic_calendar"
+        android:title="Calendar" />
+
+    <item
         android:id="@+id/navigation_profile"
         android:icon="@drawable/ic_person"
         android:title="Profile" />

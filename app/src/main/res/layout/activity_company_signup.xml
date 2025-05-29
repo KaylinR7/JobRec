@@ -11,7 +11,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/primary"
         android:elevation="4dp"
-        style="@style/Widget.CareerWorx.Toolbar" />
+        style="@style/Widget.DUTCareerHub.Toolbar" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -46,14 +46,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                style="@style/Widget.CareerWorx.TextInputLayout">
+                style="@style/Widget.DUTCareerHub.TextInputLayout">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/companyNameInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Company Name"
-                    style="@style/Widget.CareerWorx.TextInputEditText"/>
+                    style="@style/Widget.DUTCareerHub.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -69,7 +69,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Registration Number"
-                    style="@style/Widget.CareerWorx.TextInputEditText"/>
+                    style="@style/Widget.DUTCareerHub.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -85,7 +85,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Industry"
-                    style="@style/Widget.CareerWorx.TextInputEditText"/>
+                    style="@style/Widget.DUTCareerHub.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -101,7 +101,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Company Size"
-                    style="@style/Widget.CareerWorx.TextInputEditText"/>
+                    style="@style/Widget.DUTCareerHub.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -117,7 +117,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Location"
-                    style="@style/Widget.CareerWorx.TextInputEditText"/>
+                    style="@style/Widget.DUTCareerHub.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -134,7 +134,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Website"
                     android:inputType="textUri"
-                    style="@style/Widget.CareerWorx.TextInputEditText"/>
+                    style="@style/Widget.DUTCareerHub.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -153,7 +153,7 @@
                     android:inputType="textMultiLine"
                     android:minLines="3"
                     android:gravity="top"
-                    style="@style/Widget.CareerWorx.TextInputEditText"/>
+                    style="@style/Widget.DUTCareerHub.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -179,7 +179,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Contact Person Name"
-                    style="@style/Widget.CareerWorx.TextInputEditText"/>
+                    style="@style/Widget.DUTCareerHub.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -196,7 +196,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Contact Person Email"
                     android:inputType="textEmailAddress"
-                    style="@style/Widget.CareerWorx.TextInputEditText"/>
+                    style="@style/Widget.DUTCareerHub.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -213,7 +213,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Contact Person Phone"
                     android:inputType="phone"
-                    style="@style/Widget.CareerWorx.TextInputEditText"/>
+                    style="@style/Widget.DUTCareerHub.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -230,7 +230,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Company Email"
                     android:inputType="textEmailAddress"
-                    style="@style/Widget.CareerWorx.TextInputEditText"/>
+                    style="@style/Widget.DUTCareerHub.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -249,7 +249,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Password"
                     android:inputType="textPassword"
-                    style="@style/Widget.CareerWorx.TextInputEditText"/>
+                    style="@style/Widget.DUTCareerHub.TextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton

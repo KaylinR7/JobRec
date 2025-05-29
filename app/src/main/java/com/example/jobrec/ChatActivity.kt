@@ -20,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.jobrec.adapters.MessageAdapter
+import com.example.jobrec.models.CalendarEvent
 import com.example.jobrec.models.Conversation
 import com.example.jobrec.models.Message
 import com.example.jobrec.repositories.ConversationRepository
@@ -101,6 +102,24 @@ class ChatActivity : AppCompatActivity() {
                     try {
                         val repo = ConversationRepository()
                         repo.updateMeetingStatus(message.id, "accepted")
+
+                        // Create calendar event for student when they accept
+                        message.interviewDetails?.let { details ->
+                            createCalendarEventForStudent(
+                                studentId = auth.currentUser?.uid ?: "",
+                                messageId = message.id,
+                                date = details.date,
+                                time = details.time,
+                                duration = details.duration,
+                                meetingType = details.type,
+                                location = details.location,
+                                meetingLink = details.meetingLink
+                            )
+
+                            // Update company's pending calendar event to confirmed
+                            updateCompanyCalendarEventStatus(message.id, "scheduled")
+                        }
+
                         Toast.makeText(this@ChatActivity, "Meeting accepted", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         Toast.makeText(this@ChatActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -112,6 +131,10 @@ class ChatActivity : AppCompatActivity() {
                     try {
                         val repo = ConversationRepository()
                         repo.updateMeetingStatus(message.id, "rejected")
+
+                        // Cancel company's pending calendar event when declined
+                        updateCompanyCalendarEventStatus(message.id, "cancelled")
+
                         Toast.makeText(this@ChatActivity, "Meeting declined", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         Toast.makeText(this@ChatActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -271,7 +294,7 @@ class ChatActivity : AppCompatActivity() {
                                     name.isNotEmpty() && surname.isNotEmpty() -> "$name $surname"
                                     name.isNotEmpty() -> name
                                     surname.isNotEmpty() -> surname
-                                    else -> "Student" 
+                                    else -> "Student"
                                 }
                                 if (fullName.isNotEmpty() && fullName != "Student") {
                                     db.collection("conversations")
@@ -305,7 +328,7 @@ class ChatActivity : AppCompatActivity() {
                     if (!documents.isEmpty) {
                         Log.d("ChatActivity", "User is company (by email): true")
                         callback(true)
-                        invalidateOptionsMenu() 
+                        invalidateOptionsMenu()
                     } else {
                         db.collection("companies")
                             .whereEqualTo("userId", currentUserId)
@@ -314,29 +337,29 @@ class ChatActivity : AppCompatActivity() {
                                 if (!userIdDocs.isEmpty) {
                                     Log.d("ChatActivity", "User is company (by userId): true")
                                     callback(true)
-                                    invalidateOptionsMenu() 
+                                    invalidateOptionsMenu()
                                 } else {
                                     Log.d("ChatActivity", "User is not a company")
                                     callback(false)
-                                    invalidateOptionsMenu() 
+                                    invalidateOptionsMenu()
                                 }
                             }
                             .addOnFailureListener { e ->
                                 Log.e("ChatActivity", "Error checking company by userId", e)
                                 callback(false)
-                                invalidateOptionsMenu() 
+                                invalidateOptionsMenu()
                             }
                     }
                 }
                 .addOnFailureListener { e ->
                     Log.e("ChatActivity", "Error checking company by email", e)
                     callback(false)
-                    invalidateOptionsMenu() 
+                    invalidateOptionsMenu()
                 }
         } else {
             Log.d("ChatActivity", "No email available for current user, defaulting to student")
             callback(false)
-            invalidateOptionsMenu() 
+            invalidateOptionsMenu()
         }
     }
     private fun getCompanyNameFromFirestore(companyId: String) {
@@ -403,7 +426,7 @@ class ChatActivity : AppCompatActivity() {
                 }
                 if (snapshot != null && !snapshot.isEmpty) {
                     val messages = snapshot.toObjects(Message::class.java)
-                        .sortedBy { it.createdAt.seconds } 
+                        .sortedBy { it.createdAt.seconds }
                     messageAdapter.submitList(messages)
                     messagesRecyclerView.scrollToPosition(messages.size - 1)
                     emptyView.visibility = View.GONE
@@ -472,16 +495,16 @@ class ChatActivity : AppCompatActivity() {
         val durations = arrayOf("30 minutes", "45 minutes", "1 hour", "1.5 hours", "2 hours")
         val durationAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, durations)
         durationInput.setAdapter(durationAdapter)
-        durationInput.setText(durations[2], false) 
+        durationInput.setText(durations[2], false)
         val meetingTypes = arrayOf("Online", "In-person")
         val meetingTypeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, meetingTypes)
         meetingTypeInput.setAdapter(meetingTypeAdapter)
-        meetingTypeInput.setText(meetingTypes[0], false) 
+        meetingTypeInput.setText(meetingTypes[0], false)
         meetingTypeInput.setOnItemClickListener { _, _, position, _ ->
-            if (position == 0) { 
+            if (position == 0) {
                 locationInputLayout.visibility = View.GONE
                 meetingLinkInputLayout.visibility = View.VISIBLE
-            } else { 
+            } else {
                 locationInputLayout.visibility = View.VISIBLE
                 meetingLinkInputLayout.visibility = View.GONE
             }
@@ -519,7 +542,7 @@ class ChatActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
                     val repo = ConversationRepository()
-                    repo.sendMeetingInvite(
+                    val messageId = repo.sendMeetingInvite(
                         conversationId = conversationId!!,
                         receiverId = receiverId,
                         date = Timestamp(selectedDate),
@@ -529,6 +552,20 @@ class ChatActivity : AppCompatActivity() {
                         location = if (selectedType == "in-person") selectedLocation else null,
                         meetingLink = if (selectedType == "online") selectedLink else null
                     )
+
+                    // Only create calendar event for the company (sender) immediately
+                    // Student calendar event will be created when they accept the invitation
+                    createPendingCalendarEventForCompany(
+                        companyId = auth.currentUser?.uid ?: "",
+                        messageId = messageId,
+                        date = Timestamp(selectedDate),
+                        time = selectedTime,
+                        duration = durationMinutes,
+                        meetingType = selectedType,
+                        location = if (selectedType == "in-person") selectedLocation else null,
+                        meetingLink = if (selectedType == "online") selectedLink else null
+                    )
+
                     dialog.dismiss()
                     Toast.makeText(this@ChatActivity, "Meeting invitation sent", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
@@ -538,6 +575,179 @@ class ChatActivity : AppCompatActivity() {
         }
         dialog.show()
     }
+
+    private suspend fun createCalendarEventForStudent(
+        studentId: String,
+        messageId: String,
+        date: Timestamp,
+        time: String,
+        duration: Int,
+        meetingType: String,
+        location: String?,
+        meetingLink: String?
+    ) {
+        try {
+            val conversation = this.conversation ?: return
+
+            val eventTitle = "Interview - ${conversation.jobTitle}"
+            val eventDescription = "Interview with ${conversation.companyName} for ${conversation.jobTitle} position"
+
+            val calendarEvent = CalendarEvent(
+                userId = studentId,
+                title = eventTitle,
+                description = eventDescription,
+                date = date,
+                time = time,
+                duration = duration,
+                meetingType = meetingType,
+                location = location,
+                meetingLink = meetingLink,
+                notes = "Scheduled via CareerWorx messaging",
+                isInterview = true,
+                jobId = conversation.jobId,
+                companyId = conversation.companyId,
+                status = "scheduled",
+                invitationMessageId = messageId
+            )
+
+            db.collection("calendar_events").add(calendarEvent).await()
+            Log.d("ChatActivity", "Calendar event created for student: $studentId")
+
+        } catch (e: Exception) {
+            Log.e("ChatActivity", "Error creating calendar event for student", e)
+            // Don't show error to user as this is a background operation
+        }
+    }
+
+    private suspend fun createPendingCalendarEventForCompany(
+        companyId: String,
+        messageId: String,
+        date: Timestamp,
+        time: String,
+        duration: Int,
+        meetingType: String,
+        location: String?,
+        meetingLink: String?
+    ) {
+        try {
+            val conversation = this.conversation ?: return
+
+            val eventTitle = "Interview - ${conversation.jobTitle} (Pending Response)"
+            val eventDescription = "Interview with student for ${conversation.jobTitle} position - Waiting for student confirmation"
+
+            val calendarEvent = CalendarEvent(
+                companyId = companyId,
+                title = eventTitle,
+                description = eventDescription,
+                date = date,
+                time = time,
+                duration = duration,
+                meetingType = meetingType,
+                location = location,
+                meetingLink = meetingLink,
+                notes = "Scheduled via CareerWorx messaging - Pending student acceptance",
+                isInterview = true,
+                jobId = conversation.jobId,
+                status = "pending",
+                invitationMessageId = messageId
+            )
+
+            db.collection("calendar_events").add(calendarEvent).await()
+            Log.d("ChatActivity", "Pending calendar event created for company: $companyId")
+
+        } catch (e: Exception) {
+            Log.e("ChatActivity", "Error creating pending calendar event for company", e)
+            // Don't show error to user as this is a background operation
+        }
+    }
+
+    private suspend fun createCalendarEventForCompany(
+        companyId: String,
+        messageId: String,
+        date: Timestamp,
+        time: String,
+        duration: Int,
+        meetingType: String,
+        location: String?,
+        meetingLink: String?
+    ) {
+        try {
+            val conversation = this.conversation ?: return
+
+            val eventTitle = "Interview - ${conversation.jobTitle}"
+            val eventDescription = "Interview with student for ${conversation.jobTitle} position"
+
+            val calendarEvent = CalendarEvent(
+                companyId = companyId,
+                title = eventTitle,
+                description = eventDescription,
+                date = date,
+                time = time,
+                duration = duration,
+                meetingType = meetingType,
+                location = location,
+                meetingLink = meetingLink,
+                notes = "Scheduled via CareerWorx messaging",
+                isInterview = true,
+                jobId = conversation.jobId,
+                status = "scheduled",
+                invitationMessageId = messageId
+            )
+
+            db.collection("calendar_events").add(calendarEvent).await()
+            Log.d("ChatActivity", "Calendar event created for company: $companyId")
+
+        } catch (e: Exception) {
+            Log.e("ChatActivity", "Error creating calendar event for company", e)
+            // Don't show error to user as this is a background operation
+        }
+    }
+
+    private suspend fun updateCompanyCalendarEventStatus(messageId: String, newStatus: String) {
+        try {
+            // Find the calendar event with the matching invitation message ID
+            val eventsSnapshot = db.collection("calendar_events")
+                .whereEqualTo("invitationMessageId", messageId)
+                .get()
+                .await()
+
+            for (document in eventsSnapshot.documents) {
+                val event = document.toObject(CalendarEvent::class.java)
+                if (event != null && event.companyId != null) {
+                    // Update the event status and title
+                    val updatedTitle = when (newStatus) {
+                        "scheduled" -> event.title.replace(" (Pending Response)", "")
+                        "cancelled" -> event.title.replace(" (Pending Response)", " (Declined)")
+                        else -> event.title
+                    }
+
+                    val updatedNotes = when (newStatus) {
+                        "scheduled" -> event.notes.replace(" - Pending student acceptance", " - Confirmed by student")
+                        "cancelled" -> event.notes.replace(" - Pending student acceptance", " - Declined by student")
+                        else -> event.notes
+                    }
+
+                    db.collection("calendar_events")
+                        .document(document.id)
+                        .update(
+                            mapOf(
+                                "status" to newStatus,
+                                "title" to updatedTitle,
+                                "notes" to updatedNotes,
+                                "updatedAt" to Timestamp.now()
+                            )
+                        )
+                        .await()
+
+                    Log.d("ChatActivity", "Updated company calendar event status to: $newStatus")
+                    break
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("ChatActivity", "Error updating company calendar event status", e)
+        }
+    }
+
     private var isCompanyUser = false
     private var menuInstance: Menu? = null
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

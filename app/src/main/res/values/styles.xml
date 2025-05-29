@@ -11,16 +11,27 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    
-    <style name="Widget.JobRec.Button" parent="Widget.CareerWorx.Button">
-        
+
+    <style name="Widget.JobRec.Button" parent="Widget.DUTCareerHub.Button">
+
     </style>
 
-    <style name="Widget.JobRec.Button.Outlined" parent="Widget.CareerWorx.Button.Outlined">
-        
+    <style name="Widget.JobRec.Button.Outlined" parent="Widget.DUTCareerHub.Button.Outlined">
+
     </style>
 
-    
+
+    <style name="Widget.DUTCareerHub.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">?attr/colorPrimary</item>
+        <item name="hintTextColor">?attr/colorPrimary</item>
+    </style>
+
+    <style name="Widget.DUTCareerHub.TextInputEditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColorHint">?android:attr/textColorSecondary</item>
+    </style>
+
+    <!-- CareerWorx styles for compatibility -->
     <style name="Widget.CareerWorx.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="boxStrokeColor">?attr/colorPrimary</item>
         <item name="hintTextColor">?attr/colorPrimary</item>
@@ -29,5 +40,29 @@
     <style name="Widget.CareerWorx.TextInputEditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textColorHint">?android:attr/textColorSecondary</item>
+    </style>
+
+    <!-- CareerWorx Button styles for compatibility -->
+    <style name="Widget.CareerWorx.Button" parent="Widget.DUTCareerHub.Button">
+    </style>
+
+    <style name="Widget.CareerWorx.Button.Outlined" parent="Widget.DUTCareerHub.Button.Outlined">
+    </style>
+
+    <style name="Widget.CareerWorx.Button.Secondary" parent="Widget.DUTCareerHub.Button.Secondary">
+    </style>
+
+    <style name="Widget.CareerWorx.Card" parent="Widget.DUTCareerHub.Card">
+    </style>
+
+    <!-- CareerWorx Toolbar styles for compatibility -->
+    <style name="Widget.CareerWorx.Toolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="android:background">@color/primary</item>
+        <item name="titleTextColor">@color/white</item>
+        <item name="colorControlNormal">@color/white</item>
+        <item name="navigationIconTint">@color/white</item>
+    </style>
+
+    <style name="Widget.CareerWorx.Toolbar.Company" parent="Widget.CareerWorx.Toolbar">
     </style>
 </resources>

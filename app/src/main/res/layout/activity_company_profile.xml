@@ -14,7 +14,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            style="@style/Widget.CareerWorx.Toolbar.Company"
+            style="@style/Widget.DUTCareerHub.Toolbar.Company"
             app:title="Company Profile" />
 
     </com.google.android.material.appbar.AppBarLayout>

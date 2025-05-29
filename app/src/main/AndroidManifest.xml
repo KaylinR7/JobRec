@@ -16,7 +16,7 @@
     <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
     <application
-        android:name=".CareerWorxApp"
+        android:name=".DUTCareerHubApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -24,7 +24,7 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_launcher_custom"
         android:supportsRtl="true"
-        android:theme="@style/Theme.CareerWorx"
+        android:theme="@style/Theme.DUTCareerHub"
         tools:targetApi="31">
 
         <meta-data
@@ -35,7 +35,7 @@
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.CareerWorx.Splash">
+            android:theme="@style/Theme.DUTCareerHub.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -127,6 +127,19 @@
             android:exported="false"
             android:parentActivityName=".HomeActivity" />
 
+        <activity
+            android:name=".CalendarActivity"
+            android:exported="false"
+            android:label="Calendar"
+            android:parentActivityName=".HomeActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".CompanyCalendarActivity"
+            android:exported="false"
+            android:label="Company Calendar"
+            android:parentActivityName=".CompanyDashboardActivity"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ApplicationsActivity"

@@ -214,14 +214,15 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
                     startActivity(intent)
                     true
                 }
-                R.id.nav_profile -> {
-                    val intent = Intent(this, CompanyProfileActivity::class.java)
+                R.id.nav_calendar -> {
+                    val intent = Intent(this, CompanyCalendarActivity::class.java)
                     intent.putExtra("companyId", companyId)
                     startActivity(intent)
                     true
                 }
-                R.id.nav_ai_assistant -> {
-                    val intent = Intent(this, com.example.jobrec.chatbot.ChatbotActivity::class.java)
+                R.id.nav_profile -> {
+                    val intent = Intent(this, CompanyProfileActivity::class.java)
+                    intent.putExtra("companyId", companyId)
                     startActivity(intent)
                     true
                 }
@@ -246,6 +247,10 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
         }
         findViewById<View>(R.id.btnMessages).setOnClickListener {
             val intent = Intent(this, ConversationsActivity::class.java)
+            startActivity(intent)
+        }
+        findViewById<View>(R.id.btnAiAssistant).setOnClickListener {
+            val intent = Intent(this, com.example.jobrec.chatbot.ChatbotActivity::class.java)
             startActivity(intent)
         }
     }
@@ -323,7 +328,7 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
             val activities = mutableListOf<RecentActivity>()
             val applicationsSnapshot = db.collection("applications")
                 .whereEqualTo("companyId", companyId)
-                .limit(20) 
+                .limit(20)
                 .get()
                 .await()
             Log.d("CompanyDashboard", "Found ${applicationsSnapshot.size()} recent applications")
@@ -388,7 +393,7 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
                                 try {
                                     application.appliedAt ?: Timestamp.now()
                                 } catch (e2: Exception) {
-                                    Timestamp.now() 
+                                    Timestamp.now()
                                 }
                             }
                         )
@@ -399,7 +404,7 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
             }
             val jobsSnapshot = db.collection("jobs")
                 .whereEqualTo("companyId", companyId)
-                .limit(10) 
+                .limit(10)
                 .get()
                 .await()
             Log.d("CompanyDashboard", "Found ${jobsSnapshot.size()} recent job posts")
@@ -431,7 +436,7 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
             try {
                 val conversationsSnapshot = db.collection("conversations")
                     .whereEqualTo("companyId", companyId)
-                    .limit(5) 
+                    .limit(5)
                     .get()
                     .await()
                 Log.d("CompanyDashboard", "Found ${conversationsSnapshot.size()} recent conversations")
@@ -494,7 +499,7 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
             Log.d("CompanyDashboard", "Loading recent applications for company: $companyId")
             val applicationsSnapshot = db.collection("applications")
                 .whereEqualTo("companyId", companyId)
-                .limit(3) 
+                .limit(3)
                 .get()
                 .await()
             Log.d("CompanyDashboard", "Found ${applicationsSnapshot.size()} recent applications")
@@ -515,7 +520,7 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
                             }
                             if (application.candidateName.isNullOrEmpty()) {
                                 val userId = application.candidateId.takeIf { it.isNotEmpty() }
-                                    ?: doc.getString("userId") 
+                                    ?: doc.getString("userId")
                                 if (!userId.isNullOrEmpty() && userId != "users") {
                                     try {
                                         val candidateDoc = db.collection("users")
@@ -581,7 +586,7 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
                     }
                 } catch (e: Exception) {
                     Log.e("CompanyDashboard", "Error getting application date for sorting", e)
-                    0 
+                    0
                 }
             }
             Log.d("CompanyDashboard", "Processed ${sortedApplications.size} applications for display")
@@ -621,6 +626,6 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
     }
     override fun onResume() {
         super.onResume()
-        loadDashboardData() 
+        loadDashboardData()
     }
 }

@@ -14,7 +14,7 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
-            style="@style/Widget.CareerWorx.Toolbar"
+            style="@style/Widget.DUTCareerHub.Toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="Application Details" />
@@ -33,7 +33,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -87,7 +87,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -299,7 +299,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -399,7 +399,7 @@
         </LinearLayout>
     </ScrollView>
 
-    
+
     <LinearLayout
         android:id="@+id/buttonContainer"
         android:layout_width="match_parent"

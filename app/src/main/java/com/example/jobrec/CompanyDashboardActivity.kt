@@ -147,14 +147,15 @@ class CompanyDashboardActivity : AppCompatActivity() {
                     startActivity(intent)
                     true
                 }
-                R.id.nav_profile -> {
-                    val intent = Intent(this, CompanyProfileActivity::class.java)
+                R.id.nav_calendar -> {
+                    val intent = Intent(this, CompanyCalendarActivity::class.java)
                     intent.putExtra("companyId", companyId)
                     startActivity(intent)
                     true
                 }
-                R.id.nav_ai_assistant -> {
-                    val intent = Intent(this, com.example.jobrec.chatbot.ChatbotActivity::class.java)
+                R.id.nav_profile -> {
+                    val intent = Intent(this, CompanyProfileActivity::class.java)
+                    intent.putExtra("companyId", companyId)
                     startActivity(intent)
                     true
                 }
@@ -223,6 +224,6 @@ class CompanyDashboardActivity : AppCompatActivity() {
     }
     override fun onResume() {
         super.onResume()
-        loadDashboardData() 
+        loadDashboardData()
     }
 }

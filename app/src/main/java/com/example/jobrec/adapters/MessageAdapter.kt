@@ -58,19 +58,39 @@ class MessageAdapter(
         private val meetingDateText: TextView = itemView.findViewById(R.id.meetingDateText)
         private val meetingTimeText: TextView = itemView.findViewById(R.id.meetingTimeText)
         private val meetingTypeText: TextView = itemView.findViewById(R.id.meetingTypeText)
+        private val meetingDurationText: TextView = itemView.findViewById(R.id.meetingDurationText)
+        private val meetingJobTitleText: TextView = itemView.findViewById(R.id.meetingJobTitleText)
         private val meetingLocationText: TextView = itemView.findViewById(R.id.meetingLocationText)
         private val meetingLinkText: TextView = itemView.findViewById(R.id.meetingLinkText)
         private val meetingStatusText: TextView = itemView.findViewById(R.id.meetingStatusText)
         fun bind(message: Message) {
             messageText.text = message.content
             messageTimeText.text = timeFormat.format(message.createdAt.toDate())
-            if (message.type == "interview" && message.interviewDetails != null) {
+            if ((message.type == "interview" || message.type == "meeting_invite") && message.interviewDetails != null) {
                 meetingScrollView.visibility = View.VISIBLE
                 meetingDetailsLayout.visibility = View.VISIBLE
                 val details = message.interviewDetails
                 meetingDateText.text = "Date: ${dateFormat.format(details.date.toDate())}"
                 meetingTimeText.text = "Time: ${details.time}"
                 meetingTypeText.text = "Type: ${details.type.capitalize(Locale.getDefault())}"
+
+                // Set duration
+                val hours = details.duration / 60
+                val minutes = details.duration % 60
+                val durationText = when {
+                    hours > 0 && minutes > 0 -> "${hours}h ${minutes}m"
+                    hours > 0 -> "${hours}h"
+                    else -> "${minutes}m"
+                }
+                meetingDurationText.text = "Duration: $durationText"
+
+                // Set job title if available
+                if (!details.jobTitle.isNullOrEmpty()) {
+                    meetingJobTitleText.visibility = View.VISIBLE
+                    meetingJobTitleText.text = "Position: ${details.jobTitle}"
+                } else {
+                    meetingJobTitleText.visibility = View.GONE
+                }
                 if (!details.location.isNullOrEmpty()) {
                     meetingLocationText.visibility = View.VISIBLE
                     meetingLocationText.text = "Location: ${details.location}"
@@ -105,6 +125,8 @@ class MessageAdapter(
         private val meetingDateText: TextView = itemView.findViewById(R.id.meetingDateText)
         private val meetingTimeText: TextView = itemView.findViewById(R.id.meetingTimeText)
         private val meetingTypeText: TextView = itemView.findViewById(R.id.meetingTypeText)
+        private val meetingDurationText: TextView = itemView.findViewById(R.id.meetingDurationText)
+        private val meetingJobTitleText: TextView = itemView.findViewById(R.id.meetingJobTitleText)
         private val meetingLocationText: TextView = itemView.findViewById(R.id.meetingLocationText)
         private val meetingLinkText: TextView = itemView.findViewById(R.id.meetingLinkText)
         private val meetingResponseLayout: LinearLayout = itemView.findViewById(R.id.meetingResponseLayout)
@@ -114,13 +136,32 @@ class MessageAdapter(
         fun bind(message: Message) {
             messageText.text = message.content
             messageTimeText.text = timeFormat.format(message.createdAt.toDate())
-            if (message.type == "interview" && message.interviewDetails != null) {
+            if ((message.type == "interview" || message.type == "meeting_invite") && message.interviewDetails != null) {
                 meetingScrollView.visibility = View.VISIBLE
                 meetingDetailsLayout.visibility = View.VISIBLE
                 val details = message.interviewDetails
                 meetingDateText.text = "Date: ${dateFormat.format(details.date.toDate())}"
                 meetingTimeText.text = "Time: ${details.time}"
                 meetingTypeText.text = "Type: ${details.type.capitalize(Locale.getDefault())}"
+
+                // Set duration
+                val hours = details.duration / 60
+                val minutes = details.duration % 60
+                val durationText = when {
+                    hours > 0 && minutes > 0 -> "${hours}h ${minutes}m"
+                    hours > 0 -> "${hours}h"
+                    else -> "${minutes}m"
+                }
+                meetingDurationText.text = "Duration: $durationText"
+
+                // Set job title if available
+                if (!details.jobTitle.isNullOrEmpty()) {
+                    meetingJobTitleText.visibility = View.VISIBLE
+                    meetingJobTitleText.text = "Position: ${details.jobTitle}"
+                } else {
+                    meetingJobTitleText.visibility = View.GONE
+                }
+
                 if (!details.location.isNullOrEmpty()) {
                     meetingLocationText.visibility = View.VISIBLE
                     meetingLocationText.text = "Location: ${details.location}"

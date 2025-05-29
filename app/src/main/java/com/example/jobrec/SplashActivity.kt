@@ -170,7 +170,7 @@ class SplashActivity : AppCompatActivity() {
             editor.putString("user_id", auth.currentUser?.uid ?: "")
             editor.apply()
             startActivity(Intent(this, CompanyDashboardActivityNew::class.java))
-        } else if (email == "admin@careerworx.com") {
+        } else if (email == "admin@dutcareerhub.com") {
             editor.putString("user_type", "admin")
             editor.putString("user_id", auth.currentUser?.uid ?: "")
             editor.apply()

@@ -15,7 +15,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            style="@style/Widget.CareerWorx.Toolbar"
+            style="@style/Widget.DUTCareerHub.Toolbar"
             app:title="Post a Job"/>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:hint="Job Title"
                 app:boxStrokeColor="?attr/colorPrimary"
-                style="@style/Widget.CareerWorx.TextInputLayout">
+                style="@style/Widget.DUTCareerHub.TextInputLayout">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/jobTitleInput"
@@ -160,7 +160,7 @@
                 android:layout_marginTop="16dp"
                 android:hint="Specific Location (City/Town)"
                 app:boxStrokeColor="?attr/colorPrimary"
-                style="@style/Widget.CareerWorx.TextInputLayout">
+                style="@style/Widget.DUTCareerHub.TextInputLayout">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/locationInput"
@@ -217,7 +217,7 @@
                 android:layout_marginTop="16dp"
                 android:hint="Job Description"
                 app:boxStrokeColor="?attr/colorPrimary"
-                style="@style/Widget.CareerWorx.TextInputLayout">
+                style="@style/Widget.DUTCareerHub.TextInputLayout">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/descriptionInput"
@@ -238,7 +238,7 @@
                 android:layout_marginTop="16dp"
                 android:hint="Requirements"
                 app:boxStrokeColor="?attr/colorPrimary"
-                style="@style/Widget.CareerWorx.TextInputLayout">
+                style="@style/Widget.DUTCareerHub.TextInputLayout">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/requirementsInput"

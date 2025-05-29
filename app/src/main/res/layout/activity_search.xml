@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -22,7 +22,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                style="@style/Widget.CareerWorx.Toolbar"
+                style="@style/Widget.DUTCareerHub.Toolbar"
                 app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
 
         </com.google.android.material.appbar.AppBarLayout>
@@ -33,7 +33,7 @@
             android:orientation="vertical"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            
+
             <TextView
                 android:id="@+id/resultsCountText"
                 android:layout_width="match_parent"
@@ -91,7 +91,7 @@
                 android:layout_marginBottom="8dp"
                 android:visibility="gone"/>
 
-            
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/searchResultsRecyclerView"
                 android:layout_width="match_parent"
@@ -103,7 +103,7 @@
 
         </LinearLayout>
 
-        
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/searchFab"
             android:layout_width="wrap_content"
@@ -116,7 +116,7 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    
+
     <include layout="@layout/layout_filter_drawer" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

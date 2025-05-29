@@ -261,6 +261,43 @@
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
+                <!-- Pending Meeting Invitations Section -->
+                <LinearLayout
+                    android:id="@+id/pendingInvitationsSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="24dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Pending Meeting Invitations"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary"
+                        android:layout_marginBottom="16dp"/>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/pendingInvitationsRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:nestedScrollingEnabled="false"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+                    <TextView
+                        android:id="@+id/noPendingInvitationsText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="No pending invitations"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp"
+                        android:gravity="center"
+                        android:visibility="gone"
+                        android:padding="16dp"/>
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/recentJobsLabel"

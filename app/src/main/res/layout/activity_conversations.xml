@@ -14,7 +14,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            style="@style/Widget.CareerWorx.Toolbar"
+            style="@style/Widget.DUTCareerHub.Toolbar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -24,7 +24,7 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        
+
         <androidx.cardview.widget.CardView
             android:id="@+id/searchBarCard"
             android:layout_width="match_parent"
@@ -90,7 +90,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        
+
         <LinearLayout
             android:id="@+id/buttonsLayout"
             android:layout_width="wrap_content"
@@ -118,7 +118,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/newConversationFab"
         android:layout_width="wrap_content"
