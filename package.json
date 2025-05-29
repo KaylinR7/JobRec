@@ -1,0 +1,25 @@
+{
+  "name": "dut-career-hub-setup",
+  "version": "1.0.0",
+  "description": "Setup scripts for DUT Career Hub Firebase data",
+  "main": "setup-data.js",
+  "scripts": {
+    "setup-data": "node setup-data.js",
+    "setup-firestore": "node setup-firestore-data.js", 
+    "setup-calendar": "node setup-calendar-events.js",
+    "setup-all": "npm run setup-data && npm run setup-calendar"
+  },
+  "dependencies": {
+    "firebase": "^10.7.1"
+  },
+  "keywords": [
+    "firebase",
+    "firestore", 
+    "calendar",
+    "setup",
+    "dut",
+    "career-hub"
+  ],
+  "author": "DUT Career Hub Team",
+  "license": "MIT"
+}
