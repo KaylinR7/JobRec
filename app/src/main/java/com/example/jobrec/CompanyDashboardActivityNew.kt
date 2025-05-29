@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -167,6 +168,9 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.company_dashboard_menu, menu)
+
+
+
         return true
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -193,6 +197,7 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
                 finish()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -628,4 +633,12 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
         super.onResume()
         loadDashboardData()
     }
+
+
+
+
+
+
+
+
 }

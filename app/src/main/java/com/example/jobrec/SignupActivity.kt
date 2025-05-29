@@ -29,7 +29,7 @@ class SignupActivity : AppCompatActivity() {
     private lateinit var passwordInput: TextInputEditText
     private lateinit var confirmPasswordInput: TextInputEditText
     private lateinit var signupButton: MaterialButton
-    private lateinit var addressInput: TextInputEditText
+    private lateinit var cityInput: AutoCompleteTextView
     private lateinit var summaryInput: TextInputEditText
     private lateinit var skillsInput: AutoCompleteTextView
     private lateinit var linkedinInput: TextInputEditText
@@ -71,7 +71,7 @@ class SignupActivity : AppCompatActivity() {
         emailInput = findViewById(R.id.etEmail)
         passwordInput = findViewById(R.id.etPassword)
         provinceInput = findViewById(R.id.provinceInput)
-        addressInput = findViewById(R.id.etAddress)
+        cityInput = findViewById(R.id.cityInput)
         summaryInput = findViewById(R.id.etSummary)
         skillsInput = findViewById(R.id.etSkills)
         linkedinInput = findViewById(R.id.etLinkedin)
@@ -220,7 +220,7 @@ class SignupActivity : AppCompatActivity() {
         val password = passwordInput.text.toString()
         val cellNumber = cellNumberInput.text.toString().trim()
         val province = provinceInput.text.toString().trim()
-        val address = addressInput.text.toString().trim()
+        val city = cityInput.text.toString().trim()
         val summary = summaryInput.text.toString().trim()
         val linkedin = linkedinInput.text.toString().trim()
         val github = githubInput.text.toString().trim()
@@ -243,7 +243,7 @@ class SignupActivity : AppCompatActivity() {
                 email = email,
                 phoneNumber = cellNumber,
                 province = province,
-                address = address,
+                city = city,
                 summary = summary,
                 skills = skills,
                 linkedin = linkedin,

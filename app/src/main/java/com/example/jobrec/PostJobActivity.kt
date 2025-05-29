@@ -16,7 +16,7 @@ import com.example.jobrec.databinding.ActivityPostJobBinding
 import com.example.jobrec.models.FieldCategories
 import com.example.jobrec.Job
 import com.example.jobrec.Company
-import com.example.jobrec.services.NotificationManager
+import com.example.jobrec.utils.LocationUtils
 import kotlinx.coroutines.launch
 class PostJobActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
@@ -29,13 +29,15 @@ class PostJobActivity : AppCompatActivity() {
     private lateinit var selectedSkillsChipGroup: ChipGroup
     private lateinit var jobTypeInput: AutoCompleteTextView
     private lateinit var provinceInput: AutoCompleteTextView
-    private lateinit var locationInput: TextInputEditText
+    private lateinit var cityInput: AutoCompleteTextView
     private lateinit var salaryRangeInput: AutoCompleteTextView
     private lateinit var experienceInput: AutoCompleteTextView
     private lateinit var descriptionInput: TextInputEditText
     private lateinit var requirementsInput: TextInputEditText
     private lateinit var postButton: MaterialButton
     private val selectedSkills = mutableListOf<String>()
+    private var selectedProvince: String = ""
+    private var selectedCity: String = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPostJobBinding.inflate(layoutInflater)
@@ -55,6 +57,7 @@ class PostJobActivity : AppCompatActivity() {
         }
         initializeViews()
         setupJobTypeDropdown()
+        setupLocationDropdowns()
         setupPostButton()
     }
     private fun initializeViews() {
@@ -65,7 +68,7 @@ class PostJobActivity : AppCompatActivity() {
         selectedSkillsChipGroup = binding.selectedSkillsChipGroup
         jobTypeInput = binding.jobTypeInput
         provinceInput = binding.provinceInput
-        locationInput = binding.locationInput
+        cityInput = binding.cityInput
         salaryRangeInput = binding.salaryRangeInput
         experienceInput = binding.experienceInput
         descriptionInput = binding.descriptionInput
@@ -86,12 +89,7 @@ class PostJobActivity : AppCompatActivity() {
         val jobTypes = arrayOf("Full-time", "Part-time", "Contract", "Internship", "Remote")
         val typeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, jobTypes)
         jobTypeInput.setAdapter(typeAdapter)
-        val provinces = arrayOf(
-            "Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal",
-            "Limpopo", "Mpumalanga", "Northern Cape", "North West", "Western Cape"
-        )
-        val provinceAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, provinces)
-        provinceInput.setAdapter(provinceAdapter)
+        // Location dropdowns are now handled by setupLocationDropdowns()
         val salaryOptions = arrayOf(
             "R0 - R10,000",
             "R10,000 - R20,000",
@@ -105,6 +103,55 @@ class PostJobActivity : AppCompatActivity() {
         val yearsOptions = arrayOf("0-1 years", "1-3 years", "3-5 years", "5-10 years", "10+ years")
         val experienceAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, yearsOptions)
         experienceInput.setAdapter(experienceAdapter)
+    }
+
+    private fun setupLocationDropdowns() {
+        // Test location data first
+        val testResult = LocationUtils.testLocationData()
+        android.util.Log.d("PostJobActivity", "Location test result:\n$testResult")
+
+        LocationUtils.setupCascadingLocationSpinners(
+            context = this,
+            provinceSpinner = provinceInput,
+            citySpinner = cityInput
+        ) { province, city ->
+            selectedProvince = province
+            selectedCity = city
+            android.util.Log.d("PostJobActivity", "Location selected: $province, $city")
+            Toast.makeText(this, "Selected: $city, $province", Toast.LENGTH_SHORT).show()
+        }
+
+        // Add test functionality - you can remove this later
+        provinceInput.setOnLongClickListener {
+            testLocationDropdowns()
+            true
+        }
+    }
+
+    private fun testLocationDropdowns() {
+        Toast.makeText(this, "Testing location dropdowns...", Toast.LENGTH_SHORT).show()
+
+        // Simulate selecting Gauteng
+        provinceInput.setText("Gauteng", false)
+
+        // Manually trigger the province selection
+        val cities = com.example.jobrec.models.LocationData.getCitiesForProvince("Gauteng")
+        android.util.Log.d("PostJobActivity", "Test: Found ${cities.size} cities for Gauteng")
+        android.util.Log.d("PostJobActivity", "Test: Cities = ${cities.take(5)}")
+
+        if (cities.isNotEmpty()) {
+            val cityAdapter = android.widget.ArrayAdapter(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                cities.toMutableList()
+            )
+            cityInput.setAdapter(cityAdapter)
+            cityInput.isEnabled = true
+            cityInput.setText("", false)
+            cityInput.threshold = 1
+
+            Toast.makeText(this, "City dropdown should now have ${cities.size} cities", Toast.LENGTH_LONG).show()
+        }
     }
     private fun updateSpecializationDropdown(field: String) {
         val subFields = FieldCategories.fields[field] ?: listOf()
@@ -192,12 +239,8 @@ class PostJobActivity : AppCompatActivity() {
             jobTypeInput.error = "Job type is required"
             isValid = false
         }
-        if (provinceInput.text.isNullOrBlank()) {
-            provinceInput.error = "Province is required"
-            isValid = false
-        }
-        if (locationInput.text.isNullOrBlank()) {
-            locationInput.error = "Specific location is required"
+        if (!LocationUtils.isValidLocationSelection(selectedProvince, selectedCity)) {
+            Toast.makeText(this, "Please select both province and city", Toast.LENGTH_SHORT).show()
             isValid = false
         }
         if (salaryRangeInput.text.isNullOrBlank()) {
@@ -225,8 +268,8 @@ class PostJobActivity : AppCompatActivity() {
             "companyName" to company.companyName,
             "jobField" to jobFieldInput.text.toString(),
             "specialization" to jobSpecializationInput.text.toString(),
-            "province" to provinceInput.text.toString(),
-            "location" to locationInput.text.toString(),
+            "province" to selectedProvince,
+            "city" to selectedCity,
             "salary" to salaryRangeInput.text.toString(),
             "type" to jobTypeInput.text.toString(),
             "experienceLevel" to experienceInput.text.toString(),
@@ -252,8 +295,8 @@ class PostJobActivity : AppCompatActivity() {
                             companyName = company.companyName,
                             jobField = jobFieldInput.text.toString(),
                             specialization = jobSpecializationInput.text.toString(),
-                            province = provinceInput.text.toString(),
-                            location = locationInput.text.toString(),
+                            province = selectedProvince,
+                            city = selectedCity,
                             salary = salaryRangeInput.text.toString(),
                             type = jobTypeInput.text.toString(),
                             jobType = jobTypeInput.text.toString(),
@@ -264,14 +307,9 @@ class PostJobActivity : AppCompatActivity() {
                             postedDate = com.google.firebase.Timestamp.now(),
                             status = "active"
                         )
-                        lifecycleScope.launch {
-                            try {
-                                val notificationManager = NotificationManager()
-                                notificationManager.sendNewJobNotification(job)
-                            } catch (e: Exception) {
-                                android.util.Log.e("PostJobActivity", "Error sending notification", e)
-                            }
-                        }
+
+
+
                         Toast.makeText(this, "Job posted successfully", Toast.LENGTH_SHORT).show()
                         finish()
                     }
@@ -287,6 +325,8 @@ class PostJobActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error posting job: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             onBackPressed()

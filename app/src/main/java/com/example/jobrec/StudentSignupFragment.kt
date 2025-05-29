@@ -44,7 +44,7 @@ class StudentSignupFragment : Fragment() {
             email = email.lowercase(),
             phoneNumber = "",
             province = "",
-            address = "",
+            city = "",
             summary = "",
             linkedin = "",
             github = "",

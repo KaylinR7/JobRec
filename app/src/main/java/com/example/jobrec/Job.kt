@@ -9,7 +9,7 @@ data class Job(
     val title: String = "",
     val companyId: String = "",
     val companyName: String = "",
-    val location: String = "",
+    val city: String = "",
     val salary: String = "",
     val type: String = "",
     val jobType: String = "",
@@ -61,7 +61,7 @@ data class Job(
         parcel.writeString(title)
         parcel.writeString(companyId)
         parcel.writeString(companyName)
-        parcel.writeString(location)
+        parcel.writeString(city)
         parcel.writeString(salary)
         parcel.writeString(type)
         parcel.writeString(jobType)

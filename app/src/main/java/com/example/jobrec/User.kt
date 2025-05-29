@@ -9,7 +9,7 @@ data class User(
     val email: String = "",
     val phoneNumber: String = "",
     val province: String = "",
-    val address: String = "",
+    val city: String = "",
     val summary: String = "",
     val skills: List<String> = emptyList(),
     val hobbies: List<String> = emptyList(),
@@ -69,7 +69,7 @@ data class User(
         parcel.writeString(email)
         parcel.writeString(phoneNumber)
         parcel.writeString(province)
-        parcel.writeString(address)
+        parcel.writeString(city)
         parcel.writeString(summary)
         parcel.writeStringList(skills)
         parcel.writeStringList(hobbies)

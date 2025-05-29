@@ -2,7 +2,6 @@ package com.example.jobrec.repositories
 import com.example.jobrec.models.Conversation
 import com.example.jobrec.models.Message
 import com.example.jobrec.models.InterviewDetails
-import com.example.jobrec.services.NotificationManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
@@ -50,22 +49,8 @@ class MessageRepository {
                 )
                 .await()
             android.util.Log.d("MessageRepo", "Conversation updated successfully")
-            try {
-                val conversation = conversationDoc.toObject(Conversation::class.java)
-                if (conversation != null) {
-                    withContext(Dispatchers.IO) {
-                        try {
-                            val notificationManager = NotificationManager()
-                            notificationManager.sendNewMessageNotification(newMessage, conversation)
-                            android.util.Log.d("MessageRepo", "Message notification sent successfully")
-                        } catch (e: Exception) {
-                            android.util.Log.e("MessageRepo", "Error sending message notification", e)
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("MessageRepo", "Error preparing notification", e)
-            }
+
+
         }
         return messageId
     }
@@ -111,5 +96,55 @@ class MessageRepository {
             fileName = fileName
         )
         sendMessage(message)
+    }
+
+    private suspend fun getSenderName(senderId: String): String {
+        return try {
+            // First check if it's a company user
+            val companyQuery = db.collection("companies")
+                .whereEqualTo("userId", senderId)
+                .get()
+                .await()
+
+            if (!companyQuery.isEmpty) {
+                companyQuery.documents[0].getString("companyName") ?: "Company"
+            } else {
+                // Check if it's a regular user
+                val userDoc = db.collection("users")
+                    .document(senderId)
+                    .get()
+                    .await()
+
+                if (userDoc.exists()) {
+                    val firstName = userDoc.getString("name") ?: ""
+                    val lastName = userDoc.getString("surname") ?: ""
+                    "$firstName $lastName".trim().ifEmpty { "User" }
+                } else {
+                    "Unknown User"
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MessageRepo", "Error getting sender name", e)
+            "Unknown User"
+        }
+    }
+
+    private suspend fun getSenderType(senderId: String): String {
+        return try {
+            // Check if it's a company user
+            val companyQuery = db.collection("companies")
+                .whereEqualTo("userId", senderId)
+                .get()
+                .await()
+
+            if (!companyQuery.isEmpty) {
+                "company"
+            } else {
+                "student"
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MessageRepo", "Error getting sender type", e)
+            "unknown"
+        }
     }
 }

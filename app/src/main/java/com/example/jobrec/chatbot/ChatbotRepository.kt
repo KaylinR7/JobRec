@@ -1,25 +1,38 @@
 package com.example.jobrec.chatbot
 import android.content.Context
 import android.util.Log
-import com.example.jobrec.BuildConfig
+import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.generationConfig
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.UUID
 class ChatbotRepository(private val context: Context) {
-    private val huggingFaceService = HuggingFaceService()
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private val TAG = "ChatbotRepository"
-    private val huggingFaceToken: String
-        get() = retrieveHuggingFaceToken()
+
+    private val geminiApiKey = "AIzaSyCZygJPVrqx9BcECUovRds6mnFCNhPg9IY"
+
+    private val generativeModel = GenerativeModel(
+        modelName = "gemini-pro",
+        apiKey = geminiApiKey,
+        generationConfig = generationConfig {
+            temperature = 0.7f
+            topK = 40
+            topP = 0.95f
+            maxOutputTokens = 200
+        }
+    )
     private val helpTopics = mapOf(
         "what is jobrec" to "JobRec is a job recruitment app that connects job seekers with employers. It allows students to search for jobs, submit applications, and communicate with potential employers. Companies can post job openings, review applications, and connect with qualified candidates.",
         "what is careerworx" to "Careerworx is a job recruitment app that connects job seekers with employers. It allows students to search for jobs, submit applications, and communicate with potential employers. Companies can post job openings, review applications, and connect with qualified candidates.",
         "about jobrec" to "CareerWorx is a comprehensive job recruitment platform designed to streamline the job search and hiring process. It offers features for both job seekers and employers, including job listings, application management, messaging, and profile customization.",
         "how does jobrec work" to "CareerWorx works by connecting job seekers with employers. As a student, you can create a profile, search for jobs, and submit applications. Employers can post job openings, review applications, and communicate with candidates. The app facilitates the entire recruitment process from job posting to hiring.",
-        "app features" to "JobRec offers many features including job search with filters, application tracking, saved jobs, messaging with employers, profile management, CV/resume uploads, and notifications for job matches. Companies can post jobs, search for candidates, review applications, and communicate with applicants.",
+        "app features" to "JobRec offers many features including job search with filters, application tracking, saved jobs, messaging with employers, profile management, and CV/resume uploads. Companies can post jobs, search for candidates, review applications, and communicate with applicants.",
         "job search" to "To search for jobs, go to the Search tab and use the filters to narrow down results. You can filter by job type, location, experience level, and more to find positions that match your qualifications and preferences.",
         "profile" to "To update your profile, go to the Profile tab and tap on the fields you want to edit. Your profile showcases your skills, experience, and education to potential employers, so keep it up-to-date!",
         "applications" to "You can view your job applications in the Applications tab. You'll see the status of each application (pending, reviewed, accepted, or rejected) and can track your progress throughout the hiring process.",
@@ -43,12 +56,12 @@ class ChatbotRepository(private val context: Context) {
         "company dashboard" to "The Company Dashboard provides an overview of your job postings, applications received, and recent activity. It's your central hub for managing recruitment activities.",
         "delete account" to "To delete your account, please contact our support team at support@careerworx.com. Note that this action is permanent and will remove all your data from our system.",
         "change password" to "To change your password, go to the Profile section and tap on the 'Change Password' option. You'll need to enter your current password and then create a new one.",
-        "notifications" to "You can manage your notification settings in the Profile section under 'Notification Preferences'. You can choose which alerts you want to receive and how you receive them.",
+
         "privacy" to "JobRec takes your privacy seriously. Your personal information is only shared with employers when you apply for a job. You can review our full privacy policy in the app settings.",
         "data security" to "JobRec uses encryption and secure servers to protect your data. We never share your information with third parties without your consent.",
         "contact employer" to "You can contact employers through the chat feature after your application has been accepted. This allows for direct communication about job details, interviews, or any questions.",
         "messaging" to "The messaging feature allows direct communication between candidates and employers. You can access your conversations from the Messages section of the app.",
-        "schedule interview" to "Employers can schedule interviews through the chat feature. You'll receive a notification when an interview is proposed, and you can accept or suggest an alternative time.",
+        "schedule interview" to "Employers can schedule interviews through the chat feature. You'll see interview proposals in your messages, and you can accept or suggest an alternative time.",
         "app not working" to "If you're experiencing issues with the app, try these steps: 1) Restart the app, 2) Check your internet connection, 3) Update to the latest version, 4) Restart your device. If problems persist, contact support.",
         "bug report" to "To report a bug, please email support@careerworx.com with details about the issue, including what you were doing when it occurred and any error messages you received.",
         "slow app" to "If the app is running slowly, try clearing your cache, ensuring you have a stable internet connection, and closing other apps running in the background.",
@@ -77,8 +90,8 @@ class ChatbotRepository(private val context: Context) {
             return fuzzyMatch
         }
         return try {
-            val response = huggingFaceService.generateResponse(query, huggingFaceToken)
-            if (response.contains("Error:") || response.isBlank() || response.contains("404")) {
+            val response = getGeminiResponse(query)
+            if (response.contains("Error:") || response.isBlank()) {
                 val fallbackResponse = getFallbackResponse(query)
                 saveInteraction(query, fallbackResponse)
                 return fallbackResponse
@@ -86,10 +99,28 @@ class ChatbotRepository(private val context: Context) {
             saveInteraction(query, response)
             response
         } catch (e: Exception) {
-            Log.e(TAG, "Error getting chatbot response", e)
+            Log.e(TAG, "Error getting chatbot response from Gemini", e)
             val fallbackResponse = getFallbackResponse(query)
             saveInteraction(query, fallbackResponse)
             return fallbackResponse
+        }
+    }
+
+    private suspend fun getGeminiResponse(query: String): String = withContext(Dispatchers.IO) {
+        try {
+            val prompt = """
+                You are a helpful assistant for CareerWorx (also known as JobRec), a job recruitment app.
+                Answer questions about the app's features, job searching, applications, profiles, and general career advice.
+                Keep responses concise, helpful, and friendly. Focus on practical guidance.
+
+                User question: $query
+            """.trimIndent()
+
+            val response = generativeModel.generateContent(prompt)
+            response.text ?: "I'm sorry, I couldn't generate a response. Please try asking your question differently."
+        } catch (e: Exception) {
+            Log.e(TAG, "Error calling Gemini API", e)
+            throw e
         }
     }
     private fun getFallbackResponse(query: String): String {
@@ -106,7 +137,7 @@ class ChatbotRepository(private val context: Context) {
                     (lowerQuery.contains("jobrec") || lowerQuery.contains("app")) ->
                 "JobRec works by connecting job seekers with employers. As a student, you can create a profile, search for jobs using filters, and submit applications. Employers can post job openings, review applications, and communicate with candidates. The app handles the entire recruitment process from job posting to hiring."
             lowerQuery.contains("feature") || lowerQuery.contains("what can") || lowerQuery.contains("functionality") ->
-                "JobRec offers many features including: job search with filters, application tracking, saved jobs, messaging with employers, profile management, CV/resume uploads, and notifications for job matches. Companies can post jobs, search for candidates, review applications, and communicate with applicants."
+                "JobRec offers many features including: job search with filters, application tracking, saved jobs, messaging with employers, profile management, and CV/resume uploads. Companies can post jobs, search for candidates, review applications, and communicate with applicants."
             lowerQuery.contains("cv") || lowerQuery.contains("resume") ->
                 "To update your CV or resume, go to the Profile tab and scroll down to the CV section. You can edit your details including education, experience, skills, and achievements. Keep your CV updated to improve your chances of getting hired!"
             lowerQuery.contains("profile") || lowerQuery.contains("edit") || lowerQuery.contains("change") ->
@@ -330,7 +361,5 @@ class ChatbotRepository(private val context: Context) {
             Log.e(TAG, "Error saving chatbot interaction", e)
         }
     }
-    private fun retrieveHuggingFaceToken(): String {
-        return BuildConfig.HUGGING_FACE_TOKEN
-    }
+
 }

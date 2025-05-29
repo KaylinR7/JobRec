@@ -1,0 +1,5 @@
+# List your recent commits to identify the rebranding ones
+git log --oneline
+
+# Revert each rebranding commit individually
+git revert <commit-hash>

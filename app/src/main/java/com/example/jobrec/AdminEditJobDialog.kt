@@ -61,7 +61,7 @@ class AdminEditJobDialog : DialogFragment() {
             if (isNewJob) "Add New Job" else "Edit Job: ${job.title}"
         view.findViewById<TextInputEditText>(R.id.jobTitleEditText).setText(job.title)
         view.findViewById<TextInputEditText>(R.id.companyNameEditText).setText(job.companyName)
-        view.findViewById<TextInputEditText>(R.id.locationEditText).setText(job.location)
+        view.findViewById<TextInputEditText>(R.id.locationEditText).setText(job.city)
         view.findViewById<TextInputEditText>(R.id.salaryRangeEditText).setText(job.salary)
         view.findViewById<TextInputEditText>(R.id.descriptionEditText).setText(job.description)
         val jobTypeDropdown = view.findViewById<AutoCompleteTextView>(R.id.jobTypeDropdown)
@@ -73,7 +73,7 @@ class AdminEditJobDialog : DialogFragment() {
                 if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
             }
         } else {
-            "Full-time" 
+            "Full-time"
         }
         jobTypeDropdown.setText(currentJobType, false)
         val experienceLevelDropdown = view.findViewById<AutoCompleteTextView>(R.id.experienceLevelDropdown)
@@ -85,7 +85,7 @@ class AdminEditJobDialog : DialogFragment() {
                 if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
             }
         } else {
-            "Entry Level" 
+            "Entry Level"
         }
         experienceLevelDropdown.setText(currentExperienceLevel, false)
         val statusDropdown = view.findViewById<AutoCompleteTextView>(R.id.statusDropdown)
@@ -97,7 +97,7 @@ class AdminEditJobDialog : DialogFragment() {
                 if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
             }
         } else {
-            "Active" 
+            "Active"
         }
         statusDropdown.setText(currentStatus, false)
     }
@@ -122,7 +122,7 @@ class AdminEditJobDialog : DialogFragment() {
         val updatedJob = job.copy(
             title = newTitle,
             companyName = newCompanyName,
-            location = newLocation,
+            city = newLocation,
             salary = newSalary,
             description = newDescription,
             jobType = newJobType,

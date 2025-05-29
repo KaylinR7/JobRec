@@ -8,11 +8,7 @@
         android:icon="@drawable/ic_person"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_notifications"
-        android:title="Notifications"
-        android:icon="@drawable/ic_notifications"
-        app:showAsAction="ifRoom" />
+
 
     <item
         android:id="@+id/action_saved_jobs"
@@ -31,6 +27,7 @@
         android:title="My Profile"
         android:icon="@drawable/ic_person"
         app:showAsAction="never" />
+
 
 
     <item

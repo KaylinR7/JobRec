@@ -157,22 +157,19 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/cityLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:boxStrokeColor="@android:color/black"
-                app:hintTextColor="@android:color/black">
+                android:hint="City">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etAddress"
+                <AutoCompleteTextView
+                    android:id="@+id/cityInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Address"
-                    android:inputType="textPostalAddress"
-                    android:minLines="2"
-                    android:gravity="top"
-                    style="@style/Widget.CareerWorx.TextInputEditText"/>
+                    android:inputType="none" />
+
             </com.google.android.material.textfield.TextInputLayout>
 
 

@@ -50,6 +50,7 @@ import com.example.jobrec.adapters.CertificateAdapter
 import com.example.jobrec.adapters.CertificateBadgeAdapter
 import com.example.jobrec.adapters.CertificateBadge
 import com.example.jobrec.utils.ImageUtils
+import com.example.jobrec.utils.LocationUtils
 class ProfileActivity : AppCompatActivity() {
     private lateinit var toolbar: MaterialToolbar
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
@@ -57,7 +58,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var surnameInput: TextInputEditText
     private lateinit var emailInput: TextInputEditText
     private lateinit var phoneNumberInput: TextInputEditText
-    private lateinit var addressInput: TextInputEditText
+    private lateinit var cityInput: AutoCompleteTextView
     private lateinit var summaryInput: TextInputEditText
     private lateinit var skillsInput: AutoCompleteTextView
     private lateinit var linkedinInput: TextInputEditText
@@ -73,6 +74,8 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var subFieldInput: AutoCompleteTextView
     private lateinit var skillsChipGroup: ChipGroup
     private val selectedSkills = mutableListOf<String>()
+    private var selectedProvince: String = ""
+    private var selectedCity: String = ""
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
@@ -164,7 +167,7 @@ class ProfileActivity : AppCompatActivity() {
         surnameInput = findViewById(R.id.surnameInput)
         emailInput = findViewById(R.id.emailInput)
         phoneNumberInput = findViewById(R.id.phoneNumberInput)
-        addressInput = findViewById(R.id.addressInput)
+        cityInput = findViewById(R.id.cityInput)
         summaryInput = findViewById(R.id.summaryInput)
         skillsInput = findViewById(R.id.skillsInput)
         linkedinInput = findViewById(R.id.linkedinInput)
@@ -315,32 +318,15 @@ class ProfileActivity : AppCompatActivity() {
         yearsOfExperienceInput.setOnClickListener {
             yearsOfExperienceInput.showDropDown()
         }
-        val provinces = arrayOf(
-            "Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal",
-            "Limpopo", "Mpumalanga", "Northern Cape", "North West", "Western Cape"
-        )
-        val provinceAdapter = object : ArrayAdapter<String>(
-            this,
-            android.R.layout.simple_dropdown_item_1line,
-            provinces
-        ) {
-            override fun getFilter(): Filter {
-                return object : Filter() {
-                    override fun performFiltering(constraint: CharSequence?): FilterResults {
-                        val results = FilterResults()
-                        results.values = provinces
-                        results.count = provinces.size
-                        return results
-                    }
-                    override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
-                        notifyDataSetChanged()
-                    }
-                }
-            }
-        }
-        provinceInput.setAdapter(provinceAdapter)
-        provinceInput.setOnClickListener {
-            provinceInput.showDropDown()
+        // Setup cascading location dropdowns
+        LocationUtils.setupCascadingLocationSpinners(
+            context = this,
+            provinceSpinner = provinceInput,
+            citySpinner = cityInput
+        ) { province, city ->
+            selectedProvince = province
+            selectedCity = city
+            Log.d(TAG, "Location selected: $city, $province")
         }
         val salaryOptions = arrayOf(
             "R0 - R10,000",
@@ -417,7 +403,7 @@ class ProfileActivity : AppCompatActivity() {
         surnameInput.setText("")
         emailInput.setText("")
         phoneNumberInput.setText("")
-        addressInput.setText("")
+        cityInput.setText("")
         summaryInput.setText("")
         linkedinInput.setText("")
         githubInput.setText("")
@@ -462,9 +448,26 @@ class ProfileActivity : AppCompatActivity() {
                         surnameInput.setText(document.getString("surname"))
                         emailInput.setText(document.getString("email"))
                         phoneNumberInput.setText(document.getString("phoneNumber"))
-                        addressInput.setText(document.getString("address"))
                         summaryInput.setText(document.getString("summary"))
-                        provinceInput.setText(document.getString("province") ?: "")
+
+                        // Load location data and setup cascading dropdowns
+                        val province = document.getString("province") ?: ""
+                        val city = document.getString("city") ?: ""
+
+                        if (province.isNotEmpty() || city.isNotEmpty()) {
+                            // Reinitialize dropdowns with loaded data
+                            LocationUtils.setupCascadingLocationSpinners(
+                                context = this@ProfileActivity,
+                                provinceSpinner = provinceInput,
+                                citySpinner = cityInput,
+                                selectedProvince = province,
+                                selectedCity = city
+                            ) { selectedProv, selectedCit ->
+                                selectedProvince = selectedProv
+                                selectedCity = selectedCit
+                                Log.d(TAG, "Location loaded: $selectedCit, $selectedProv")
+                            }
+                        }
                         yearsOfExperienceInput.setText(document.getString("yearsOfExperience") ?: "")
                         expectedSalaryInput.setText(document.getString("expectedSalary") ?: "")
                         val field = document.getString("field") ?: ""
@@ -565,7 +568,7 @@ class ProfileActivity : AppCompatActivity() {
                 "surname" to surnameInput.text.toString().trim(),
                 "email" to emailInput.text.toString().trim(),
                 "phoneNumber" to phoneNumberInput.text.toString().trim(),
-                "address" to addressInput.text.toString().trim(),
+                "city" to selectedCity,
                 "summary" to summaryInput.text.toString().trim(),
                 "linkedin" to linkedinInput.text.toString().trim(),
                 "github" to githubInput.text.toString().trim(),
@@ -575,7 +578,7 @@ class ProfileActivity : AppCompatActivity() {
                 "education" to educationAdapter.getEducationList(),
                 "references" to getReferencesList(),
                 "certificates" to certificateAdapter.getCertificatesList(),
-                "province" to provinceInput.text.toString().trim(),
+                "province" to selectedProvince,
                 "yearsOfExperience" to yearsOfExperienceInput.text.toString().trim(),
                 "expectedSalary" to expectedSalaryInput.text.toString().trim(),
                 "field" to fieldInput.text.toString().trim(),

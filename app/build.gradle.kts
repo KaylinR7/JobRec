@@ -22,6 +22,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val huggingFaceToken = localProperties.getProperty("huggingface.token") ?: "YOUR_TOKEN_HERE"
         buildConfigField("String", "HUGGING_FACE_TOKEN", "\"$huggingFaceToken\"")
+
+        val geminiApiKey = localProperties.getProperty("gemini.api.key") ?: "AIzaSyCZygJPVrqx9BcECUovRds6mnFCNhPg9IY"
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
     }
     buildTypes {
         release {
@@ -65,7 +68,8 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
-    implementation("com.google.firebase:firebase-messaging-ktx")
+
+
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.google.android.gms:play-services-base:18.3.0")
     implementation("com.google.android.gms:play-services-basement:18.3.0")
@@ -87,5 +91,9 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // Google Gemini AI
+    implementation("com.google.ai.client.generativeai:generativeai:0.2.2")
+
     // PDF viewing dependencies - using WebView for better compatibility
 }

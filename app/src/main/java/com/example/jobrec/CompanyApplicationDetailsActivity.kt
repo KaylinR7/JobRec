@@ -9,12 +9,14 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.jobrec.adapters.CertificateBadgeAdapter
 import com.example.jobrec.adapters.CertificateBadge
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.jobrec.utils.PdfUtils
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 class CompanyApplicationDetailsActivity : AppCompatActivity() {
@@ -86,6 +88,8 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                     "applicantId=$applicantId, resumeUrl=$resumeUrl")
             updateApplicationStatus("reviewed")
 
+
+
             // Priority: Try to show CV/Resume first, then fallback to profile
             if (!resumeUrl.isNullOrEmpty()) {
                 android.util.Log.d("CompanyApplicationDetails", "Resume URL found for review: $resumeUrl")
@@ -156,6 +160,8 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
             }
     }
     private fun showCandidateProfileDialog(candidate: User) {
+
+
         val view = createCandidateProfileView(candidate)
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("${candidate.name} ${candidate.surname}")
@@ -176,7 +182,7 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
         val phoneText = view.findViewById<TextView>(R.id.phoneText)
         phoneText.text = candidate.phoneNumber
         val locationText = view.findViewById<TextView>(R.id.locationText)
-        locationText.text = candidate.address
+        locationText.text = "${candidate.city}, ${candidate.province}"
         val summaryText = view.findViewById<TextView>(R.id.summaryText)
         summaryText.text = candidate.summary
         val skillsText = view.findViewById<TextView>(R.id.skillsText)
@@ -404,6 +410,9 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                 )
                 .addOnSuccessListener {
                     Toast.makeText(this, "Application $newStatus", Toast.LENGTH_SHORT).show()
+
+
+
                     loadApplicationDetails()
                 }
                 .addOnFailureListener { e ->

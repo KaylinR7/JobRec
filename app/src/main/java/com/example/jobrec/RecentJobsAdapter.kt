@@ -35,7 +35,7 @@ class RecentJobsAdapter(private val onJobClick: (Job) -> Unit) :
         fun bind(job: Job) {
             titleTextView.text = job.title
             companyTextView.text = job.companyName
-            locationTextView.text = job.location
+            locationTextView.text = job.city
             jobTypeChip.text = job.type
             cardView.setOnClickListener { onJobClick(job) }
 

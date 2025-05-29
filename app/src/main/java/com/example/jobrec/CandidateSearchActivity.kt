@@ -15,8 +15,10 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.launch
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -261,6 +263,7 @@ class CandidateSearchActivity : AppCompatActivity() {
         }
     }
     private fun showCandidateProfileDialog(candidate: User) {
+
         val view = createCandidateProfileView(candidate)
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("${candidate.name} ${candidate.surname}")
