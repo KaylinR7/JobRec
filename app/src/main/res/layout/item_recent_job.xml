@@ -27,7 +27,7 @@
                 android:text="Job Title"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="@color/black"
+                android:textColor="?android:attr/textColorPrimary"
                 android:maxLines="2"
                 android:ellipsize="end" />
 
@@ -52,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:text="Match"
                     android:textSize="8sp"
-                    android:textColor="@color/black"/>
+                    android:textColor="?android:attr/textColorSecondary"/>
 
             </LinearLayout>
 
@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:text="Company Name"
             android:textSize="14sp"
-            android:textColor="@color/black"
+            android:textColor="?android:attr/textColorSecondary"
             android:layout_marginTop="4dp" />
 
         <TextView
@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:text="Location"
             android:textSize="14sp"
-            android:textColor="@color/black"
+            android:textColor="?android:attr/textColorSecondary"
             android:layout_marginTop="4dp" />
 
         <TextView
@@ -82,7 +82,7 @@
             android:layout_height="wrap_content"
             android:text="Posted 2 days ago"
             android:textSize="12sp"
-            android:textColor="@color/black"
+            android:textColor="?android:attr/textColorSecondary"
             android:layout_marginTop="8dp" />
 
         <com.google.android.material.chip.Chip

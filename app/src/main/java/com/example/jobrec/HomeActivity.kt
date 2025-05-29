@@ -339,7 +339,7 @@ class HomeActivity : AppCompatActivity() {
         val subtitle = when {
             jobCount == 0 && isHighMatch -> "No matching jobs found at the moment"
             jobCount == 0 -> "No recommendations available at the moment"
-            isHighMatch -> "Recommended jobs (70%+ compatibility) • $jobCount found"
+            isHighMatch -> "Recommended jobs • $jobCount found"
             else -> "Recent job postings • $jobCount available"
         }
         binding.recommendedJobsSubtitle.text = subtitle

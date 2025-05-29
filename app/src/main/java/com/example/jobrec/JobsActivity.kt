@@ -76,22 +76,50 @@ class JobsActivity : AppCompatActivity() {
         }
     }
     private fun loadJobs() {
+        // Show loading indicator
+        findViewById<View>(R.id.progressBar)?.visibility = View.VISIBLE
+
+        // Hide empty state and show recycler view
+        findViewById<View>(R.id.emptyStateLayout)?.visibility = View.GONE
+        findViewById<View>(R.id.jobsRecyclerView)?.visibility = View.VISIBLE
+
         db.collection("jobs")
+            .whereEqualTo("status", "active")
+            .orderBy("postedDate", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
                 val allJobs = documents.mapNotNull { doc ->
                     try {
                         val job = doc.toObject(Job::class.java)
                         job.id = doc.id
-                        if (job.status == "active") job else null
+                        job
                     } catch (e: Exception) {
                         null
                     }
-                }.sortedByDescending { it.postedDate.toDate() }
+                }
+
+                // Hide loading indicator
+                findViewById<View>(R.id.progressBar)?.visibility = View.GONE
+
+                // Update adapter with jobs
                 jobsAdapter.submitList(allJobs)
+
+                // Show appropriate state
+                if (allJobs.isEmpty()) {
+                    findViewById<View>(R.id.emptyStateLayout)?.visibility = View.VISIBLE
+                    findViewById<View>(R.id.jobsRecyclerView)?.visibility = View.GONE
+                    Toast.makeText(this, "No active jobs found", Toast.LENGTH_SHORT).show()
+                } else {
+                    findViewById<View>(R.id.emptyStateLayout)?.visibility = View.GONE
+                    findViewById<View>(R.id.jobsRecyclerView)?.visibility = View.VISIBLE
+                    Toast.makeText(this, "Loaded ${allJobs.size} jobs", Toast.LENGTH_SHORT).show()
+                }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error loading jobs: ${e.message}", Toast.LENGTH_SHORT).show()
+                findViewById<View>(R.id.progressBar)?.visibility = View.GONE
+                findViewById<View>(R.id.emptyStateLayout)?.visibility = View.VISIBLE
+                findViewById<View>(R.id.jobsRecyclerView)?.visibility = View.GONE
+                Toast.makeText(this, "Error loading jobs: ${e.message}", Toast.LENGTH_LONG).show()
                 jobsAdapter.submitList(emptyList())
             }
     }
