@@ -16,6 +16,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.messaging.FirebaseMessaging
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.jobrec.ai.JobMatchingRepository
@@ -419,19 +420,72 @@ class HomeActivity : AppCompatActivity() {
     private fun testNotifications() {
         AlertDialog.Builder(this)
             .setTitle("Test Notifications")
-            .setMessage("This will send test notifications to demonstrate the notification system. Make sure notifications are enabled.")
-            .setPositiveButton("Test All") { _, _ ->
+            .setMessage("Choose notification test type:")
+            .setPositiveButton("Local Test") { _, _ ->
+                // Test local notifications (these work)
                 com.example.jobrec.notifications.LocalNotificationService.getInstance()
                     .testAllNotificationTypes(this)
-                Toast.makeText(this, "Test notifications sent!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Local test notifications sent!", Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("Clear All") { _, _ ->
+            .setNegativeButton("FCM Test") { _, _ ->
+                // Test real FCM notifications (these need server key)
+                testRealFCMNotifications()
+            }
+            .setNeutralButton("Clear All") { _, _ ->
                 com.example.jobrec.notifications.LocalNotificationService.getInstance()
                     .clearAllNotifications(this)
                 Toast.makeText(this, "All notifications cleared!", Toast.LENGTH_SHORT).show()
             }
-            .setNeutralButton("Cancel", null)
             .show()
+    }
+
+    private fun testRealFCMNotifications() {
+        lifecycleScope.launch {
+            try {
+                val currentUser = FirebaseAuth.getInstance().currentUser
+                if (currentUser == null) {
+                    Toast.makeText(this@HomeActivity, "Please log in first", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                // Get current user's FCM token
+                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val token = task.result
+                        Log.d("HomeActivity", "Current FCM Token: $token")
+
+                        // Test sending a notification to self
+                        lifecycleScope.launch {
+                            val notificationManager = com.example.jobrec.notifications.NotificationManager.getInstance()
+
+                            // Simulate a meeting invitation notification
+                            try {
+                                notificationManager.sendMeetingInvitationNotification(
+                                    recipientId = currentUser.uid,
+                                    senderName = "Test Company",
+                                    jobTitle = "Test Position",
+                                    meetingDate = "Today",
+                                    meetingTime = "Now",
+                                    messageId = "test_message_123"
+                                )
+
+                                Toast.makeText(this@HomeActivity, "FCM test notification sent! Check logs for details.", Toast.LENGTH_LONG).show()
+
+                            } catch (e: Exception) {
+                                Log.e("HomeActivity", "Error testing FCM notification", e)
+                                Toast.makeText(this@HomeActivity, "FCM test failed: ${e.message}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    } else {
+                        Toast.makeText(this@HomeActivity, "Failed to get FCM token", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+            } catch (e: Exception) {
+                Log.e("HomeActivity", "Error in FCM test", e)
+                Toast.makeText(this, "FCM test error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(

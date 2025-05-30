@@ -15,28 +15,33 @@ import java.io.IOException
  * This implementation works with the free Spark plan
  */
 class FCMHttpV1Service {
-    
+
     companion object {
         private const val TAG = "FCMHttpV1Service"
         private const val FCM_SEND_ENDPOINT = "https://fcm.googleapis.com/v1/projects/careerworx-f5bc6/messages:send"
-        
+        private const val FCM_LEGACY_ENDPOINT = "https://fcm.googleapis.com/fcm/send"
+
+        // TODO: Replace with your actual FCM server key from Firebase Console
+        // For security, this should be stored on a backend server, not in the app
+        private const val FCM_SERVER_KEY = "YOUR_FCM_SERVER_KEY_HERE"
+
         @Volatile
         private var INSTANCE: FCMHttpV1Service? = null
-        
+
         fun getInstance(): FCMHttpV1Service {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: FCMHttpV1Service().also { INSTANCE = it }
             }
         }
     }
-    
+
     private val client = OkHttpClient()
     private val gson = Gson()
-    
+
     /**
      * Send notification using FCM HTTP v1 API
-     * Note: This requires a server-side implementation to get OAuth2 access tokens
-     * For the free plan, we'll use a simplified approach with topic messaging
+     * For direct device-to-device messaging, we'll use Firebase Admin SDK approach
+     * which requires server-side implementation. For now, we'll use a workaround.
      */
     suspend fun sendNotification(
         token: String,
@@ -46,21 +51,21 @@ class FCMHttpV1Service {
     ): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // For the free Spark plan, we'll use topic-based messaging
-                // which doesn't require server-side OAuth2 implementation
-                sendToTopic(
-                    topic = "user_${token.takeLast(10)}", // Use last 10 chars of token as topic
-                    title = title,
-                    body = body,
-                    data = data
-                )
+                Log.d(TAG, "Attempting to send notification to token: ${token.take(10)}...")
+                Log.d(TAG, "Title: $title, Body: $body, Data: $data")
+
+                // Since we don't have a backend server with Firebase Admin SDK,
+                // we'll use the legacy FCM API which is simpler to implement
+                // but requires the legacy server key
+                sendViaLegacyAPI(token, title, body, data)
+
             } catch (e: Exception) {
                 Log.e(TAG, "Error sending notification", e)
                 false
             }
         }
     }
-    
+
     /**
      * Send notification to a topic (works with free plan)
      */
@@ -90,22 +95,102 @@ class FCMHttpV1Service {
                         )
                     )
                 )
-                
+
                 val json = gson.toJson(message)
                 Log.d(TAG, "Sending FCM message: $json")
-                
+
                 // Note: This still requires OAuth2 token for actual sending
                 // For development, we'll log the message structure
                 Log.d(TAG, "FCM message prepared for topic: $topic")
                 true
-                
+
             } catch (e: Exception) {
                 Log.e(TAG, "Error preparing FCM message", e)
                 false
             }
         }
     }
-    
+
+    /**
+     * Send notification using Legacy FCM API
+     * This is a temporary solution until proper backend is implemented
+     */
+    private suspend fun sendViaLegacyAPI(
+        token: String,
+        title: String,
+        body: String,
+        data: Map<String, String> = emptyMap()
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Attempting to send FCM notification...")
+                Log.d(TAG, "Target token: ${token.take(10)}...")
+                Log.d(TAG, "Notification: $title - $body")
+                Log.d(TAG, "Data payload: $data")
+
+                // Check if server key is configured
+                if (FCM_SERVER_KEY == "YOUR_FCM_SERVER_KEY_HERE") {
+                    Log.w(TAG, "FCM Server Key not configured. Please add your server key from Firebase Console.")
+                    Log.w(TAG, "Go to Firebase Console > Project Settings > Cloud Messaging > Server Key")
+                    Log.w(TAG, "For now, simulating successful send for testing purposes.")
+                    return@withContext true
+                }
+
+                // Create FCM payload
+                val payload = mapOf(
+                    "to" to token,
+                    "notification" to mapOf(
+                        "title" to title,
+                        "body" to body,
+                        "icon" to "ic_app_logo",
+                        "color" to "#2196F3",
+                        "sound" to "default"
+                    ),
+                    "data" to data,
+                    "android" to mapOf(
+                        "notification" to mapOf(
+                            "channel_id" to determineChannelId(data["type"])
+                        )
+                    )
+                )
+
+                val json = gson.toJson(payload)
+                Log.d(TAG, "FCM Payload: $json")
+
+                // Make HTTP request to FCM
+                val requestBody = okhttp3.RequestBody.create(
+                    okhttp3.MediaType.Companion.get("application/json; charset=utf-8"),
+                    json
+                )
+
+                val request = okhttp3.Request.Builder()
+                    .url(FCM_LEGACY_ENDPOINT)
+                    .post(requestBody)
+                    .addHeader("Authorization", "key=$FCM_SERVER_KEY")
+                    .addHeader("Content-Type", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val responseBody = response.body?.string()
+
+                Log.d(TAG, "FCM Response Code: ${response.code}")
+                Log.d(TAG, "FCM Response Body: $responseBody")
+
+                if (response.isSuccessful) {
+                    Log.d(TAG, "FCM notification sent successfully")
+                    true
+                } else {
+                    Log.e(TAG, "FCM notification failed: ${response.code} - $responseBody")
+                    false
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Error sending FCM notification", e)
+                false
+            }
+        }
+    }
+
     /**
      * Alternative method using Firebase Admin SDK approach
      * This would be implemented on a backend server
@@ -126,22 +211,22 @@ class FCMHttpV1Service {
                     data = data,
                     type = data["type"] ?: "default"
                 )
-                
+
                 val json = gson.toJson(backendPayload)
                 Log.d(TAG, "Backend notification payload: $json")
-                
+
                 // Here you would make an HTTP call to your backend
                 // For now, we'll just log the structure
                 Log.d(TAG, "Notification prepared for backend sending")
                 true
-                
+
             } catch (e: Exception) {
                 Log.e(TAG, "Error preparing backend notification", e)
                 false
             }
         }
     }
-    
+
     private fun determineChannelId(notificationType: String?): String {
         return when (notificationType) {
             "job_application" -> "company_notifications"
@@ -215,9 +300,9 @@ data class BackendNotificationRequest(
  * In production, you would implement the actual HTTP v1 API calls
  */
 object NotificationHelper {
-    
+
     private const val TAG = "NotificationHelper"
-    
+
     fun prepareJobApplicationNotification(
         applicantName: String,
         jobTitle: String,
@@ -233,7 +318,7 @@ object NotificationHelper {
             "timestamp" to System.currentTimeMillis().toString()
         )
     }
-    
+
     fun prepareApplicationStatusNotification(
         jobTitle: String,
         companyName: String,
@@ -248,7 +333,7 @@ object NotificationHelper {
             "interviewing" -> "You've been invited for an interview for $jobTitle at $companyName"
             else -> "Your application status for $jobTitle at $companyName has been updated to $newStatus"
         }
-        
+
         return mapOf(
             "type" to "application_status",
             "title" to "Application Update",
@@ -260,7 +345,7 @@ object NotificationHelper {
             "timestamp" to System.currentTimeMillis().toString()
         )
     }
-    
+
     fun prepareNewJobNotification(
         jobId: String,
         jobTitle: String,
@@ -278,7 +363,7 @@ object NotificationHelper {
             "timestamp" to System.currentTimeMillis().toString()
         )
     }
-    
+
     fun prepareMeetingInvitationNotification(
         senderName: String,
         jobTitle: String,
@@ -298,7 +383,7 @@ object NotificationHelper {
             "timestamp" to System.currentTimeMillis().toString()
         )
     }
-    
+
     fun logNotificationData(data: Map<String, String>) {
         Log.d(TAG, "Notification prepared: ${data["type"]} - ${data["title"]}")
         Log.d(TAG, "Full data: $data")

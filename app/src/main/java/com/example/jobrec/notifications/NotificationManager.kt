@@ -14,24 +14,24 @@ import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
 
 class NotificationManager private constructor() {
-    
+
     companion object {
         private const val TAG = "NotificationManager"
         private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1001
-        
+
         @Volatile
         private var INSTANCE: NotificationManager? = null
-        
+
         fun getInstance(): NotificationManager {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: NotificationManager().also { INSTANCE = it }
             }
         }
     }
-    
+
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
-    
+
     /**
      * Initialize FCM and request notification permissions
      */
@@ -39,20 +39,20 @@ class NotificationManager private constructor() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestNotificationPermission(context)
         }
-        
+
         // Get FCM token and save to user profile
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (!task.isSuccessful) {
                 Log.w(TAG, "Fetching FCM registration token failed", task.exception)
                 return@addOnCompleteListener
             }
-            
+
             val token = task.result
             Log.d(TAG, "FCM Registration Token: $token")
             saveFCMTokenToUser(token)
         }
     }
-    
+
     /**
      * Request notification permission for Android 13+
      */
@@ -71,13 +71,13 @@ class NotificationManager private constructor() {
             }
         }
     }
-    
+
     /**
      * Save FCM token to user's Firestore document
      */
     private fun saveFCMTokenToUser(token: String) {
         val userId = auth.currentUser?.uid ?: return
-        
+
         // Try updating user document first
         db.collection("users").document(userId)
             .update("fcmToken", token)
@@ -97,7 +97,7 @@ class NotificationManager private constructor() {
                     }
             }
     }
-    
+
     /**
      * Send notification for new job application
      */
@@ -110,7 +110,7 @@ class NotificationManager private constructor() {
         try {
             val companyDoc = db.collection("companies").document(companyId).get().await()
             val fcmToken = companyDoc.getString("fcmToken") ?: return
-            
+
             val notificationData = mapOf(
                 "type" to "job_application",
                 "title" to "New Job Application",
@@ -119,15 +119,15 @@ class NotificationManager private constructor() {
                 "jobTitle" to jobTitle,
                 "applicantName" to applicantName
             )
-            
+
             // Send via HTTP v1 API (implementation will be added)
             sendNotificationViaHTTPv1(fcmToken, notificationData)
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error sending job application notification", e)
         }
     }
-    
+
     /**
      * Send notification for application status update
      */
@@ -141,7 +141,7 @@ class NotificationManager private constructor() {
         try {
             val userDoc = db.collection("users").document(applicantId).get().await()
             val fcmToken = userDoc.getString("fcmToken") ?: return
-            
+
             val statusMessage = when (newStatus.lowercase()) {
                 "reviewed" -> "Your application for $jobTitle at $companyName has been reviewed"
                 "accepted", "hired" -> "Congratulations! Your application for $jobTitle at $companyName has been accepted"
@@ -150,7 +150,7 @@ class NotificationManager private constructor() {
                 "interviewing" -> "You've been invited for an interview for $jobTitle at $companyName"
                 else -> "Your application status for $jobTitle at $companyName has been updated to $newStatus"
             }
-            
+
             val notificationData = mapOf(
                 "type" to "application_status",
                 "title" to "Application Update",
@@ -160,14 +160,14 @@ class NotificationManager private constructor() {
                 "companyName" to companyName,
                 "status" to newStatus
             )
-            
+
             sendNotificationViaHTTPv1(fcmToken, notificationData)
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error sending application status notification", e)
         }
     }
-    
+
     /**
      * Send notification for new job posting (to matching students)
      */
@@ -185,7 +185,7 @@ class NotificationManager private constructor() {
                 .whereArrayContains("interests", jobField)
                 .get()
                 .await()
-            
+
             val notificationData = mapOf(
                 "type" to "new_job",
                 "title" to "New Job Match",
@@ -195,19 +195,19 @@ class NotificationManager private constructor() {
                 "companyName" to companyName,
                 "location" to location
             )
-            
+
             for (studentDoc in studentsSnapshot.documents) {
                 val fcmToken = studentDoc.getString("fcmToken")
                 if (fcmToken != null) {
                     sendNotificationViaHTTPv1(fcmToken, notificationData)
                 }
             }
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error sending new job notifications", e)
         }
     }
-    
+
     /**
      * Send notification for meeting invitation
      */
@@ -222,7 +222,7 @@ class NotificationManager private constructor() {
         try {
             val userDoc = db.collection("users").document(recipientId).get().await()
             val fcmToken = userDoc.getString("fcmToken") ?: return
-            
+
             val notificationData = mapOf(
                 "type" to "meeting_invitation",
                 "title" to "Meeting Invitation",
@@ -233,35 +233,53 @@ class NotificationManager private constructor() {
                 "meetingDate" to meetingDate,
                 "meetingTime" to meetingTime
             )
-            
+
             sendNotificationViaHTTPv1(fcmToken, notificationData)
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error sending meeting invitation notification", e)
         }
     }
-    
+
     /**
      * Send notification via Firebase HTTP v1 API
-     * This is a placeholder - actual implementation will use HTTP client
      */
     private suspend fun sendNotificationViaHTTPv1(
         fcmToken: String,
         data: Map<String, String>
     ) {
-        // This will be implemented with the HTTP v1 API service
-        Log.d(TAG, "Sending notification to token: ${fcmToken.take(10)}... with data: $data")
-        
-        // For now, we'll use the legacy method through Firebase Admin SDK
-        // In production, you would implement the HTTP v1 API call here
+        try {
+            Log.d(TAG, "Sending notification to token: ${fcmToken.take(10)}... with data: $data")
+
+            val title = data["title"] ?: "Notification"
+            val body = data["body"] ?: ""
+
+            // Use FCM HTTP v1 Service to send the notification
+            val fcmService = FCMHttpV1Service.getInstance()
+            val success = fcmService.sendNotification(
+                token = fcmToken,
+                title = title,
+                body = body,
+                data = data
+            )
+
+            if (success) {
+                Log.d(TAG, "Notification sent successfully")
+            } else {
+                Log.e(TAG, "Failed to send notification")
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error sending notification via HTTP v1", e)
+        }
     }
-    
+
     /**
      * Subscribe user to topic based on their role and interests
      */
     fun subscribeToTopics(userRole: String, interests: List<String> = emptyList()) {
         val messaging = FirebaseMessaging.getInstance()
-        
+
         // Subscribe to role-based topic
         messaging.subscribeToTopic("${userRole}_notifications")
             .addOnCompleteListener { task ->
@@ -271,7 +289,7 @@ class NotificationManager private constructor() {
                     Log.e(TAG, "Failed to subscribe to ${userRole}_notifications topic", task.exception)
                 }
             }
-        
+
         // Subscribe to interest-based topics for students
         if (userRole == "student") {
             interests.forEach { interest ->
@@ -284,15 +302,15 @@ class NotificationManager private constructor() {
             }
         }
     }
-    
+
     /**
      * Unsubscribe from all topics (useful for logout)
      */
     fun unsubscribeFromAllTopics(userRole: String, interests: List<String> = emptyList()) {
         val messaging = FirebaseMessaging.getInstance()
-        
+
         messaging.unsubscribeFromTopic("${userRole}_notifications")
-        
+
         if (userRole == "student") {
             interests.forEach { interest ->
                 messaging.unsubscribeFromTopic("jobs_${interest.lowercase().replace(" ", "_")}")
