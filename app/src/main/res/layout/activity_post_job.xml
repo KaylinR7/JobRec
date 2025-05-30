@@ -160,13 +160,13 @@
                 android:layout_marginTop="16dp"
                 android:hint="Specific Location (City/Town)"
                 app:boxStrokeColor="?attr/colorPrimary"
-                style="@style/Widget.DUTCareerHub.TextInputLayout">
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <AutoCompleteTextView
                     android:id="@+id/locationInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text"
+                    android:inputType="none"
                     android:textColor="?android:attr/textColorPrimary"/>
 
             </com.google.android.material.textfield.TextInputLayout>

@@ -20,7 +20,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.jobrec.ai.JobMatchingRepository
 import com.example.jobrec.chatbot.ChatbotHelper
 import com.example.jobrec.databinding.ActivityHomeBinding
-import com.example.jobrec.utils.NotificationHelper
 import com.example.jobrec.adapters.PendingInvitationAdapter
 import com.example.jobrec.models.Message
 import com.example.jobrec.repositories.ConversationRepository
@@ -38,7 +37,6 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var recentJobsAdapter: RecentJobsAdapter
     private lateinit var recommendedJobsAdapter: JobsAdapter
     private lateinit var pendingInvitationsAdapter: PendingInvitationAdapter
-    private lateinit var notificationHelper: NotificationHelper
     private lateinit var jobMatchingRepository: JobMatchingRepository
     private lateinit var conversationRepository: ConversationRepository
     private lateinit var messageRepository: MessageRepository
@@ -49,8 +47,6 @@ class HomeActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         userId = auth.currentUser?.uid
-        notificationHelper = NotificationHelper(this)
-        notificationHelper.createNotificationChannel()
         jobMatchingRepository = JobMatchingRepository()
         conversationRepository = ConversationRepository()
         messageRepository = MessageRepository()
@@ -395,11 +391,9 @@ class HomeActivity : AppCompatActivity() {
     }
     override fun onResume() {
         super.onResume()
-        notificationHelper.startJobNotificationsListener()
     }
     override fun onPause() {
         super.onPause()
-        notificationHelper.stopJobNotificationsListener()
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
@@ -409,10 +403,6 @@ class HomeActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_my_applications -> {
                 startActivity(Intent(this, MyApplicationsActivity::class.java))
-                true
-            }
-            R.id.action_notifications -> {
-                startActivity(Intent(this, NotificationsActivity::class.java))
                 true
             }
             R.id.action_saved_jobs -> {

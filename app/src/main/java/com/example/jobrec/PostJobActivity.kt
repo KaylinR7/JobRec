@@ -68,7 +68,7 @@ class PostJobActivity : AppCompatActivity() {
         selectedSkillsChipGroup = binding.selectedSkillsChipGroup
         jobTypeInput = binding.jobTypeInput
         provinceInput = binding.provinceInput
-        cityInput = binding.cityInput
+        cityInput = binding.locationInput
         salaryRangeInput = binding.salaryRangeInput
         experienceInput = binding.experienceInput
         descriptionInput = binding.descriptionInput
