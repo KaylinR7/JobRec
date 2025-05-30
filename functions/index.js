@@ -42,9 +42,9 @@ exports.sendNotification = functions.https.onCall(async (data, context) => {
 
     // Send the notification
     const response = await admin.messaging().send(message);
-    
+
     console.log('Successfully sent message:', response);
-    
+
     return {
       success: true,
       messageId: response
@@ -89,9 +89,9 @@ exports.sendMulticastNotification = functions.https.onCall(async (data, context)
     };
 
     const response = await admin.messaging().sendMulticast(message);
-    
+
     console.log('Successfully sent multicast message:', response);
-    
+
     return {
       success: true,
       successCount: response.successCount,
@@ -138,9 +138,9 @@ exports.sendTopicNotification = functions.https.onCall(async (data, context) => 
     };
 
     const response = await admin.messaging().send(message);
-    
+
     console.log('Successfully sent topic message:', response);
-    
+
     return {
       success: true,
       messageId: response
@@ -177,56 +177,78 @@ exports.onNewMessage = functions.firestore
   .document('messages/{messageId}')
   .onCreate(async (snap, context) => {
     const messageData = snap.data();
-    
-    // Only send notifications for certain message types
-    if (messageData.type === 'meeting_invite') {
-      try {
-        // Get the recipient's FCM token
-        const recipientDoc = await admin.firestore()
-          .collection('users')
+
+    try {
+      // Get the recipient's FCM token (check both users and companies)
+      let recipientDoc = await admin.firestore()
+        .collection('users')
+        .doc(messageData.receiverId)
+        .get();
+
+      if (!recipientDoc.exists) {
+        // Try companies collection
+        recipientDoc = await admin.firestore()
+          .collection('companies')
           .doc(messageData.receiverId)
           .get();
-        
-        if (!recipientDoc.exists) {
-          console.log('Recipient not found');
-          return;
-        }
-        
-        const fcmToken = recipientDoc.data().fcmToken;
-        if (!fcmToken) {
-          console.log('No FCM token for recipient');
-          return;
-        }
-        
-        // Send notification
-        const message = {
-          token: fcmToken,
-          notification: {
-            title: 'Meeting Invitation',
-            body: `${messageData.senderName || 'Someone'} invited you for an interview`,
-          },
-          data: {
-            type: 'meeting_invitation',
-            messageId: context.params.messageId,
-            senderId: messageData.senderId,
-            conversationId: messageData.conversationId
-          },
-          android: {
-            notification: {
-              icon: 'ic_app_logo',
-              color: '#2196F3',
-              sound: 'default',
-              channelId: 'meeting_notifications'
-            }
-          }
-        };
-        
-        await admin.messaging().send(message);
-        console.log('Meeting invitation notification sent');
-        
-      } catch (error) {
-        console.error('Error sending meeting invitation notification:', error);
       }
+
+      if (!recipientDoc.exists) {
+        console.log('Recipient not found in users or companies');
+        return;
+      }
+
+      const fcmToken = recipientDoc.data().fcmToken;
+      if (!fcmToken) {
+        console.log('No FCM token for recipient');
+        return;
+      }
+
+      // Handle different message types
+      let title = 'New Message';
+      let body = '';
+      let channelId = 'careerworx_default';
+
+      if (messageData.type === 'meeting_invite') {
+        title = 'Meeting Invitation';
+        body = `${messageData.senderName || 'Someone'} invited you for an interview`;
+        channelId = 'meeting_notifications';
+      } else {
+        // Regular chat message
+        title = `Message from ${messageData.senderName || 'Someone'}`;
+        body = messageData.content || 'You have a new message';
+        channelId = 'careerworx_default';
+      }
+
+      // Send notification
+      const message = {
+        token: fcmToken,
+        notification: {
+          title: title,
+          body: body,
+        },
+        data: {
+          type: messageData.type || 'chat_message',
+          messageId: context.params.messageId,
+          senderId: messageData.senderId,
+          conversationId: messageData.conversationId,
+          senderName: messageData.senderName || ''
+        },
+        android: {
+          notification: {
+            icon: 'ic_app_logo',
+            color: '#2196F3',
+            sound: 'default',
+            channelId: channelId
+          }
+        }
+      };
+
+      await admin.messaging().send(message);
+      console.log(`Message notification sent: ${messageData.type || 'chat_message'}`);
+
+    } catch (error) {
+      console.error('Error sending message notification:', error);
     }
   });
 
@@ -237,35 +259,35 @@ exports.onNewApplication = functions.firestore
   .document('applications/{applicationId}')
   .onCreate(async (snap, context) => {
     const applicationData = snap.data();
-    
+
     try {
       // Get the company's FCM token
       const companyDoc = await admin.firestore()
         .collection('companies')
         .doc(applicationData.companyId)
         .get();
-      
+
       if (!companyDoc.exists) {
         console.log('Company not found');
         return;
       }
-      
+
       const fcmToken = companyDoc.data().fcmToken;
       if (!fcmToken) {
         console.log('No FCM token for company');
         return;
       }
-      
+
       // Get applicant name
       const userDoc = await admin.firestore()
         .collection('users')
         .doc(applicationData.userId)
         .get();
-      
-      const applicantName = userDoc.exists ? 
-        `${userDoc.data().name} ${userDoc.data().surname}` : 
+
+      const applicantName = userDoc.exists ?
+        `${userDoc.data().name} ${userDoc.data().surname}` :
         'Someone';
-      
+
       // Send notification
       const message = {
         token: fcmToken,
@@ -288,11 +310,192 @@ exports.onNewApplication = functions.firestore
           }
         }
       };
-      
+
       await admin.messaging().send(message);
       console.log('Job application notification sent');
-      
+
     } catch (error) {
       console.error('Error sending job application notification:', error);
+    }
+  });
+
+/**
+ * Firestore trigger to send notifications when new jobs are posted
+ */
+exports.onNewJob = functions.firestore
+  .document('jobs/{jobId}')
+  .onCreate(async (snap, context) => {
+    const jobData = snap.data();
+
+    try {
+      // Get company information
+      const companyDoc = await admin.firestore()
+        .collection('companies')
+        .doc(jobData.companyId)
+        .get();
+
+      const companyName = companyDoc.exists ? companyDoc.data().name : 'A company';
+
+      // Get all students with matching interests/skills
+      const studentsSnapshot = await admin.firestore()
+        .collection('users')
+        .where('role', '==', 'student')
+        .get();
+
+      const notifications = [];
+
+      studentsSnapshot.forEach(studentDoc => {
+        const studentData = studentDoc.data();
+        const fcmToken = studentData.fcmToken;
+
+        if (!fcmToken) return;
+
+        // Check if student's interests match job field
+        const studentInterests = studentData.interests || [];
+        const jobField = jobData.field || jobData.category || '';
+
+        const isMatch = studentInterests.some(interest =>
+          interest.toLowerCase().includes(jobField.toLowerCase()) ||
+          jobField.toLowerCase().includes(interest.toLowerCase())
+        );
+
+        if (isMatch || !jobField) { // Send to all if no specific field
+          const message = {
+            token: fcmToken,
+            notification: {
+              title: 'New Job Opportunity',
+              body: `${companyName} posted: ${jobData.title} in ${jobData.location || 'your area'}`,
+            },
+            data: {
+              type: 'new_job',
+              jobId: context.params.jobId,
+              jobTitle: jobData.title,
+              companyName: companyName,
+              location: jobData.location || '',
+              field: jobField
+            },
+            android: {
+              notification: {
+                icon: 'ic_app_logo',
+                color: '#2196F3',
+                sound: 'default',
+                channelId: 'job_notifications'
+              }
+            }
+          };
+
+          notifications.push(admin.messaging().send(message));
+        }
+      });
+
+      if (notifications.length > 0) {
+        await Promise.all(notifications);
+        console.log(`New job notifications sent to ${notifications.length} students`);
+      }
+
+    } catch (error) {
+      console.error('Error sending new job notifications:', error);
+    }
+  });
+
+/**
+ * Firestore trigger to send notifications when application status changes
+ */
+exports.onApplicationStatusUpdate = functions.firestore
+  .document('applications/{applicationId}')
+  .onUpdate(async (change, context) => {
+    const beforeData = change.before.data();
+    const afterData = change.after.data();
+
+    // Check if status changed
+    if (beforeData.status === afterData.status) {
+      return;
+    }
+
+    try {
+      // Get student's FCM token
+      const userDoc = await admin.firestore()
+        .collection('users')
+        .doc(afterData.userId)
+        .get();
+
+      if (!userDoc.exists) {
+        console.log('Student not found');
+        return;
+      }
+
+      const fcmToken = userDoc.data().fcmToken;
+      if (!fcmToken) {
+        console.log('No FCM token for student');
+        return;
+      }
+
+      // Get company name
+      const companyDoc = await admin.firestore()
+        .collection('companies')
+        .doc(afterData.companyId)
+        .get();
+
+      const companyName = companyDoc.exists ? companyDoc.data().name : 'Company';
+
+      // Determine notification message based on status
+      let title = 'Application Update';
+      let body = '';
+
+      switch (afterData.status.toLowerCase()) {
+        case 'accepted':
+        case 'approved':
+          title = '🎉 Application Accepted!';
+          body = `Congratulations! ${companyName} accepted your application for ${afterData.jobTitle}`;
+          break;
+        case 'rejected':
+        case 'declined':
+          title = 'Application Update';
+          body = `${companyName} has updated your application status for ${afterData.jobTitle}`;
+          break;
+        case 'viewed':
+        case 'under_review':
+          title = 'Application Viewed';
+          body = `${companyName} has viewed your application for ${afterData.jobTitle}`;
+          break;
+        case 'interview':
+        case 'interview_scheduled':
+          title = '📅 Interview Scheduled';
+          body = `${companyName} wants to interview you for ${afterData.jobTitle}`;
+          break;
+        default:
+          title = 'Application Update';
+          body = `${companyName} updated your application for ${afterData.jobTitle}`;
+      }
+
+      // Send notification
+      const message = {
+        token: fcmToken,
+        notification: {
+          title: title,
+          body: body,
+        },
+        data: {
+          type: 'application_status',
+          applicationId: context.params.applicationId,
+          status: afterData.status,
+          jobTitle: afterData.jobTitle,
+          companyName: companyName
+        },
+        android: {
+          notification: {
+            icon: 'ic_app_logo',
+            color: '#2196F3',
+            sound: 'default',
+            channelId: 'application_notifications'
+          }
+        }
+      };
+
+      await admin.messaging().send(message);
+      console.log(`Application status notification sent: ${afterData.status}`);
+
+    } catch (error) {
+      console.error('Error sending application status notification:', error);
     }
   });
