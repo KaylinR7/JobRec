@@ -566,6 +566,29 @@ class ChatActivity : AppCompatActivity() {
                         meetingLink = if (selectedType == "online") selectedLink else null
                     )
 
+                    // Send notification to recipient about meeting invitation
+                    lifecycleScope.launch {
+                        try {
+                            val dateFormat = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
+                            val timeFormat = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+
+                            com.example.jobrec.notifications.NotificationManager.getInstance()
+                                .sendMeetingInvitationNotification(
+                                    recipientId = receiverId,
+                                    senderName = auth.currentUser?.displayName ?: "Company Representative",
+                                    jobTitle = conversation?.jobTitle ?: "Position",
+                                    meetingDate = dateFormat.format(selectedDate),
+                                    meetingTime = timeFormat.format(Date().apply {
+                                        hours = selectedTime.split(":")[0].toInt()
+                                        minutes = selectedTime.split(":")[1].toInt()
+                                    }),
+                                    messageId = messageId
+                                )
+                        } catch (e: Exception) {
+                            Log.e("ChatActivity", "Error sending meeting invitation notification", e)
+                        }
+                    }
+
                     dialog.dismiss()
                     Toast.makeText(this@ChatActivity, "Meeting invitation sent", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {

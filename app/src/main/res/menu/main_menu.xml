@@ -31,6 +31,12 @@
 
 
     <item
+        android:id="@+id/action_test_notifications"
+        android:title="Test Notifications"
+        android:icon="@android:drawable/ic_popup_reminder"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_logout"
         android:title="Logout"
         android:icon="@drawable/ic_logout"

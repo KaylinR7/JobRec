@@ -31,6 +31,7 @@ import kotlinx.coroutines.tasks.await
 import android.util.Log
 import android.view.animation.AnimationUtils
 import com.example.jobrec.utils.SpacingItemDecoration
+import com.example.jobrec.notifications.NotificationPermissionHelper
 import java.util.UUID
 class CompanyDashboardActivityNew : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
@@ -46,12 +47,14 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
     private lateinit var emptyApplicationsView: TextView
     private lateinit var recentActivityAdapter: RecentActivityAdapter
     private lateinit var recentApplicationsAdapter: RecentApplicationsAdapter
+    private lateinit var notificationPermissionHelper: NotificationPermissionHelper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_company_dashboard_new)
         try {
             db = FirebaseFirestore.getInstance()
             auth = FirebaseAuth.getInstance()
+            notificationPermissionHelper = NotificationPermissionHelper(this)
             companyId = intent.getStringExtra("companyId") ?: run {
                 val currentUser = auth.currentUser
                 if (currentUser != null) {
@@ -107,6 +110,19 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
             setupQuickActions()
             setupSwipeRefresh()
             loadDashboardData()
+
+            // Request notification permissions for companies
+            notificationPermissionHelper.requestNotificationPermission(
+                onGranted = {
+                    Log.d("CompanyDashboard", "Notification permission granted for company")
+                    // Subscribe to company-specific topics
+                    com.example.jobrec.notifications.NotificationManager.getInstance()
+                        .subscribeToTopics("company")
+                },
+                onDenied = {
+                    Log.d("CompanyDashboard", "Notification permission denied for company")
+                }
+            )
         } catch (e: Exception) {
             Log.e("CompanyDashboardActivity", "Error in onCreate", e)
             Toast.makeText(this, "Error initializing activity: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -634,11 +650,24 @@ class CompanyDashboardActivityNew : AppCompatActivity() {
         loadDashboardData()
     }
 
-
-
-
-
-
-
-
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        notificationPermissionHelper.handlePermissionResult(
+            requestCode,
+            permissions,
+            grantResults,
+            onGranted = {
+                Log.d("CompanyDashboard", "Notification permission granted in CompanyDashboardActivityNew")
+                com.example.jobrec.notifications.NotificationManager.getInstance()
+                    .subscribeToTopics("company")
+            },
+            onDenied = {
+                Log.d("CompanyDashboard", "Notification permission denied in CompanyDashboardActivityNew")
+            }
+        )
+    }
 }

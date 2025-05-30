@@ -17,6 +17,8 @@ import com.example.jobrec.adapters.CertificateBadge
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.jobrec.utils.PdfUtils
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import android.util.Log
 import java.text.SimpleDateFormat
 import java.util.Locale
 class CompanyApplicationDetailsActivity : AppCompatActivity() {
@@ -411,7 +413,29 @@ class CompanyApplicationDetailsActivity : AppCompatActivity() {
                 .addOnSuccessListener {
                     Toast.makeText(this, "Application $newStatus", Toast.LENGTH_SHORT).show()
 
+                    // Send notification to applicant about status change
+                    lifecycleScope.launch {
+                        try {
+                            // Get application details for notification
+                            val appDoc = db.collection("applications").document(id).get().await()
+                            val applicantId = appDoc.getString("userId") ?: ""
+                            val jobTitle = appDoc.getString("jobTitle") ?: ""
+                            val companyName = appDoc.getString("companyName") ?: ""
 
+                            if (applicantId.isNotEmpty()) {
+                                com.example.jobrec.notifications.NotificationManager.getInstance()
+                                    .sendApplicationStatusNotification(
+                                        applicantId = applicantId,
+                                        jobTitle = jobTitle,
+                                        companyName = companyName,
+                                        newStatus = newStatus,
+                                        applicationId = id
+                                    )
+                            }
+                        } catch (e: Exception) {
+                            Log.e("CompanyApplicationDetails", "Error sending status notification", e)
+                        }
+                    }
 
                     loadApplicationDetails()
                 }

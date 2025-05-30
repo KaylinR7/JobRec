@@ -21,6 +21,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.jobrec.ai.JobMatchingRepository
 import com.example.jobrec.chatbot.ChatbotHelper
 import com.example.jobrec.databinding.ActivityHomeBinding
+import com.example.jobrec.notifications.NotificationPermissionHelper
 import kotlinx.coroutines.launch
 class HomeActivity : AppCompatActivity() {
     companion object {
@@ -32,7 +33,7 @@ class HomeActivity : AppCompatActivity() {
     private var userId: String? = null
     private lateinit var recentJobsAdapter: RecentJobsAdapter
     private lateinit var recommendedJobsAdapter: JobsAdapter
-
+    private lateinit var notificationPermissionHelper: NotificationPermissionHelper
     private lateinit var jobMatchingRepository: JobMatchingRepository
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,13 +43,26 @@ class HomeActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
         userId = auth.currentUser?.uid
 
-
+        notificationPermissionHelper = NotificationPermissionHelper(this)
         jobMatchingRepository = JobMatchingRepository()
         initializeViews()
         setupClickListeners()
         setupBottomNavigation()
         setupSwipeRefresh()
         loadData()
+
+        // Request notification permissions for students
+        notificationPermissionHelper.requestNotificationPermission(
+            onGranted = {
+                Log.d(TAG, "Notification permission granted for student")
+                // Subscribe to relevant topics
+                com.example.jobrec.notifications.NotificationManager.getInstance()
+                    .subscribeToTopics("student", getUserInterests())
+            },
+            onDenied = {
+                Log.d(TAG, "Notification permission denied for student")
+            }
+        )
     }
     private fun initializeViews() {
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
@@ -388,19 +402,56 @@ class HomeActivity : AppCompatActivity() {
                 logout()
                 true
             }
-
-
+            R.id.action_test_notifications -> {
+                testNotifications()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    private fun getUserInterests(): List<String> {
+        // This would typically come from user profile
+        // For now, return empty list - can be enhanced later
+        return emptyList()
+    }
 
+    private fun testNotifications() {
+        AlertDialog.Builder(this)
+            .setTitle("Test Notifications")
+            .setMessage("This will send test notifications to demonstrate the notification system. Make sure notifications are enabled.")
+            .setPositiveButton("Test All") { _, _ ->
+                com.example.jobrec.notifications.LocalNotificationService.getInstance()
+                    .testAllNotificationTypes(this)
+                Toast.makeText(this, "Test notifications sent!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Clear All") { _, _ ->
+                com.example.jobrec.notifications.LocalNotificationService.getInstance()
+                    .clearAllNotifications(this)
+                Toast.makeText(this, "All notifications cleared!", Toast.LENGTH_SHORT).show()
+            }
+            .setNeutralButton("Cancel", null)
+            .show()
+    }
 
-
-
-
-
-
-
-
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        notificationPermissionHelper.handlePermissionResult(
+            requestCode,
+            permissions,
+            grantResults,
+            onGranted = {
+                Log.d(TAG, "Notification permission granted in HomeActivity")
+                com.example.jobrec.notifications.NotificationManager.getInstance()
+                    .subscribeToTopics("student", getUserInterests())
+            },
+            onDenied = {
+                Log.d(TAG, "Notification permission denied in HomeActivity")
+            }
+        )
+    }
 }

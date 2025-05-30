@@ -6,6 +6,7 @@ import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import android.util.Log
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.chip.ChipGroup
@@ -308,7 +309,21 @@ class PostJobActivity : AppCompatActivity() {
                             status = "active"
                         )
 
-
+                        // Send notifications to matching students about new job
+                        lifecycleScope.launch {
+                            try {
+                                com.example.jobrec.notifications.NotificationManager.getInstance()
+                                    .sendNewJobNotification(
+                                        jobId = jobId,
+                                        jobTitle = job.title,
+                                        companyName = job.companyName,
+                                        jobField = job.jobField,
+                                        location = "${job.city}, ${job.province}"
+                                    )
+                            } catch (e: Exception) {
+                                Log.e("PostJobActivity", "Error sending new job notifications", e)
+                            }
+                        }
 
                         Toast.makeText(this, "Job posted successfully", Toast.LENGTH_SHORT).show()
                         finish()

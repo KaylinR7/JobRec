@@ -10,6 +10,7 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.jobrec.notifications.NotificationPermissionHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 class SplashActivity : AppCompatActivity() {
@@ -19,6 +20,7 @@ class SplashActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var notificationPermissionHelper: NotificationPermissionHelper
     private val TAG = "SplashActivity"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +28,7 @@ class SplashActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         sharedPreferences = getSharedPreferences("JobRecPrefs", Context.MODE_PRIVATE)
+        notificationPermissionHelper = NotificationPermissionHelper(this)
         logoImage = findViewById(R.id.logoImage)
         appNameText = findViewById(R.id.appNameText)
         taglineText = findViewById(R.id.taglineText)
@@ -37,6 +40,11 @@ class SplashActivity : AppCompatActivity() {
         Handler(Looper.getMainLooper()).postDelayed({
             checkUserAndNavigate()
         }, 2000)
+
+        // Check notification permissions after a short delay
+        Handler(Looper.getMainLooper()).postDelayed({
+            notificationPermissionHelper.checkAndRequestPermission(showReminderIfDenied = false)
+        }, 3000)
     }
     private fun checkUserAndNavigate() {
         val currentUser = auth.currentUser
@@ -181,5 +189,24 @@ class SplashActivity : AppCompatActivity() {
             editor.apply()
             startActivity(Intent(this, HomeActivity::class.java))
         }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        notificationPermissionHelper.handlePermissionResult(
+            requestCode,
+            permissions,
+            grantResults,
+            onGranted = {
+                Log.d(TAG, "Notification permission granted in SplashActivity")
+            },
+            onDenied = {
+                Log.d(TAG, "Notification permission denied in SplashActivity")
+            }
+        )
     }
 }

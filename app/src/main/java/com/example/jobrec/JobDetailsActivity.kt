@@ -405,7 +405,20 @@ class JobDetailsActivity : AppCompatActivity() {
                                 .addOnSuccessListener { documentReference ->
                                     Log.d("JobDetailsActivity", "Application submitted successfully with ID: ${documentReference.id}")
 
-
+                                    // Send notification to company about new application
+                                    lifecycleScope.launch {
+                                        try {
+                                            com.example.jobrec.notifications.NotificationManager.getInstance()
+                                                .sendJobApplicationNotification(
+                                                    companyId = companyId,
+                                                    applicantName = "${user.name} ${user.surname}",
+                                                    jobTitle = jobTitle.text.toString(),
+                                                    applicationId = documentReference.id
+                                                )
+                                        } catch (e: Exception) {
+                                            Log.e("JobDetailsActivity", "Error sending notification", e)
+                                        }
+                                    }
 
                                     Toast.makeText(this, "Application submitted successfully", Toast.LENGTH_SHORT).show()
                                     finish()

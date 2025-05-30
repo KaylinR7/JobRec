@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">DUT CareerHub</string>
+
+    <!-- Notification Channels -->
+    <string name="default_notification_channel_id">careerworx_default</string>
+    <string name="default_notification_channel_name">General Notifications</string>
+    <string name="default_notification_channel_description">General app notifications</string>
+
+    <string name="job_notifications_channel_id">job_notifications</string>
+    <string name="job_notifications_channel_name">Job Notifications</string>
+    <string name="job_notifications_channel_description">Notifications about new jobs and job applications</string>
+
+    <string name="application_notifications_channel_id">application_notifications</string>
+    <string name="application_notifications_channel_name">Application Updates</string>
+    <string name="application_notifications_channel_description">Updates about your job applications</string>
+
+    <string name="meeting_notifications_channel_id">meeting_notifications</string>
+    <string name="meeting_notifications_channel_name">Meeting Invitations</string>
+    <string name="meeting_notifications_channel_description">Meeting invitations and updates</string>
+
+    <string name="company_notifications_channel_id">company_notifications</string>
+    <string name="company_notifications_channel_name">Company Notifications</string>
+    <string name="company_notifications_channel_description">Notifications for company activities</string>
 </resources>
