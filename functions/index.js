@@ -260,6 +260,14 @@ exports.onNewApplication = functions.firestore
   .onCreate(async (snap, context) => {
     const applicationData = snap.data();
 
+    console.log('New application created:', {
+      applicationId: context.params.applicationId,
+      companyId: applicationData.companyId,
+      userId: applicationData.userId,
+      jobTitle: applicationData.jobTitle,
+      applicantName: applicationData.applicantName
+    });
+
     try {
       // Get the company's FCM token
       const companyDoc = await admin.firestore()
@@ -278,15 +286,20 @@ exports.onNewApplication = functions.firestore
         return;
       }
 
-      // Get applicant name
-      const userDoc = await admin.firestore()
-        .collection('users')
-        .doc(applicationData.userId)
-        .get();
+      // Get applicant name - try from application data first, then from user doc
+      let applicantName = applicationData.applicantName || 'Someone';
 
-      const applicantName = userDoc.exists ?
-        `${userDoc.data().name} ${userDoc.data().surname}` :
-        'Someone';
+      if (!applicationData.applicantName && applicationData.userId) {
+        const userDoc = await admin.firestore()
+          .collection('users')
+          .doc(applicationData.userId)
+          .get();
+
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          applicantName = `${userData.name} ${userData.surname}`;
+        }
+      }
 
       // Send notification
       const message = {
@@ -312,7 +325,7 @@ exports.onNewApplication = functions.firestore
       };
 
       await admin.messaging().send(message);
-      console.log('Job application notification sent');
+      console.log('Job application notification sent successfully');
 
     } catch (error) {
       console.error('Error sending job application notification:', error);
@@ -326,6 +339,15 @@ exports.onNewJob = functions.firestore
   .document('jobs/{jobId}')
   .onCreate(async (snap, context) => {
     const jobData = snap.data();
+
+    console.log('New job created:', {
+      jobId: context.params.jobId,
+      title: jobData.title,
+      companyId: jobData.companyId,
+      companyName: jobData.companyName,
+      city: jobData.city,
+      jobField: jobData.jobField
+    });
 
     try {
       // Get company information
@@ -352,26 +374,26 @@ exports.onNewJob = functions.firestore
 
         // Check if student's interests match job field
         const studentInterests = studentData.interests || [];
-        const jobField = jobData.field || jobData.category || '';
+        const jobField = jobData.jobField || jobData.field || jobData.category || jobData.specialization || '';
 
         const isMatch = studentInterests.some(interest =>
           interest.toLowerCase().includes(jobField.toLowerCase()) ||
           jobField.toLowerCase().includes(interest.toLowerCase())
-        );
+        ) || jobField === '' || studentInterests.length === 0; // Send to all if no specific matching
 
-        if (isMatch || !jobField) { // Send to all if no specific field
+        if (isMatch) { // Send to matching students or all if no field specified
           const message = {
             token: fcmToken,
             notification: {
               title: 'New Job Opportunity',
-              body: `${companyName} posted: ${jobData.title} in ${jobData.location || 'your area'}`,
+              body: `${companyName} posted: ${jobData.title} in ${jobData.city || jobData.location || 'your area'}`,
             },
             data: {
               type: 'new_job',
               jobId: context.params.jobId,
               jobTitle: jobData.title,
               companyName: companyName,
-              location: jobData.location || '',
+              location: jobData.city || jobData.location || '',
               field: jobField
             },
             android: {
@@ -407,20 +429,36 @@ exports.onApplicationStatusUpdate = functions.firestore
     const beforeData = change.before.data();
     const afterData = change.after.data();
 
+    console.log('Application status update:', {
+      applicationId: context.params.applicationId,
+      oldStatus: beforeData.status,
+      newStatus: afterData.status,
+      userId: afterData.userId,
+      jobTitle: afterData.jobTitle,
+      companyId: afterData.companyId
+    });
+
     // Check if status changed
     if (beforeData.status === afterData.status) {
+      console.log('Status unchanged, skipping notification');
       return;
     }
 
     try {
-      // Get student's FCM token
+      // Get student's FCM token - check userId field
+      const userId = afterData.userId;
+      if (!userId) {
+        console.log('No userId in application data');
+        return;
+      }
+
       const userDoc = await admin.firestore()
         .collection('users')
-        .doc(afterData.userId)
+        .doc(userId)
         .get();
 
       if (!userDoc.exists) {
-        console.log('Student not found');
+        console.log(`Student not found with userId: ${userId}`);
         return;
       }
 

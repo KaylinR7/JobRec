@@ -159,6 +159,18 @@ class HomeActivity : AppCompatActivity() {
                     startActivity(Intent(this, MyApplicationsActivity::class.java))
                     false
                 }
+                R.id.navigation_calendar -> {
+                    try {
+                        Log.d(TAG, "Calendar navigation clicked")
+                        val intent = Intent(this, CalendarActivity::class.java)
+                        startActivity(intent)
+                        Log.d(TAG, "Calendar activity started successfully")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error starting calendar activity", e)
+                        Toast.makeText(this, "Error opening calendar: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                    false
+                }
                 R.id.navigation_profile -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
                     false
