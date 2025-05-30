@@ -158,10 +158,8 @@ class FCMHttpV1Service {
                 Log.d(TAG, "FCM Payload: $json")
 
                 // Make HTTP request to FCM
-                val requestBody = okhttp3.RequestBody.create(
-                    okhttp3.MediaType.Companion.get("application/json; charset=utf-8"),
-                    json
-                )
+                val mediaType = "application/json; charset=utf-8".toMediaType()
+                val requestBody = okhttp3.RequestBody.create(mediaType, json)
 
                 val request = okhttp3.Request.Builder()
                     .url(FCM_LEGACY_ENDPOINT)

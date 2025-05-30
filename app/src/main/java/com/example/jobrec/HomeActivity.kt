@@ -483,7 +483,7 @@ class HomeActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 Log.e("HomeActivity", "Error in FCM test", e)
-                Toast.makeText(this, "FCM test error: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@HomeActivity, "FCM test error: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
