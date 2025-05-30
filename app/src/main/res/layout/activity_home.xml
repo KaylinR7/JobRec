@@ -78,7 +78,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_search"
-                            android:tint="@color/black"
+                            android:tint="?attr/colorPrimary"
                             android:layout_marginEnd="12dp" />
 
                         <TextView
@@ -86,7 +86,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Search jobs..."
-                            android:textColor="?android:attr/textColorSecondary"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:textSize="16sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -205,13 +205,13 @@
                             android:orientation="vertical"
                             android:gravity="center"
                             android:padding="20dp"
-                            android:background="#FFFFFF">
+                            android:background="?attr/colorSurface">
 
                             <ImageView
                                 android:layout_width="40dp"
                                 android:layout_height="40dp"
                                 android:src="@drawable/ic_application"
-                                android:tint="@color/black"
+                                android:tint="?attr/colorPrimary"
                                 android:layout_marginBottom="12dp"/>
 
                             <TextView
@@ -241,13 +241,13 @@
                             android:orientation="vertical"
                             android:gravity="center"
                             android:padding="20dp"
-                            android:background="#FFFFFF">
+                            android:background="?attr/colorSurface">
 
                             <ImageView
                                 android:layout_width="40dp"
                                 android:layout_height="40dp"
                                 android:src="@android:drawable/ic_dialog_email"
-                                android:tint="@color/black"
+                                android:tint="?attr/colorPrimary"
                                 android:layout_marginBottom="12dp"/>
 
                             <TextView

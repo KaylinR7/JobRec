@@ -8,7 +8,9 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.chip.Chip
+
+import java.text.SimpleDateFormat
+import java.util.*
 class JobsAdapter(private val onJobClick: (Job) -> Unit) :
     ListAdapter<Job, JobsAdapter.JobViewHolder>(JobDiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobViewHolder {
@@ -26,6 +28,7 @@ class JobsAdapter(private val onJobClick: (Job) -> Unit) :
         private val locationTextView: TextView = itemView.findViewById(R.id.locationText)
         private val jobTypeTextView: TextView = itemView.findViewById(R.id.jobTypeText)
         private val salaryTextView: TextView = itemView.findViewById(R.id.salaryText)
+        private val postedDateText: TextView = itemView.findViewById(R.id.postedDateText)
         private val matchContainer: LinearLayout = itemView.findViewById(R.id.matchContainer)
         private val matchPercentageText: TextView = itemView.findViewById(R.id.matchPercentageText)
         init {
@@ -43,6 +46,25 @@ class JobsAdapter(private val onJobClick: (Job) -> Unit) :
             jobTypeTextView.text = job.type
             salaryTextView.text = job.salary
 
+            // Format posted date
+            val postedDate = job.postedDate.toDate()
+            val now = Date()
+            val diffInMillis = now.time - postedDate.time
+            val diffInDays = diffInMillis / (1000 * 60 * 60 * 24)
+
+            val dateText = when {
+                diffInDays == 0L -> "Posted today"
+                diffInDays == 1L -> "Posted yesterday"
+                diffInDays < 7 -> "Posted ${diffInDays} days ago"
+                diffInDays < 30 -> "Posted ${diffInDays / 7} weeks ago"
+                else -> {
+                    val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
+                    "Posted ${dateFormat.format(postedDate)}"
+                }
+            }
+            postedDateText.text = dateText
+
+            // Handle match percentage
             if (job.matchPercentage > 0) {
                 matchContainer.visibility = View.VISIBLE
                 matchPercentageText.text = "${job.matchPercentage}%"

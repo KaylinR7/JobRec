@@ -318,7 +318,8 @@ class ProfileActivity : AppCompatActivity() {
         yearsOfExperienceInput.setOnClickListener {
             yearsOfExperienceInput.showDropDown()
         }
-        // Setup cascading location dropdowns
+        // Setup cascading location dropdowns (will be properly initialized when data loads)
+        // Initial setup with empty values - will be overridden when user data loads
         LocationUtils.setupCascadingLocationSpinners(
             context = this,
             provinceSpinner = provinceInput,
@@ -454,19 +455,23 @@ class ProfileActivity : AppCompatActivity() {
                         val province = document.getString("province") ?: ""
                         val city = document.getString("city") ?: ""
 
-                        if (province.isNotEmpty() || city.isNotEmpty()) {
-                            // Reinitialize dropdowns with loaded data
-                            LocationUtils.setupCascadingLocationSpinners(
-                                context = this@ProfileActivity,
-                                provinceSpinner = provinceInput,
-                                citySpinner = cityInput,
-                                selectedProvince = province,
-                                selectedCity = city
-                            ) { selectedProv, selectedCit ->
-                                selectedProvince = selectedProv
-                                selectedCity = selectedCit
-                                Log.d(TAG, "Location loaded: $selectedCit, $selectedProv")
-                            }
+                        // Set the selected values first
+                        selectedProvince = province
+                        selectedCity = city
+
+                        Log.d(TAG, "Loading location data - Province: '$province', City: '$city'")
+
+                        // Setup dropdowns with loaded data
+                        LocationUtils.setupCascadingLocationSpinners(
+                            context = this@ProfileActivity,
+                            provinceSpinner = provinceInput,
+                            citySpinner = cityInput,
+                            selectedProvince = province,
+                            selectedCity = city
+                        ) { selectedProv, selectedCit ->
+                            selectedProvince = selectedProv
+                            selectedCity = selectedCit
+                            Log.d(TAG, "Location updated: '$selectedCit', '$selectedProv'")
                         }
                         yearsOfExperienceInput.setText(document.getString("yearsOfExperience") ?: "")
                         expectedSalaryInput.setText(document.getString("expectedSalary") ?: "")
@@ -587,12 +592,14 @@ class ProfileActivity : AppCompatActivity() {
             db.collection("users").document(userId)
                 .set(userData)
                 .addOnSuccessListener {
+                    Log.d(TAG, "Profile saved successfully")
+                    Log.d(TAG, "Saved province: $selectedProvince, city: $selectedCity")
                     Toast.makeText(this, "Profile saved successfully", Toast.LENGTH_SHORT).show()
-                    finish()
+                    // Don't finish() - stay on profile page
                 }
                 .addOnFailureListener { e ->
                     Log.e(TAG, "Error saving profile", e)
-                    Toast.makeText(this, "Error saving profile", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Error saving profile: ${e.message}", Toast.LENGTH_LONG).show()
                 }
         }
     }

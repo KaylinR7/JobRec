@@ -9,6 +9,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
@@ -20,11 +21,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.jobrec.ai.JobMatchingRepository
 import com.example.jobrec.chatbot.ChatbotHelper
 import com.example.jobrec.databinding.ActivityHomeBinding
-import com.example.jobrec.adapters.PendingInvitationAdapter
-import com.example.jobrec.models.Message
-import com.example.jobrec.repositories.ConversationRepository
-import com.example.jobrec.repositories.MessageRepository
-import com.example.jobrec.utils.SpacingItemDecoration
 import kotlinx.coroutines.launch
 class HomeActivity : AppCompatActivity() {
     companion object {
@@ -36,10 +32,8 @@ class HomeActivity : AppCompatActivity() {
     private var userId: String? = null
     private lateinit var recentJobsAdapter: RecentJobsAdapter
     private lateinit var recommendedJobsAdapter: JobsAdapter
-    private lateinit var pendingInvitationsAdapter: PendingInvitationAdapter
+
     private lateinit var jobMatchingRepository: JobMatchingRepository
-    private lateinit var conversationRepository: ConversationRepository
-    private lateinit var messageRepository: MessageRepository
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
@@ -47,9 +41,9 @@ class HomeActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         userId = auth.currentUser?.uid
+
+
         jobMatchingRepository = JobMatchingRepository()
-        conversationRepository = ConversationRepository()
-        messageRepository = MessageRepository()
         initializeViews()
         setupClickListeners()
         setupBottomNavigation()
@@ -66,15 +60,6 @@ class HomeActivity : AppCompatActivity() {
         recommendedJobsAdapter = JobsAdapter { job ->
             navigateToJobDetails(job.id)
         }
-        pendingInvitationsAdapter = PendingInvitationAdapter(
-            invitations = emptyList(),
-            onAccept = { invitation ->
-                acceptMeetingInvitation(invitation)
-            },
-            onDecline = { invitation ->
-                declineMeetingInvitation(invitation)
-            }
-        )
         binding.recentJobsRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@HomeActivity, LinearLayoutManager.HORIZONTAL, false)
             adapter = recentJobsAdapter
@@ -84,11 +69,6 @@ class HomeActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@HomeActivity)
             adapter = recommendedJobsAdapter
             addItemDecoration(SpacingItemDecoration(16))
-        }
-        binding.pendingInvitationsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@HomeActivity)
-            adapter = pendingInvitationsAdapter
-            addItemDecoration(SpacingItemDecoration(8))
         }
         applyEntranceAnimations()
     }
@@ -164,17 +144,6 @@ class HomeActivity : AppCompatActivity() {
                     startActivity(Intent(this, MyApplicationsActivity::class.java))
                     false
                 }
-                R.id.navigation_calendar -> {
-                    Log.d("HomeActivity", "Calendar button clicked")
-                    Toast.makeText(this, "Calendar button clicked! Opening calendar...", Toast.LENGTH_SHORT).show()
-                    try {
-                        startActivity(Intent(this, CalendarActivity::class.java))
-                    } catch (e: Exception) {
-                        Log.e("HomeActivity", "Error starting CalendarActivity", e)
-                        Toast.makeText(this, "Error opening calendar: ${e.message}", Toast.LENGTH_LONG).show()
-                    }
-                    false
-                }
                 R.id.navigation_profile -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
                     false
@@ -192,7 +161,6 @@ class HomeActivity : AppCompatActivity() {
         loadRecentJobs()
         loadRecommendedJobs()
         loadStats()
-        loadPendingInvitations()
     }
     private fun loadUserData() {
         val isDefaultStudent = intent.getBooleanExtra("isDefaultStudent", false)
@@ -309,12 +277,12 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val allJobsWithMatches = jobMatchingRepository.getJobsWithMatches(100) // Get more jobs to filter from
-                // Filter for recommended jobs (50%+ match with much improved algorithm)
+                // Filter for recommended jobs (70%+ match with stricter algorithm)
                 val highMatchJobs = allJobsWithMatches.filter { job ->
-                    job.matchPercentage >= 50
+                    job.matchPercentage >= 70
                 }.take(10) // Limit to 10 high-match jobs
 
-                Log.d(TAG, "Successfully loaded ${highMatchJobs.size} recommended jobs (50%+ match) from ${allJobsWithMatches.size} total jobs")
+                Log.d(TAG, "Successfully loaded ${highMatchJobs.size} recommended jobs (70%+ match) from ${allJobsWithMatches.size} total jobs")
                 recommendedJobsAdapter.submitList(highMatchJobs)
 
                 // Update subtitle based on results
@@ -322,7 +290,7 @@ class HomeActivity : AppCompatActivity() {
 
                 // If no high-match jobs found, show empty state message
                 if (highMatchJobs.isEmpty()) {
-                    Log.d(TAG, "No high-match jobs (75%+) found")
+                    Log.d(TAG, "No high-match jobs (70%+) found")
                     updateRecommendedJobsSubtitle(0, true)
                 }
             } catch (e: Exception) {
@@ -371,7 +339,7 @@ class HomeActivity : AppCompatActivity() {
         val subtitle = when {
             jobCount == 0 && isHighMatch -> "No matching jobs found at the moment"
             jobCount == 0 -> "No recommendations available at the moment"
-            isHighMatch -> "Recommended jobs (50%+ compatibility) • $jobCount found"
+            isHighMatch -> "Recommended jobs (70%+ compatibility) • $jobCount found"
             else -> "Recent job postings • $jobCount available"
         }
         binding.recommendedJobsSubtitle.text = subtitle
@@ -389,14 +357,12 @@ class HomeActivity : AppCompatActivity() {
     private fun showError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
-    override fun onResume() {
-        super.onResume()
-    }
-    override fun onPause() {
-        super.onPause()
-    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
+
+
+
         return true
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -405,6 +371,7 @@ class HomeActivity : AppCompatActivity() {
                 startActivity(Intent(this, MyApplicationsActivity::class.java))
                 true
             }
+
             R.id.action_saved_jobs -> {
                 startActivity(Intent(this, SavedJobsActivity::class.java))
                 true
@@ -421,124 +388,19 @@ class HomeActivity : AppCompatActivity() {
                 logout()
                 true
             }
+
+
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun loadPendingInvitations() {
-        userId?.let { uid ->
-            lifecycleScope.launch {
-                try {
-                    // Get all conversations where the current user is the receiver
-                    val conversations = conversationRepository.getUserConversations(uid)
-                    val pendingInvitations = mutableListOf<Message>()
 
-                    // Check each conversation for pending meeting invitations
-                    for (conversation in conversations) {
-                        val messages = messageRepository.getConversationMessages(conversation.id)
-                        val pendingMessages = messages.filter { message: Message ->
-                            message.type == "meeting_invite" &&
-                            message.receiverId == uid &&
-                            message.interviewDetails?.status == "pending"
-                        }
-                        pendingInvitations.addAll(pendingMessages)
-                    }
 
-                    // Update UI
-                    if (pendingInvitations.isNotEmpty()) {
-                        binding.pendingInvitationsSection.visibility = View.VISIBLE
-                        binding.noPendingInvitationsText.visibility = View.GONE
-                        pendingInvitationsAdapter.updateInvitations(pendingInvitations)
-                    } else {
-                        binding.pendingInvitationsSection.visibility = View.GONE
-                    }
 
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error loading pending invitations", e)
-                    binding.pendingInvitationsSection.visibility = View.GONE
-                }
-            }
-        }
-    }
 
-    private fun acceptMeetingInvitation(invitation: Message) {
-        lifecycleScope.launch {
-            try {
-                // Update meeting status to accepted
-                conversationRepository.updateMeetingStatus(invitation.id, "accepted")
 
-                // Create calendar event for student
-                invitation.interviewDetails?.let { details ->
-                    createCalendarEventForStudent(
-                        studentId = userId ?: "",
-                        messageId = invitation.id,
-                        details = details
-                    )
-                }
 
-                Toast.makeText(this@HomeActivity, "Meeting invitation accepted", Toast.LENGTH_SHORT).show()
 
-                // Reload pending invitations
-                loadPendingInvitations()
 
-            } catch (e: Exception) {
-                Log.e(TAG, "Error accepting meeting invitation", e)
-                Toast.makeText(this@HomeActivity, "Error accepting invitation: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
 
-    private fun declineMeetingInvitation(invitation: Message) {
-        lifecycleScope.launch {
-            try {
-                // Update meeting status to rejected
-                conversationRepository.updateMeetingStatus(invitation.id, "rejected")
-
-                Toast.makeText(this@HomeActivity, "Meeting invitation declined", Toast.LENGTH_SHORT).show()
-
-                // Reload pending invitations
-                loadPendingInvitations()
-
-            } catch (e: Exception) {
-                Log.e(TAG, "Error declining meeting invitation", e)
-                Toast.makeText(this@HomeActivity, "Error declining invitation: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private suspend fun createCalendarEventForStudent(
-        studentId: String,
-        messageId: String,
-        details: com.example.jobrec.models.InterviewDetails
-    ) {
-        try {
-            val eventTitle = "Interview - ${details.jobTitle ?: "Job Interview"}"
-            val eventDescription = "Interview with ${details.companyName ?: "Company"}"
-
-            val calendarEvent = com.example.jobrec.models.CalendarEvent(
-                userId = studentId,
-                title = eventTitle,
-                description = eventDescription,
-                date = details.date,
-                time = details.time,
-                duration = details.duration,
-                meetingType = details.type,
-                location = details.location,
-                meetingLink = details.meetingLink,
-                notes = "Scheduled via CareerWorx messaging",
-                isInterview = true,
-                jobId = details.jobId,
-                companyId = details.companyId,
-                status = "scheduled",
-                invitationMessageId = messageId
-            )
-
-            db.collection("calendar_events").add(calendarEvent)
-            Log.d(TAG, "Calendar event created for student: $studentId")
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Error creating calendar event for student", e)
-            throw e
-        }
-    }
 }

@@ -90,6 +90,8 @@ class LoginActivity : AppCompatActivity() {
         }
         if (validateInput(email, password)) {
             Toast.makeText(this, "Logging in...", Toast.LENGTH_SHORT).show()
+
+            // Try to login first
             FirebaseHelper.getInstance().checkUser(email, password) { success, userType, error ->
                 if (success) {
                     val actualUserType = userType ?: "unknown"
@@ -115,21 +117,29 @@ class LoginActivity : AppCompatActivity() {
                         }
                     }
                 } else {
-                    runOnUiThread {
-                        val errorMessage = when {
-                            error?.contains("password is invalid", ignoreCase = true) == true ->
-                                "Incorrect password. Please try again."
-                            error?.contains("no user record", ignoreCase = true) == true ->
-                                "This email is not registered. Please sign up first."
-                            error?.contains("blocked", ignoreCase = true) == true ->
-                                "This account has been temporarily blocked due to too many failed login attempts. Please try again later."
-                            else -> "Login failed: $error"
+                    // If login failed, check if it's a test account and try to create it
+                    if (isTestAccount(email, password)) {
+                        runOnUiThread {
+                            Toast.makeText(this, "Creating test account...", Toast.LENGTH_SHORT).show()
                         }
-                        Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
-                        if (errorMessage.contains("password", ignoreCase = true)) {
-                            passwordInput.error = "Incorrect password"
-                        } else if (errorMessage.contains("email", ignoreCase = true)) {
-                            emailInput.error = "Email not registered"
+                        createTestAccount(email, password, selectedUserType)
+                    } else {
+                        runOnUiThread {
+                            val errorMessage = when {
+                                error?.contains("password is invalid", ignoreCase = true) == true ->
+                                    "Incorrect password. Please try again."
+                                error?.contains("no user record", ignoreCase = true) == true ->
+                                    "This email is not registered. Please sign up first."
+                                error?.contains("blocked", ignoreCase = true) == true ->
+                                    "This account has been temporarily blocked due to too many failed login attempts. Please try again later."
+                                else -> "Login failed: $error"
+                            }
+                            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+                            if (errorMessage.contains("password", ignoreCase = true)) {
+                                passwordInput.error = "Incorrect password"
+                            } else if (errorMessage.contains("email", ignoreCase = true)) {
+                                emailInput.error = "Email not registered"
+                            }
                         }
                     }
                 }
@@ -400,5 +410,108 @@ class LoginActivity : AppCompatActivity() {
             return false
         }
         return true
+    }
+
+    private fun isTestAccount(email: String, password: String): Boolean {
+        val testAccounts = mapOf(
+            "john.doe@example.com" to "password123",
+            "jane.smith@example.com" to "password123",
+            "hr@techcorp.com" to "password123",
+            "hr@businesssolutions.com" to "password123"
+        )
+        return testAccounts[email.lowercase()] == password
+    }
+
+    private fun createTestAccount(email: String, password: String, userType: String) {
+        Log.d(TAG, "Creating test account for $email as $userType")
+
+        when (userType) {
+            "student" -> {
+                val user = when (email.lowercase()) {
+                    "john.doe@example.com" -> User(
+                        id = "",
+                        name = "John",
+                        surname = "Doe",
+                        email = email,
+                        field = "Technology",
+                        subField = "Software Development",
+                        education = listOf(),
+                        experience = listOf(),
+                        skills = listOf(),
+                        yearsOfExperience = "2-3 years",
+                        province = "Western Cape",
+                        city = "Cape Town"
+                    )
+                    "jane.smith@example.com" -> User(
+                        id = "",
+                        name = "Jane",
+                        surname = "Smith",
+                        email = email,
+                        field = "Business",
+                        subField = "Marketing",
+                        education = listOf(),
+                        experience = listOf(),
+                        skills = listOf(),
+                        yearsOfExperience = "1-2 years",
+                        province = "Gauteng",
+                        city = "Johannesburg"
+                    )
+                    else -> return
+                }
+
+                FirebaseHelper.getInstance().addUser(user, password) { success, error ->
+                    runOnUiThread {
+                        if (success) {
+                            Toast.makeText(this, "Test student account created! Please login again.", Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(this, "Failed to create test account: $error", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }
+            "company" -> {
+                val company = when (email.lowercase()) {
+                    "hr@techcorp.com" -> Company(
+                        id = "REG001",
+                        companyName = "TechCorp",
+                        registrationNumber = "REG001",
+                        industry = "Technology",
+                        companySize = "50-100",
+                        location = "Cape Town",
+                        website = "https://techcorp.com",
+                        description = "Leading technology company",
+                        contactPersonName = "HR Manager",
+                        contactPersonEmail = email,
+                        contactPersonPhone = "+27123456789",
+                        email = email
+                    )
+                    "hr@businesssolutions.com" -> Company(
+                        id = "REG002",
+                        companyName = "BusinessSolutions",
+                        registrationNumber = "REG002",
+                        industry = "Consulting",
+                        companySize = "20-50",
+                        location = "Johannesburg",
+                        website = "https://businesssolutions.com",
+                        description = "Business consulting firm",
+                        contactPersonName = "HR Manager",
+                        contactPersonEmail = email,
+                        contactPersonPhone = "+27123456789",
+                        email = email
+                    )
+                    else -> return
+                }
+
+                FirebaseHelper.getInstance().addCompany(company, password) { success, error ->
+                    runOnUiThread {
+                        if (success) {
+                            Toast.makeText(this, "Test company account created! Please login again.", Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(this, "Failed to create test account: $error", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }
+        }
     }
 }
