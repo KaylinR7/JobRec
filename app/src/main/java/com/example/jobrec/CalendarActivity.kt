@@ -101,9 +101,13 @@ class CalendarActivity : AppCompatActivity() {
     }
 
     private fun setupToolbar() {
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
         supportActionBar?.apply {
             title = "Calendar"
             setDisplayHomeAsUpEnabled(true)
+            setDisplayShowHomeEnabled(true)
         }
     }
 
