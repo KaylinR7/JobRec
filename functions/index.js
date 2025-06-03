@@ -1,8 +1,18 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const nodemailer = require('nodemailer');
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
+
+// Email configuration
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: functions.config().email?.user || 'your-email@gmail.com',
+    pass: functions.config().email?.password || 'your-app-password'
+  }
+});
 
 /**
  * Cloud Function to send FCM notifications
@@ -178,12 +188,28 @@ exports.onNewMessage = functions.firestore
   .onCreate(async (snap, context) => {
     const messageData = snap.data();
 
+    console.log('New message created:', {
+      messageId: context.params.messageId,
+      senderId: messageData.senderId,
+      receiverId: messageData.receiverId,
+      type: messageData.type,
+      conversationId: messageData.conversationId
+    });
+
     try {
+      // Skip notifications for certain message types or if no receiverId
+      if (!messageData.receiverId || messageData.receiverId === messageData.senderId) {
+        console.log('Skipping notification - no valid receiver or sender is receiver');
+        return;
+      }
+
       // Get the recipient's FCM token (check both users and companies)
       let recipientDoc = await admin.firestore()
         .collection('users')
         .doc(messageData.receiverId)
         .get();
+
+      let recipientType = 'student';
 
       if (!recipientDoc.exists) {
         // Try companies collection
@@ -191,17 +217,46 @@ exports.onNewMessage = functions.firestore
           .collection('companies')
           .doc(messageData.receiverId)
           .get();
+        recipientType = 'company';
       }
 
       if (!recipientDoc.exists) {
-        console.log('Recipient not found in users or companies');
+        console.log(`Recipient not found in users or companies: ${messageData.receiverId}`);
         return;
       }
 
-      const fcmToken = recipientDoc.data().fcmToken;
+      const recipientData = recipientDoc.data();
+      const fcmToken = recipientData.fcmToken;
       if (!fcmToken) {
-        console.log('No FCM token for recipient');
+        console.log(`No FCM token for recipient: ${messageData.receiverId}`);
         return;
+      }
+
+      // Get sender information for better notification content
+      let senderDoc = await admin.firestore()
+        .collection('users')
+        .doc(messageData.senderId)
+        .get();
+
+      let senderName = messageData.senderName || 'Someone';
+      let senderType = 'student';
+
+      if (!senderDoc.exists) {
+        // Try companies collection
+        senderDoc = await admin.firestore()
+          .collection('companies')
+          .doc(messageData.senderId)
+          .get();
+        senderType = 'company';
+      }
+
+      if (senderDoc.exists) {
+        const senderData = senderDoc.data();
+        if (senderType === 'company') {
+          senderName = senderData.companyName || senderData.name || 'Company';
+        } else {
+          senderName = `${senderData.name || ''} ${senderData.surname || ''}`.trim() || 'Student';
+        }
       }
 
       // Handle different message types
@@ -211,14 +266,19 @@ exports.onNewMessage = functions.firestore
 
       if (messageData.type === 'meeting_invite') {
         title = 'Meeting Invitation';
-        body = `${messageData.senderName || 'Someone'} invited you for an interview`;
+        body = `${senderName} invited you for an interview`;
         channelId = 'meeting_notifications';
       } else {
         // Regular chat message
-        title = `Message from ${messageData.senderName || 'Someone'}`;
+        title = `Message from ${senderName}`;
         body = messageData.content || 'You have a new message';
-        channelId = 'careerworx_default';
+
+        // Use appropriate channel based on recipient type
+        channelId = recipientType === 'company' ? 'company_notifications' : 'careerworx_default';
       }
+
+      console.log(`Sending notification to ${recipientType}: ${messageData.receiverId}`);
+      console.log(`From ${senderType}: ${messageData.senderId} (${senderName})`);
 
       // Send notification
       const message = {
@@ -231,8 +291,11 @@ exports.onNewMessage = functions.firestore
           type: messageData.type || 'chat_message',
           messageId: context.params.messageId,
           senderId: messageData.senderId,
+          receiverId: messageData.receiverId,
           conversationId: messageData.conversationId,
-          senderName: messageData.senderName || ''
+          senderName: senderName,
+          senderType: senderType,
+          recipientType: recipientType
         },
         android: {
           notification: {
@@ -245,10 +308,12 @@ exports.onNewMessage = functions.firestore
       };
 
       await admin.messaging().send(message);
-      console.log(`Message notification sent: ${messageData.type || 'chat_message'}`);
+      console.log(`Message notification sent successfully: ${messageData.type || 'chat_message'}`);
+      console.log(`Notification sent to ${recipientType} ${messageData.receiverId} from ${senderType} ${senderName}`);
 
     } catch (error) {
       console.error('Error sending message notification:', error);
+      console.error('Message data:', messageData);
     }
   });
 
@@ -537,3 +602,295 @@ exports.onApplicationStatusUpdate = functions.firestore
       console.error('Error sending application status notification:', error);
     }
   });
+
+/**
+ * Cloud Function to send email verification code
+ */
+exports.sendVerificationEmail = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const { email, verificationCode, userType, name } = data;
+
+  if (!email || !verificationCode) {
+    throw new functions.https.HttpsError('invalid-argument', 'Missing required fields: email, verificationCode');
+  }
+
+  try {
+    const mailOptions = {
+      from: functions.config().email?.user || 'noreply@dutcareerhub.com',
+      to: email,
+      subject: 'DUTCareerHub - Email Verification',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #2196F3; margin: 0;">DUTCareerHub</h1>
+            <p style="color: #666; margin: 5px 0;">Your Career Journey Starts Here</p>
+          </div>
+
+          <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 20px;">
+            <h2 style="color: #333; margin-top: 0;">Welcome${name ? ` ${name}` : ''}!</h2>
+            <p style="color: #666; line-height: 1.6;">
+              Thank you for registering with DUTCareerHub. To complete your ${userType || 'account'} registration,
+              please verify your email address using the verification code below:
+            </p>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <div style="background: #2196F3; color: white; padding: 15px 30px; border-radius: 5px; display: inline-block; font-size: 24px; font-weight: bold; letter-spacing: 3px;">
+                ${verificationCode}
+              </div>
+            </div>
+
+            <p style="color: #666; line-height: 1.6;">
+              Enter this code in the app to verify your email address. This code will expire in 10 minutes.
+            </p>
+          </div>
+
+          <div style="text-align: center; color: #999; font-size: 14px;">
+            <p>If you didn't create an account with DUTCareerHub, please ignore this email.</p>
+            <p>© 2024 DUTCareerHub. All rights reserved.</p>
+          </div>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('Verification email sent successfully to:', email);
+
+    return {
+      success: true,
+      message: 'Verification email sent successfully'
+    };
+
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to send verification email', error);
+  }
+});
+
+/**
+ * Cloud Function to send password reset code
+ */
+exports.sendPasswordResetEmail = functions.https.onCall(async (data, context) => {
+  const { email, resetCode, userType, name } = data;
+
+  if (!email || !resetCode) {
+    throw new functions.https.HttpsError('invalid-argument', 'Missing required fields: email, resetCode');
+  }
+
+  try {
+    const mailOptions = {
+      from: functions.config().email?.user || 'noreply@dutcareerhub.com',
+      to: email,
+      subject: 'DUTCareerHub - Password Reset',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #2196F3; margin: 0;">DUTCareerHub</h1>
+            <p style="color: #666; margin: 5px 0;">Your Career Journey Starts Here</p>
+          </div>
+
+          <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 20px;">
+            <h2 style="color: #333; margin-top: 0;">Password Reset Request</h2>
+            <p style="color: #666; line-height: 1.6;">
+              Hello${name ? ` ${name}` : ''},
+            </p>
+            <p style="color: #666; line-height: 1.6;">
+              We received a request to reset your password for your DUTCareerHub ${userType || 'account'}.
+              Use the verification code below to reset your password:
+            </p>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <div style="background: #ff5722; color: white; padding: 15px 30px; border-radius: 5px; display: inline-block; font-size: 24px; font-weight: bold; letter-spacing: 3px;">
+                ${resetCode}
+              </div>
+            </div>
+
+            <p style="color: #666; line-height: 1.6;">
+              Enter this code in the app to reset your password. This code will expire in 15 minutes.
+            </p>
+
+            <p style="color: #d32f2f; line-height: 1.6; font-weight: bold;">
+              If you didn't request a password reset, please ignore this email and your password will remain unchanged.
+            </p>
+          </div>
+
+          <div style="text-align: center; color: #999; font-size: 14px;">
+            <p>For security reasons, this link will expire in 15 minutes.</p>
+            <p>© 2024 DUTCareerHub. All rights reserved.</p>
+          </div>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('Password reset email sent successfully to:', email);
+
+    return {
+      success: true,
+      message: 'Password reset email sent successfully'
+    };
+
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to send password reset email', error);
+  }
+});
+
+/**
+ * Cloud Function to reset password with verification code
+ * This function uses Firebase Admin SDK to directly update the user's password
+ */
+exports.resetPasswordWithCode = functions.https.onCall(async (data, context) => {
+  const { email, newPassword, resetCode } = data;
+
+  // Validate required fields
+  if (!email || !newPassword || !resetCode) {
+    throw new functions.https.HttpsError('invalid-argument', 'Missing required fields: email, newPassword, resetCode');
+  }
+
+  try {
+    // Get user by email
+    const userRecord = await admin.auth().getUserByEmail(email);
+
+    // Verify the reset code by checking Firestore
+    const usersRef = admin.firestore().collection('users');
+    const companiesRef = admin.firestore().collection('companies');
+
+    // Check users collection first
+    const userQuery = await usersRef.where('email', '==', email.toLowerCase()).get();
+    let isValidCode = false;
+    let docToUpdate = null;
+    let collectionRef = null;
+
+    if (!userQuery.empty) {
+      const userDoc = userQuery.docs[0];
+      const userData = userDoc.data();
+      const storedCode = userData.passwordResetCode;
+      const expiryTime = userData.passwordResetExpiry;
+      const currentTime = Date.now();
+
+      if (storedCode === resetCode && currentTime < expiryTime) {
+        isValidCode = true;
+        docToUpdate = userDoc;
+        collectionRef = usersRef;
+      }
+    } else {
+      // Check companies collection
+      const companyQuery = await companiesRef.where('email', '==', email.toLowerCase()).get();
+      if (!companyQuery.empty) {
+        const companyDoc = companyQuery.docs[0];
+        const companyData = companyDoc.data();
+        const storedCode = companyData.passwordResetCode;
+        const expiryTime = companyData.passwordResetExpiry;
+        const currentTime = Date.now();
+
+        if (storedCode === resetCode && currentTime < expiryTime) {
+          isValidCode = true;
+          docToUpdate = companyDoc;
+          collectionRef = companiesRef;
+        }
+      }
+    }
+
+    if (!isValidCode) {
+      throw new functions.https.HttpsError('invalid-argument', 'Invalid or expired reset code');
+    }
+
+    // Update the user's password using Firebase Admin SDK
+    await admin.auth().updateUser(userRecord.uid, {
+      password: newPassword
+    });
+
+    // Clear the reset codes from Firestore
+    await collectionRef.doc(docToUpdate.id).update({
+      passwordResetCode: '',
+      passwordResetExpiry: 0
+    });
+
+    console.log('Password reset successfully for user:', email);
+
+    return {
+      success: true,
+      message: 'Password reset successfully'
+    };
+
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to reset password', error);
+  }
+});
+
+/**
+ * Cloud Function to delete a user from Firebase Authentication by email
+ * This is needed for admin operations since client-side code cannot delete other users
+ */
+exports.deleteUserByEmail = functions.https.onCall(async (data, context) => {
+    try {
+        // Verify that the request is coming from an authenticated admin
+        // For now, we'll allow any authenticated user to call this
+        // In production, you should add proper admin role verification
+        if (!context.auth) {
+            throw new functions.https.HttpsError(
+                'unauthenticated',
+                'The function must be called while authenticated.'
+            );
+        }
+
+        const { email } = data;
+
+        if (!email) {
+            throw new functions.https.HttpsError(
+                'invalid-argument',
+                'Email is required.'
+            );
+        }
+
+        console.log(`Attempting to delete user with email: ${email}`);
+
+        try {
+            // Get user by email
+            const userRecord = await admin.auth().getUserByEmail(email);
+            console.log(`Found user with UID: ${userRecord.uid}`);
+
+            // Delete the user
+            await admin.auth().deleteUser(userRecord.uid);
+            console.log(`Successfully deleted user with email: ${email} and UID: ${userRecord.uid}`);
+
+            return {
+                success: true,
+                message: `User with email ${email} deleted successfully`,
+                deletedUid: userRecord.uid
+            };
+
+        } catch (authError) {
+            if (authError.code === 'auth/user-not-found') {
+                console.log(`User with email ${email} not found in Firebase Auth`);
+                return {
+                    success: true,
+                    message: `User with email ${email} was not found in Firebase Auth (may have been already deleted)`,
+                    deletedUid: null
+                };
+            } else {
+                console.error(`Error deleting user from Firebase Auth:`, authError);
+                throw new functions.https.HttpsError(
+                    'internal',
+                    `Failed to delete user from Firebase Auth: ${authError.message}`
+                );
+            }
+        }
+
+    } catch (error) {
+        console.error('Error in deleteUserByEmail function:', error);
+
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+
+        throw new functions.https.HttpsError(
+            'internal',
+            `An unexpected error occurred: ${error.message}`
+        );
+    }
+});

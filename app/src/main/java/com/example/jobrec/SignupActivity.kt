@@ -18,6 +18,9 @@ import android.widget.LinearLayout
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import com.example.jobrec.models.FieldCategories
+import com.example.jobrec.utils.PasswordValidator
+import com.google.android.material.textfield.TextInputLayout
+import android.widget.TextView
 import java.util.UUID
 class SignupActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
@@ -62,6 +65,7 @@ class SignupActivity : AppCompatActivity() {
         setupClickListeners()
         setupSkillsInput()
         setupDropdowns()
+        setupPasswordValidation()
     }
     private fun initializeViews() {
         toolbar = findViewById(R.id.toolbar)
@@ -115,6 +119,21 @@ class SignupActivity : AppCompatActivity() {
     }
     private fun setupSkillsInput() {
         skillsInput.isEnabled = false
+    }
+
+    private fun setupPasswordValidation() {
+        // Find the password layout - it might have a different ID in this layout
+        val passwordLayout = findViewById<TextInputLayout>(R.id.passwordLayout)
+            ?: passwordInput.parent.parent as? TextInputLayout
+
+        if (passwordLayout != null) {
+            PasswordValidator.setupPasswordValidation(
+                this,
+                passwordInput,
+                passwordLayout,
+                null // passwordStrengthIndicator not available in this layout
+            )
+        }
     }
     private fun addSkillChip(skill: String) {
         val chip = Chip(this).apply {
@@ -230,6 +249,16 @@ class SignupActivity : AppCompatActivity() {
             Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
             return
         }
+
+        // Validate password strength
+        val passwordValidation = PasswordValidator.validatePassword(password)
+        if (!passwordValidation.isValid) {
+            val passwordLayout = findViewById<TextInputLayout>(R.id.passwordLayout)
+                ?: passwordInput.parent.parent as? TextInputLayout
+            passwordLayout?.error = passwordValidation.errors.joinToString("\n")
+            Toast.makeText(this, "Password must contain:\n${passwordValidation.errors.joinToString("\n")}", Toast.LENGTH_LONG).show()
+            return
+        }
         FirebaseHelper.getInstance().isEmailExists(email) { emailExists ->
             if (emailExists) {
                 runOnUiThread {
@@ -256,11 +285,17 @@ class SignupActivity : AppCompatActivity() {
                 field = fieldInput.text.toString().trim(),
                 subField = subFieldInput.text.toString().trim()
             )
-            FirebaseHelper.getInstance().addUser(user, password) { success, error ->
+            FirebaseHelper.getInstance().registerUserWithVerification(user, password) { success, error, verificationCode ->
                 if (success) {
                     runOnUiThread {
-                        Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this, HomeActivity::class.java))
+                        Toast.makeText(this, "Registration successful! Please check your email for verification code, then login to continue.", Toast.LENGTH_LONG).show()
+
+                        // Navigate to login page
+                        val intent = Intent(this, LoginActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        intent.putExtra("registration_completed", true)
+                        intent.putExtra("registered_email", email)
+                        startActivity(intent)
                         finish()
                     }
                 } else {

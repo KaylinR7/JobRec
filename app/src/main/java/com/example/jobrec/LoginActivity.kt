@@ -12,6 +12,7 @@ import android.widget.TextView
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.example.jobrec.utils.VerificationStateManager
 class LoginActivity : AppCompatActivity() {
     private lateinit var emailInput: TextInputEditText
     private lateinit var passwordInput: TextInputEditText
@@ -31,23 +32,65 @@ class LoginActivity : AppCompatActivity() {
         loginButton = findViewById(R.id.loginButton)
         signupButton = findViewById(R.id.signupButton)
         userTypeRadioGroup = findViewById(R.id.userTypeRadioGroup)
-        val slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up)
-        val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in)
-        findViewById<View>(R.id.emailInput).startAnimation(slideUp)
-        findViewById<View>(R.id.passwordInput).startAnimation(slideUp)
-        findViewById<View>(R.id.loginButton).startAnimation(slideUp)
-        findViewById<View>(R.id.userTypeRadioGroup).startAnimation(fadeIn)
-        findViewById<View>(R.id.signupButton).startAnimation(fadeIn)
+        // Temporarily disabled animations for debugging
+        // val slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up)
+        // val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in)
+        // findViewById<View>(R.id.emailInput).startAnimation(slideUp)
+        // findViewById<View>(R.id.passwordInput).startAnimation(slideUp)
+        // findViewById<View>(R.id.loginButton).startAnimation(slideUp)
+        // findViewById<View>(R.id.userTypeRadioGroup).startAnimation(fadeIn)
+        // findViewById<View>(R.id.signupButton).startAnimation(fadeIn)
+        // Check for pending verification first
+        val verificationStateManager = VerificationStateManager.getInstance(this)
+        Log.d(TAG, "Checking for pending verification...")
+        if (verificationStateManager.hasPendingVerification()) {
+            val verificationData = verificationStateManager.getPendingVerificationData()
+            Log.d(TAG, "Found pending verification for: ${verificationData?.email}")
+            if (verificationData != null) {
+                Log.d(TAG, "Redirecting to EmailVerificationActivity")
+                // Navigate to verification screen
+                val intent = Intent(this, EmailVerificationActivity::class.java)
+                intent.putExtra(EmailVerificationActivity.EXTRA_EMAIL, verificationData.email)
+                intent.putExtra(EmailVerificationActivity.EXTRA_USER_TYPE, verificationData.userType)
+                intent.putExtra(EmailVerificationActivity.EXTRA_USER_NAME, verificationData.userName)
+                startActivity(intent)
+                return
+            }
+        } else {
+            Log.d(TAG, "No pending verification found")
+        }
+
         val currentUser = auth.currentUser
         if (currentUser != null) {
             checkUserTypeAndRedirect(currentUser.email ?: "")
         }
         loginButton.setOnClickListener {
+            Log.d(TAG, "LOGIN BUTTON CLICKED!")
+            Toast.makeText(this, "Login button clicked!", Toast.LENGTH_SHORT).show()
+
+            // Clear any stuck verification state before login
+            VerificationStateManager.getInstance(this).clearPendingVerification()
+
             loginUser()
         }
         signupButton.setOnClickListener {
+            Log.d(TAG, "SIGNUP BUTTON CLICKED!")
+            Toast.makeText(this, "Signup button clicked!", Toast.LENGTH_SHORT).show()
             startActivity(Intent(this, UnifiedSignupActivity::class.java))
             overridePendingTransition(R.anim.slide_up, R.anim.fade_in)
+        }
+
+        findViewById<TextView>(R.id.forgotPasswordText).setOnClickListener {
+            startActivity(Intent(this, ForgotPasswordActivity::class.java))
+        }
+
+        // Temporary debug button - long press on forgot password to clear verification state
+        findViewById<TextView>(R.id.forgotPasswordText).setOnLongClickListener {
+            Log.d(TAG, "CLEARING VERIFICATION STATE (DEBUG)")
+            Toast.makeText(this, "Clearing verification state...", Toast.LENGTH_SHORT).show()
+            VerificationStateManager.getInstance(this).clearPendingVerification()
+            recreate() // Restart the activity
+            true
         }
     }
     private fun loginUser() {
@@ -95,27 +138,37 @@ class LoginActivity : AppCompatActivity() {
             FirebaseHelper.getInstance().checkUser(email, password) { success, userType, error ->
                 if (success) {
                     val actualUserType = userType ?: "unknown"
-                    when {
-                        selectedUserType == "student" && (actualUserType == "user" || actualUserType == "unknown") -> {
-                            runOnUiThread {
-                                val intent = Intent(this, HomeActivity::class.java)
+
+                    // Login successful - now check if verification is needed
+                    Log.d(TAG, "Login successful for $email, checking verification status")
+                    FirebaseHelper.getInstance().getCurrentUserVerificationStatus(email) { needsVerification, userType, verificationCode ->
+                        runOnUiThread {
+                            Log.d(TAG, "Verification status: needsVerification=$needsVerification, userType=$userType")
+                            if (needsVerification) {
+                                Toast.makeText(this, "Login successful! Please verify your email to continue using the app.", Toast.LENGTH_LONG).show()
+
+                                // Save verification state
+                                val verificationStateManager = VerificationStateManager.getInstance(this)
+                                val userTypeForVerification = if (actualUserType == "user") "student" else actualUserType
+                                verificationStateManager.setPendingVerification(email, userTypeForVerification, "User")
+
+                                // Navigate to email verification
+                                val intent = Intent(this, EmailVerificationActivity::class.java)
+                                intent.putExtra(EmailVerificationActivity.EXTRA_EMAIL, email)
+                                intent.putExtra(EmailVerificationActivity.EXTRA_USER_TYPE, userTypeForVerification)
+                                intent.putExtra(EmailVerificationActivity.EXTRA_USER_NAME, "User") // We'll get the actual name later
+                                intent.putExtra("fromLogin", true)
                                 startActivity(intent)
-                                finish()
-                            }
-                        }
-                        selectedUserType == "company" && (actualUserType == "company" || actualUserType == "unknown") -> {
-                            runOnUiThread {
-                                val intent = Intent(this, CompanyDashboardActivityNew::class.java)
-                                startActivity(intent)
-                                finish()
-                            }
-                        }
-                        else -> {
-                            runOnUiThread {
-                                Toast.makeText(this, "This account is not registered as a ${selectedUserType}. Please select the correct user type.", Toast.LENGTH_LONG).show()
+                                // DO NOT finish() here - keep login activity alive so user can return
+                            } else {
+                                // User is verified, proceed to main app
+                                Log.d(TAG, "User is verified, proceeding to main app")
+                                proceedToMainApp(actualUserType, email, selectedUserType)
                             }
                         }
                     }
+
+                    // This code is now handled by proceedToMainApp function above
                 } else {
                     // If login failed, check if it's a test account and try to create it
                     if (isTestAccount(email, password)) {
@@ -146,6 +199,25 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun proceedToMainApp(actualUserType: String, email: String, selectedUserType: String) {
+        when {
+            selectedUserType == "student" && (actualUserType == "user" || actualUserType == "unknown") -> {
+                val intent = Intent(this, HomeActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+            selectedUserType == "company" && (actualUserType == "company" || actualUserType == "unknown") -> {
+                val intent = Intent(this, CompanyDashboardActivityNew::class.java)
+                startActivity(intent)
+                finish()
+            }
+            else -> {
+                Toast.makeText(this, "This account is not registered as a ${selectedUserType}. Please select the correct user type.", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     private fun checkEmailExistsInAuth(email: String, callback: (Boolean) -> Unit) {
         Log.d(TAG, "Checking if email exists in Firebase Authentication: $email")
         auth.fetchSignInMethodsForEmail(email)

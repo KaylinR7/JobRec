@@ -18,7 +18,11 @@ data class Company(
     val profileImageUrl: String = "",
     val status: String = "active",
     val createdDate: Timestamp = Timestamp.now(),
-    val userId: String = ""  
+    val userId: String = "",
+    val emailVerified: Boolean = false,
+    val verificationCode: String = "",
+    val passwordResetCode: String = "",
+    val passwordResetExpiry: Long = 0
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",
@@ -36,7 +40,11 @@ data class Company(
         parcel.readString() ?: "",
         parcel.readString() ?: "",
         Timestamp(parcel.readLong(), parcel.readInt()),
-        parcel.readString() ?: ""
+        parcel.readString() ?: "",
+        parcel.readByte() != 0.toByte(),
+        parcel.readString() ?: "",
+        parcel.readString() ?: "",
+        parcel.readLong()
     )
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(id)
@@ -56,6 +64,10 @@ data class Company(
         parcel.writeLong(createdDate.seconds)
         parcel.writeInt(createdDate.nanoseconds)
         parcel.writeString(userId)
+        parcel.writeByte(if (emailVerified) 1 else 0)
+        parcel.writeString(verificationCode)
+        parcel.writeString(passwordResetCode)
+        parcel.writeLong(passwordResetExpiry)
     }
     override fun describeContents(): Int {
         return 0

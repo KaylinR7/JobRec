@@ -7,6 +7,8 @@ import android.util.Log
 import com.example.jobrec.notifications.NotificationManager
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 class DUTCareerHubApp : Application() {
     private val TAG = "DUTCareerHubApp"
 
@@ -18,6 +20,19 @@ class DUTCareerHubApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+
+        // Initialize Firebase App Check
+        try {
+            Log.d(TAG, "Initializing Firebase App Check...")
+            val firebaseAppCheck = FirebaseAppCheck.getInstance()
+            firebaseAppCheck.installAppCheckProviderFactory(
+                PlayIntegrityAppCheckProviderFactory.getInstance()
+            )
+            Log.d(TAG, "Firebase App Check initialized successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing Firebase App Check", e)
+        }
+
         val settings = FirebaseFirestoreSettings.Builder()
             .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
             .build()

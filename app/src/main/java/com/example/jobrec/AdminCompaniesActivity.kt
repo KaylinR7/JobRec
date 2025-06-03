@@ -173,18 +173,27 @@ class AdminCompaniesActivity : AppCompatActivity() {
     }
     private fun performDeleteCompany(companyId: String) {
         showLoading(true)
-        db.collection("companies").document(companyId)
-            .delete()
-            .addOnSuccessListener {
-                Log.d(TAG, "Company deleted successfully")
-                Toast.makeText(this, "Company deleted", Toast.LENGTH_SHORT).show()
-                loadCompanies()
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error deleting company", e)
-                Toast.makeText(this, "Error deleting company: ${e.message}", Toast.LENGTH_SHORT).show()
+
+        // Use the new admin deletion method that deletes from both Firebase Auth and Firestore
+        FirebaseHelper.getInstance().adminDeleteCompany(companyId) { success, error ->
+            runOnUiThread {
                 showLoading(false)
+                if (success) {
+                    Log.d(TAG, "Company deleted successfully from both Auth and Firestore")
+                    if (error != null) {
+                        // Partial success - Firestore deleted but Auth cleanup failed
+                        Toast.makeText(this, "Company deleted successfully. Note: $error", Toast.LENGTH_LONG).show()
+                    } else {
+                        // Complete success
+                        Toast.makeText(this, "Company completely deleted from system", Toast.LENGTH_SHORT).show()
+                    }
+                    loadCompanies()
+                } else {
+                    Log.e(TAG, "Error deleting company: $error")
+                    Toast.makeText(this, "Error deleting company: $error", Toast.LENGTH_LONG).show()
+                }
             }
+        }
     }
     private fun addCompany() {
         val dialog = AdminEditCompanyDialog.newInstance(Company())

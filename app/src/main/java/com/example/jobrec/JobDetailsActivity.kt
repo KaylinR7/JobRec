@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import com.example.jobrec.utils.CvGenerationUtils
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
@@ -158,7 +159,13 @@ class JobDetailsActivity : AppCompatActivity() {
     private fun useProfileAsCv() {
         val userId = auth.currentUser?.uid ?: return
         val userEmail = auth.currentUser?.email ?: return
-        Log.d("JobDetailsActivity", "Creating CV from profile for user: $userEmail (ID: $userId)")
+
+        Log.d("JobDetailsActivity", "Creating AI-powered CV from profile for user: $userEmail (ID: $userId)")
+
+        // Update UI to show CV generation in progress
+        applyButton.isEnabled = false
+        applyButton.text = "Generating CV..."
+
         db.collection("users")
             .whereEqualTo("email", userEmail)
             .get()
@@ -168,55 +175,92 @@ class JobDetailsActivity : AppCompatActivity() {
                     try {
                         val user = userDoc.toObject(User::class.java)
                         if (user != null) {
-                            Log.d("JobDetailsActivity", "Successfully retrieved user profile for CV creation")
-                            val cvContent = buildString {
-                                append("${user.name} ${user.surname}\n")
-                                append("${user.email}\n")
-                                append("${user.phoneNumber}\n")
-                                append("${user.city}, ${user.province}\n\n")
-                                append("SUMMARY\n")
-                                append("${user.summary}\n\n")
-                                append("SKILLS\n")
-                                append(user.skills.joinToString(", ").plus("\n\n"))
-                                append("EDUCATION\n")
-                                if (user.education.isNotEmpty()) {
-                                    user.education.forEach { education ->
-                                        append("${education.institution} - ${education.degree}\n")
-                                        append("${education.startDate} to ${education.endDate}\n\n")
+                            Log.d("JobDetailsActivity", "Successfully retrieved user profile for AI CV creation")
+
+                            // Debug: Print actual user data
+                            Log.d("JobDetailsActivity", "User data debug:")
+                            Log.d("JobDetailsActivity", "  Name: '${user.name}'")
+                            Log.d("JobDetailsActivity", "  Surname: '${user.surname}'")
+                            Log.d("JobDetailsActivity", "  Email: '${user.email}'")
+                            Log.d("JobDetailsActivity", "  Phone: '${user.phoneNumber}'")
+                            Log.d("JobDetailsActivity", "  City: '${user.city}'")
+                            Log.d("JobDetailsActivity", "  Province: '${user.province}'")
+                            Log.d("JobDetailsActivity", "  Summary: '${user.summary}'")
+                            Log.d("JobDetailsActivity", "  Skills count: ${user.skills.size}")
+                            Log.d("JobDetailsActivity", "  Experience count: ${user.experience.size}")
+                            Log.d("JobDetailsActivity", "  Education count: ${user.education.size}")
+
+                            // Validate user profile completeness
+                            val missingFields = CvGenerationUtils.validateUserProfile(user)
+                            if (missingFields.isNotEmpty()) {
+                                Log.w("JobDetailsActivity", "User profile missing fields: ${missingFields.joinToString(", ")}")
+                                Toast.makeText(this, "Profile missing: ${missingFields.joinToString(", ")}. Continuing with available data...", Toast.LENGTH_LONG).show()
+                                // Continue with CV generation instead of stopping
+                            }
+
+                            // Check if user has minimum required data for quality CV
+                            if (!CvGenerationUtils.hasMinimumProfileData(user)) {
+                                Log.w("JobDetailsActivity", "User profile lacks sufficient data for quality CV")
+                                Toast.makeText(this, "Please add more information to your profile (summary, skills, experience, or education) for a better CV", Toast.LENGTH_LONG).show()
+                                // Continue with generation but warn user
+                            }
+
+                            // Generate AI-powered CV using coroutines
+                            lifecycleScope.launch {
+                                try {
+                                    applyButton.text = "Generating AI CV..."
+                                    Log.d("JobDetailsActivity", "Starting AI CV generation process")
+
+                                    val documentId = CvGenerationUtils.generateAndStoreCvFromProfile(user, userId)
+
+                                    Log.d("JobDetailsActivity", "AI CV generation completed successfully with ID: $documentId")
+                                    currentCvUrl = documentId
+
+                                    // Reset button state and proceed to cover letter
+                                    applyButton.isEnabled = true
+                                    applyButton.text = "Apply Now"
+                                    showCoverLetterDialog()
+
+                                } catch (e: Exception) {
+                                    Log.e("JobDetailsActivity", "Error in AI CV generation, falling back to simple CV", e)
+
+                                    // Fallback to simple text-based CV
+                                    try {
+                                        applyButton.text = "Creating simple CV..."
+                                        val simpleCvContent = CvGenerationUtils.generateSimpleCvContent(user)
+
+                                        val cvRef = db.collection("cvs").document()
+                                        cvRef.set(hashMapOf(
+                                            "userId" to userId,
+                                            "content" to simpleCvContent,
+                                            "createdAt" to System.currentTimeMillis(),
+                                            "generatedBy" to "Fallback",
+                                            "version" to "1.0"
+                                        )).addOnSuccessListener {
+                                            Log.d("JobDetailsActivity", "Fallback CV created successfully: ${cvRef.id}")
+                                            currentCvUrl = cvRef.id
+                                            applyButton.isEnabled = true
+                                            applyButton.text = "Apply Now"
+                                            showCoverLetterDialog()
+                                        }.addOnFailureListener { fallbackError ->
+                                            Log.e("JobDetailsActivity", "Error creating fallback CV", fallbackError)
+                                            Toast.makeText(this@JobDetailsActivity, "Error creating CV: ${fallbackError.message}", Toast.LENGTH_SHORT).show()
+                                            applyButton.isEnabled = true
+                                            applyButton.text = "Apply Now"
+                                        }
+
+                                    } catch (fallbackException: Exception) {
+                                        Log.e("JobDetailsActivity", "Error in fallback CV generation", fallbackException)
+                                        Toast.makeText(this@JobDetailsActivity, "Error creating CV: ${fallbackException.message}", Toast.LENGTH_SHORT).show()
+                                        applyButton.isEnabled = true
+                                        applyButton.text = "Apply Now"
                                     }
-                                } else {
-                                    append("No education information provided\n\n")
-                                }
-                                append("EXPERIENCE\n")
-                                if (user.experience.isNotEmpty()) {
-                                    user.experience.forEach { experience ->
-                                        append("${experience.position} at ${experience.company}\n")
-                                        append("${experience.startDate} to ${experience.endDate}\n")
-                                        append("${experience.description}\n\n")
-                                    }
-                                } else {
-                                    append("No experience information provided\n\n")
                                 }
                             }
-                            val cvRef = db.collection("cvs").document()
-                            Log.d("JobDetailsActivity", "Creating CV document with ID: ${cvRef.id}")
-                            cvRef.set(hashMapOf(
-                                "userId" to userId,
-                                "content" to cvContent,
-                                "createdAt" to System.currentTimeMillis()
-                            )).addOnSuccessListener {
-                                Log.d("JobDetailsActivity", "Successfully created CV document: ${cvRef.id}")
-                                currentCvUrl = cvRef.id
-                                showCoverLetterDialog()
-                            }.addOnFailureListener { e ->
-                                Log.e("JobDetailsActivity", "Error creating CV from profile", e)
-                                Toast.makeText(this, "Error creating CV from profile: ${e.message}", Toast.LENGTH_SHORT).show()
-                                applyButton.isEnabled = true
-                                applyButton.text = "Apply Now"
-                            }
+
                         } else {
                             Log.e("JobDetailsActivity", "User object is null after conversion")
-                            Toast.makeText(this, "Error creating profile: Invalid user data", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Error creating CV: Invalid user data", Toast.LENGTH_SHORT).show()
                             applyButton.isEnabled = true
                             applyButton.text = "Apply Now"
                         }

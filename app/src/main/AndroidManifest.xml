@@ -315,6 +315,22 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Email Verification and Password Reset Activities -->
+        <activity
+            android:name=".EmailVerificationActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ResetPasswordActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
 
 
 

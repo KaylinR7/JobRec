@@ -62,4 +62,10 @@
     <color name="comptia_red">#C8102E</color>
     <color name="pmp_green">#4CAF50</color>
     <color name="scrum_blue">#2196F3</color>
+
+    <!-- Email verification and password reset colors -->
+    <color name="primary_color">#2196F3</color>
+    <color name="background_color">#F5F7FA</color>
+    <color name="border_color">#E0E0E0</color>
+    <color name="info_background">#E3F2FD</color>
 </resources>

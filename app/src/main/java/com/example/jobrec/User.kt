@@ -29,7 +29,11 @@ data class User(
     val certificates: List<Map<String, String>> = emptyList(),
     val expectedSalary: String = "",
     val field: String = "",
-    val subField: String = ""
+    val subField: String = "",
+    val emailVerified: Boolean = false,
+    val verificationCode: String = "",
+    val passwordResetCode: String = "",
+    val passwordResetExpiry: Long = 0
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",
@@ -59,7 +63,11 @@ data class User(
         CREATOR.readCertificatesFromParcel(parcel),
         parcel.readString() ?: "",
         parcel.readString() ?: "",
-        parcel.readString() ?: ""
+        parcel.readString() ?: "",
+        parcel.readByte() != 0.toByte(),
+        parcel.readString() ?: "",
+        parcel.readString() ?: "",
+        parcel.readLong()
     )
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(id)
@@ -90,6 +98,10 @@ data class User(
         parcel.writeString(expectedSalary)
         parcel.writeString(field)
         parcel.writeString(subField)
+        parcel.writeByte(if (emailVerified) 1 else 0)
+        parcel.writeString(verificationCode)
+        parcel.writeString(passwordResetCode)
+        parcel.writeLong(passwordResetExpiry)
     }
     override fun describeContents(): Int {
         return 0

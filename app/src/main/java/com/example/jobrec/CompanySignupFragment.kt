@@ -1,4 +1,5 @@
 package com.example.jobrec
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +8,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import com.example.jobrec.utils.PasswordValidator
 class CompanySignupFragment : Fragment() {
     private lateinit var companyNameInput: TextInputEditText
     private lateinit var registrationNumberInput: TextInputEditText
@@ -37,8 +40,16 @@ class CompanySignupFragment : Fragment() {
         val industry = industryInput.text.toString().trim()
         val email = emailInput.text.toString().trim()
         val password = passwordInput.text.toString()
+
         if (companyName.isEmpty() || registrationNumber.isEmpty() || industry.isEmpty() || email.isEmpty() || password.isEmpty()) {
             Toast.makeText(requireContext(), "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Validate password strength
+        val passwordValidation = PasswordValidator.validatePassword(password)
+        if (!passwordValidation.isValid) {
+            Toast.makeText(requireContext(), "Password must contain:\n${passwordValidation.errors.joinToString("\n")}", Toast.LENGTH_LONG).show()
             return
         }
         val company = Company(
@@ -55,15 +66,28 @@ class CompanySignupFragment : Fragment() {
             contactPersonPhone = "",
             email = email.lowercase()
         )
-        FirebaseHelper.getInstance().addCompany(company, password) { success, error ->
-            if (success) {
+        FirebaseHelper.getInstance().registerCompanyWithVerification(company, password) { success, error, verificationCode ->
+            // Check if fragment is still attached to avoid crashes
+            if (isAdded && !isDetached && activity != null) {
                 requireActivity().runOnUiThread {
-                    Toast.makeText(requireContext(), "Registration successful! Please login to continue.", Toast.LENGTH_LONG).show()
+                    if (success) {
+                        Toast.makeText(requireContext(), "Registration successful! Please check your email for verification code, then login to continue.", Toast.LENGTH_LONG).show()
+                    } else {
+                        // Show error but still redirect to login
+                        if (error?.contains("email address is already in use", ignoreCase = true) == true) {
+                            Toast.makeText(requireContext(), "Email already registered. Please login instead.", Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(requireContext(), "Registration failed: $error", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    // ALWAYS redirect to login page regardless of success or failure
+                    val intent = Intent(requireContext(), LoginActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    intent.putExtra("registration_completed", true)
+                    intent.putExtra("registered_email", email)
+                    startActivity(intent)
                     requireActivity().finish()
-                }
-            } else {
-                requireActivity().runOnUiThread {
-                    Toast.makeText(requireContext(), "Registration failed: $error", Toast.LENGTH_SHORT).show()
                 }
             }
         }

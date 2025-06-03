@@ -214,17 +214,26 @@ class AdminUsersActivity : AppCompatActivity() {
     }
     private fun performDeleteUser(userId: String) {
         showLoading(true)
-        db.collection("users").document(userId)
-            .delete()
-            .addOnSuccessListener {
-                Log.d(TAG, "User deleted successfully from 'users' collection")
-                Toast.makeText(this, "User deleted", Toast.LENGTH_SHORT).show()
-                loadUsers()
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error deleting user from 'users'", e)
-                Toast.makeText(this, "Error deleting user: ${e.message}", Toast.LENGTH_SHORT).show()
+
+        // Use the new admin deletion method that deletes from both Firebase Auth and Firestore
+        FirebaseHelper.getInstance().adminDeleteUser(userId) { success, error ->
+            runOnUiThread {
                 showLoading(false)
+                if (success) {
+                    Log.d(TAG, "User deleted successfully from both Auth and Firestore")
+                    if (error != null) {
+                        // Partial success - Firestore deleted but Auth cleanup failed
+                        Toast.makeText(this, "User deleted successfully. Note: $error", Toast.LENGTH_LONG).show()
+                    } else {
+                        // Complete success
+                        Toast.makeText(this, "User completely deleted from system", Toast.LENGTH_SHORT).show()
+                    }
+                    loadUsers()
+                } else {
+                    Log.e(TAG, "Error deleting user: $error")
+                    Toast.makeText(this, "Error deleting user: $error", Toast.LENGTH_LONG).show()
+                }
             }
+        }
     }
 }
